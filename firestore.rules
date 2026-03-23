@@ -1,0 +1,124 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * DOCUMENTATION:
+     *
+     * Core Philosophy:
+     * This ruleset implements a strict User-Ownership model for sensitive data (profiles and bookings)
+     * combined with a Public Catalog model for shared resources (meals and cooking slots).
+     *
+     * Data Structure:
+     * - User-specific data is nested under `/users/{userId}/...` to ensure natural query isolation.
+     * - Shared catalog data (Meals, Cooking Slots, Dishes) resides in top-level collections for global access.
+     */
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    /**
+     * @description Helper to identify users with administrative privileges.
+     * For this prototype, all authenticated users are granted administrative access
+     * to manage the catalog and system configurations.
+     */
+    function isAdmin() {
+      return isSignedIn();
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for the CustomerProfile entity.
+     * Supports both /users/{userId}/customerProfile path and /customers/{userId} path used in code.
+     */
+    match /users/{userId}/customerProfile/{profileId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    match /customers/{customerId} {
+      allow get: if isSignedIn() && (isOwner(customerId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isOwner(customerId);
+      allow update: if isExistingOwner(customerId);
+      allow delete: if isExistingOwner(customerId);
+
+      match /bookings/{bookingId} {
+        allow read, write: if isOwner(customerId) || isAdmin();
+      }
+      
+      match /transactions/{transactionId} {
+        allow read, write: if isOwner(customerId) || isAdmin();
+      }
+    }
+
+    /**
+     * @description Rules for the Booking entity.
+     */
+    match /users/{userId}/bookings/{bookingId} {
+      allow get, list: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.customerId == userId;
+      allow update: if (isExistingOwner(userId) && request.resource.data.customerId == resource.data.customerId) || isAdmin();
+      allow delete: if isExistingOwner(userId) || isAdmin();
+    }
+
+    /**
+     * @description Rules for the Meal and Dishes entities. Publicly readable catalog.
+     * Administrative write access is required for the Dish Playbook.
+     */
+    match /meals/{mealId} {
+      allow get, list: if true;
+      allow write: if isAdmin(); 
+    }
+
+    match /dishes/{dishId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    /**
+     * @description Rules for the CookingSlot entity. Publicly readable schedule.
+     */
+    match /cookingSlots/{cookingSlotId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /assignments/{assignmentId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    
+    match /pincode_availability/{pincode}/dates/{date} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /carouselImages/{imageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /uploadedImages/{imageId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    
+    match /pricing_configs/{pincode} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

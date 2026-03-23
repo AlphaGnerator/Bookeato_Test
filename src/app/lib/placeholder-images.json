@@ -1,0 +1,64 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-salad",
+      "description": "Healthy salad bowl",
+      "imageUrl": "https://picsum.photos/seed/salad/800/800",
+      "imageHint": "salad bowl"
+    },
+    {
+      "id": "dish-avocado",
+      "description": "Avocado Toast",
+      "imageUrl": "https://picsum.photos/seed/avocado/600/400",
+      "imageHint": "avocado toast"
+    },
+    {
+      "id": "dish-salmon",
+      "description": "Grilled Salmon",
+      "imageUrl": "https://picsum.photos/seed/salmon/600/400",
+      "imageHint": "grilled salmon"
+    },
+    {
+      "id": "dish-quinoa",
+      "description": "Quinoa Salad",
+      "imageUrl": "https://picsum.photos/seed/quinoa/600/400",
+      "imageHint": "quinoa salad"
+    },
+    {
+      "id": "dish-chicken",
+      "description": "Chicken Curry",
+      "imageUrl": "https://picsum.photos/seed/chicken/600/400",
+      "imageHint": "chicken curry"
+    },
+    {
+      "id": "dish-paneer",
+      "description": "Paneer Bowl",
+      "imageUrl": "https://picsum.photos/seed/paneer/600/400",
+      "imageHint": "paneer bowl"
+    },
+    {
+      "id": "dish-khichdi",
+      "description": "Millet Khichdi",
+      "imageUrl": "https://picsum.photos/seed/khichdi/600/400",
+      "imageHint": "millet khichdi"
+    },
+    {
+      "id": "generic-dish",
+      "description": "Delicious prepared meal",
+      "imageUrl": "https://picsum.photos/seed/meal/600/400",
+      "imageHint": "plated food"
+    },
+    {
+      "id": "dashboard-hero",
+      "description": "A vibrant kitchen scene",
+      "imageUrl": "https://picsum.photos/seed/kitchen/1080/600",
+      "imageHint": "kitchen food"
+    },
+    {
+      "id": "person-cooking",
+      "description": "A person happily cooking",
+      "imageUrl": "https://picsum.photos/seed/cooking/1080/600",
+      "imageHint": "person cooking"
+    }
+  ]
+}

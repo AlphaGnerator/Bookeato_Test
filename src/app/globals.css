@@ -1,0 +1,235 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* white */
+    --foreground: 215 28% 17%;
+    --card: 240 5% 96%; /* light-grey */
+    --card-foreground: 215 28% 17%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 28% 17%;
+    --primary: 142 71% 45%;  /* green */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 44 98% 60%; /* yellow */
+    --secondary-foreground: 215 28% 17%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 25 84% 50%; /* orange */
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 142 71% 45%;
+    --radius: 0.5rem;
+
+    /* Custom Color Tokens */
+    --text-primary: #1F2937;
+    --text-secondary: #4B5563;
+    --text-muted: #6B7280;
+
+    --green-primary: #22c55e;
+    --green-dark: #065F46;
+
+    --cta-bg: #F97316;
+    --cta-bg-hover: #EA580C;
+    --cta-text: #FFFFFF;
+
+    --surface: #FFFFFF;
+    --surface-border: #E5E7EB;
+    --badge-bg: #FEF3C7;
+    --badge-text: #92400E;
+
+    --vibrant: 325 90% 55%;
+    --vibrant-foreground: 325 90% 98%;
+
+    --h1-size: 48px;
+    --h2-size: 32px;
+    --h3-size: 24px;
+    --body-size: 16px;
+    --caption-size: 14px;
+
+    --font-regular: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+  }
+
+  .dark {
+    --background: 200 15% 12%;
+    --foreground: 210 40% 98%;
+    --card: 200 15% 15%;
+    --card-foreground: 210 40% 98%;
+    --popover: 200 15% 15%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 142 71% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 44 98% 60%;
+    --secondary-foreground: 215 28% 17%;
+    --muted: 150 20% 20%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 25 84% 50%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 150 20% 25%;
+    --input: 150 20% 25%;
+    --ring: 142 71% 45%;
+    --vibrant: 325 90% 60%;
+    --vibrant-foreground: 325 90% 98%;
+
+    /* Custom Color Tokens */
+    --text-primary: #FFFFFF;
+    --text-secondary: #D1D5DB;
+    --text-muted: #9CA3AF;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground overflow-x-hidden antialiased;
+  }
+
+  html, body {
+    font-family: 'Poppins', sans-serif;
+    height: 100%;
+  }
+
+  /* Global Mobile Fixes */
+  button, a, [role="button"] {
+    @apply touch-manipulation select-none;
+  }
+
+  h1, .hero-title {
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: var(--font-bold);
+    line-height: 1.15;
+    animation: heroFadeUp 0.6s ease-out 0.1s both;
+  }
+  h2, .section-title {
+    font-size: clamp(1.5rem, 4vw, 2.4rem);
+    font-weight: var(--font-semibold);
+    line-height: 1.2;
+  }
+  
+  h3 {
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
+    font-weight: var(--font-semibold);
+  }
+
+  p {
+     font-size: var(--body-size);
+     line-height: 1.5;
+  }
+
+  .gradient-bg {
+    @apply fixed inset-0 -z-10 pointer-events-none bg-gradient-to-br from-background via-background to-primary/5;
+  }
+
+  .section {
+    @apply py-12 md:py-24;
+  }
+  
+  .container {
+    @apply max-w-[1120px] mx-auto px-4 md:px-6;
+  }
+  
+  .hero-word-main {
+    color: var(--text-primary);
+  }
+  .hero-word-orange {
+    color: var(--cta-bg);
+  }
+  .hero-word-green {
+    color: var(--green-primary);
+  }
+
+  .hero-intro {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.98rem;
+    line-height: 1.5;
+    color: #1f2933;
+  }
+
+  .hero-solution {
+    font-size: 0.98rem;
+    line-height: 1.5;
+    font-weight: 500;
+    color: #1f2933;
+    margin-bottom: 1.25rem;
+  }
+
+  .hero-pain-tabs {
+    margin: 0.75rem 0 1.25rem 0;
+  }
+
+  .hero-pain-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .pain-chip {
+    border: none;
+    border-radius: 9999px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.85rem;
+    background: #ecfdf3;
+    color: #14532d;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .pain-chip.active {
+    background: #16a34a;
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .hero-pain-detail {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 0.8rem 1rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    max-width: 32rem;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  @media (max-width: 768px) {
+    .hero-pain-chips {
+      justify-content: flex-start;
+    }
+    .hero-pain-detail {
+      max-width: 100%;
+    }
+  }
+}
+
+@layer components {
+    .tabs-trigger-active-accent[data-state='active'] {
+        @apply bg-accent text-accent-foreground;
+    }
+}
+
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

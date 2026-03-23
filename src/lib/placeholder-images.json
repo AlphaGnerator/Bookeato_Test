@@ -1,0 +1,28 @@
+{
+  "placeholderImages": [
+    {
+      "id": "dashboard-hero",
+      "description": "A vibrant kitchen scene with fresh ingredients on a wooden counter.",
+      "imageUrl": "https://images.unsplash.com/photo-1490818387583-1baba5e638af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxraXRjaGVuJTIwZm9vZHxlbnwwfHx8fDE3NjE5MzY3NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "kitchen food"
+    },
+    {
+      "id": "booking-card",
+      "description": "A person happily cooking in a modern kitchen.",
+      "imageUrl": "https://images.unsplash.com/photo-1556911073-52527ac43761?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZXJzb24lMjBjb29raW5nfGVufDB8fHx8MTc2MTkwMTc1Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person cooking"
+    },
+    {
+      "id": "recommendations-card",
+      "description": "A beautifully plated dish, looking delicious and healthy.",
+      "imageUrl": "https://images.unsplash.com/photo-1734330931856-77cdf1b5bba9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwbGF0ZWQlMjBkaXNofGVufDB8fHx8MTc2MTg2MzcyN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "plated dish"
+    },
+    {
+      "id": "user-avatar",
+      "description": "A generic user avatar.",
+      "imageUrl": "https://images.unsplash.com/photo-1672794444732-e007954a177c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjE4NDAyNjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait person"
+    }
+  ]
+}
