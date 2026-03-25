@@ -13,12 +13,21 @@ export function MaidCheckoutDetails({ onBack, onNext }: { onBack?: () => void, o
   const [flat, setFlat] = useState('');
 
   useEffect(() => {
-    if (isInitialized && user.id !== 'guest') {
-      if (user.contactNumber) setPhoneNumber(user.contactNumber.replace('+91', ''));
+    if (isInitialized && user && user.id !== 'guest') {
+      if (user.contactNumber) {
+          const rawPhone = user.contactNumber.replace('+91', '');
+          if (rawPhone) setPhoneNumber(rawPhone);
+      }
       if (user.pincode) setPincode(user.pincode);
       if (user.address) {
-          // Naive split for demo purposes, or just put whole address in society
-          setSociety(user.address);
+          // If address contains a comma, try to split it into society and flat
+          if (user.address.includes(',')) {
+              const parts = user.address.split(',');
+              setSociety(parts[0].trim());
+              setFlat(parts.slice(1).join(',').trim());
+          } else {
+              setSociety(user.address);
+          }
       }
     }
   }, [isInitialized, user]);

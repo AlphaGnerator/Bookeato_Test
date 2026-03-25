@@ -34,7 +34,6 @@ export function CustomerList() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>All Customers</CardTitle>
         <CardDescription>
           A list of all registered customers and their daily calorie targets.
         </CardDescription>

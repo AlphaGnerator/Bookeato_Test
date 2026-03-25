@@ -19,32 +19,41 @@ import { Header } from './header';
 import { useUser } from '@/firebase';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarTrigger } from './ui/sidebar';
+import { BottomNav } from './bottom-nav';
+import { cn } from '@/lib/utils';
 
 const customerNavItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/pricing', label: 'New Booking', icon: CalendarDays },
-  { href: '/order-history', label: 'Order History', icon: List },
-  { href: '/recommendations', label: 'AI Recommendations', icon: Sparkles },
-  { href: '/wallet', label: 'My Wallet', icon: Wallet },
-  { href: '/profile', label: 'My Profile', icon: User },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiresAuth: true },
+  { href: '/pricing', label: 'New Booking', icon: CalendarDays, requiresAuth: true },
+  { href: '/order-history', label: 'Order History', icon: List, requiresAuth: true },
+  { href: '/recommendations', label: 'AI Recommendations', icon: Sparkles, requiresAuth: true },
+  { href: '/wallet', label: 'My Wallet', icon: Wallet, requiresAuth: true },
+  { href: '/profile', label: 'My Profile', icon: User, requiresAuth: true },
+];
+
+const maidNavItems = [
+    { href: '/maid/dashboard', label: 'My Schedule', icon: CalendarDays, requiresAuth: true },
+    { href: '/maid/earnings', label: 'My Earnings', icon: Wallet, requiresAuth: true },
+    { href: '/maid/profile', label: 'My Profile', icon: User, requiresAuth: true },
 ];
 
 const cookNavItems = [
-    { href: '/cook/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/cook/availability', label: 'My Availability', icon: CalendarClock },
-    { href: '/cook/tutorials', label: 'Tutorials', icon: Video },
-    { href: '/cook/profile', label: 'My Profile', icon: User },
+    { href: '/cook/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiresAuth: true },
+    { href: '/cook/availability', label: 'My Availability', icon: CalendarClock, requiresAuth: true },
+    { href: '/cook/tutorials', label: 'Tutorials', icon: Video, requiresAuth: true },
+    { href: '/cook/profile', label: 'My Profile', icon: User, requiresAuth: true },
 ]
 
 const adminNavItems = [
-    { href: '/admin/bookings', label: 'Bookings', icon: BookOpen },
-    { href: '/admin/customers', label: 'Customers', icon: Database },
-    { href: '/admin/cook-requests', label: 'Cook Requests', icon: UserCheck },
-    { href: '/admin/dishes', label: 'Dish Playbook', icon: Flame },
-    { href: '/admin/availability', label: 'Slot Availability', icon: CalendarX },
-    { href: '/admin/carousel', label: 'Carousel', icon: Images},
-    { href: '/admin/image-library', label: 'Image Library', icon: Library},
-    { href: '/admin/debug-calculation', label: 'Debug Calc', icon: Calculator, separator: true},
+    { href: '/admin/bookings', label: 'Bookings', icon: BookOpen, requiresAuth: true },
+    { href: '/admin/customers', label: 'Customers', icon: Database, requiresAuth: true },
+    { href: '/admin/cook-requests', label: 'Cook Requests', icon: UserCheck, requiresAuth: true },
+    { href: '/admin/dishes', label: 'Dish Playbook', icon: Flame, requiresAuth: true },
+    { href: '/admin/availability', label: 'Slot Availability', icon: CalendarX, requiresAuth: true },
+    { href: '/admin/carousel', label: 'Carousel', icon: Images, requiresAuth: true },
+    { href: '/admin/image-library', label: 'Image Library', icon: Library, requiresAuth: true },
+    { href: '/admin/debug-calculation', label: 'Debug Calc', icon: Calculator, separator: true, requiresAuth: true },
+    { href: '/', label: 'Return to Site', icon: Home, separator: true, requiresAuth: true },
 ]
 
 const publicNavItems = [
@@ -65,6 +74,8 @@ export function AppLayout({ children, pageTitle }: { children: React.ReactNode; 
         setUserRole('admin');
     } else if (pathname.startsWith('/cook/')) {
         setUserRole('cook');
+    } else if (pathname.startsWith('/maid/')) {
+        setUserRole('maid' as any);
     } else if (user) {
         setUserRole('customer');
     } else {
@@ -89,12 +100,14 @@ export function AppLayout({ children, pageTitle }: { children: React.ReactNode; 
     itemsToShow = customerNavItems;
   } else if (userRole === 'cook') {
     itemsToShow = cookNavItems;
+  } else if (userRole as any === 'maid') {
+    itemsToShow = maidNavItems;
   } else if (userRole === 'admin') {
     itemsToShow = adminNavItems;
   }
 
-  if (pathname === '/') {
-    return <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>;
+  if (pathname === '/' || pathname === '/admin/login') {
+    return <main className="flex-1 min-h-screen">{children}</main>;
   }
 
 
@@ -128,7 +141,10 @@ export function AppLayout({ children, pageTitle }: { children: React.ReactNode; 
         </Sidebar>
         <div className="flex-1">
           <Header title={pageTitle} />
-          <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
+          <main className={cn("flex-1 p-4 md:p-6 lg:p-8", (userRole === 'customer' || !userRole) && "pb-24 md:pb-8")}>
+            {children}
+          </main>
+          {(userRole === 'customer' || !userRole) && <BottomNav isGuest={!userRole} />}
         </div>
       </div>
     </SidebarProvider>

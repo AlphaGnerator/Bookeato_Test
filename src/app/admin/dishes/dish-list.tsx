@@ -150,7 +150,6 @@ export function DishList() {
     <Card>
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4">
         <div>
-          <CardTitle>Dish Playbook</CardTitle>
           <CardDescription>
             Manage the master list of all dishes available on the platform.
           </CardDescription>

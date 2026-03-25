@@ -8,11 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format, addDays, differenceInHours, isSameDay } from 'date-fns';
-import { 
-  PlusCircle, Wallet, Clock, CheckCircle2, 
-  ChevronRight, ChefHat, Sparkles, Hourglass, 
-  XCircle, CalendarIcon, BarChart3
-} from 'lucide-react';
+import { PlusCircle, Wallet, Clock, CheckCircle2, ChevronRight, ChefHat, Sparkles, Hourglass, XCircle, CalendarIcon, BarChart3, Info, IndianRupee, Filter, Calendar, ArrowRight, User, MapPin } from 'lucide-react';
+import { LoadingState } from "@/components/loading-state";
 import { MaidPendingCart } from '@/components/maid-pending-cart';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -23,6 +20,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from '@/components/ui/separator';
 import { useCulinaryStore } from '@/hooks/use-culinary-store';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
@@ -50,8 +53,11 @@ export default function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalBookingDate, setModalBookingDate] = useState<Date | null>(null);
 
-  if (!isInitialized || !bookings) {
-     return <AppLayout pageTitle="Home Operating System"><div className="p-8 space-y-4"><Skeleton className="h-32 w-full rounded-xl" /><Skeleton className="h-48 w-full rounded-xl" /></div></AppLayout>;
+  // Assuming isLoading is derived from isInitialized or similar state
+  const isLoading = !isInitialized; 
+
+  if (isLoading) {
+    return <LoadingState fullPage type="generic" message="Syncing your culinary journey..." />;
   }
   
   const safeBookings = bookings || [];
@@ -69,8 +75,9 @@ export default function DashboardPage() {
           date: b.bookingDate,
           time: timeStr,
           status: b.status,
-          professional: b.cookId ? { name: b.cookName || 'Assigned Cook', rating: '4.8' } : null,
+          professional: b.cookId ? { name: b.cookName || 'Assigned Cook', rating: '4.8' } : (b.maidId ? { name: b.maidName || 'Assigned Maid', rating: '5.0' } : null),
           isDishSelected: isCook ? (b.items && b.items.length > 0) : true,
+          otp: b.otp,
       }
   });
 
@@ -81,7 +88,13 @@ export default function DashboardPage() {
     const dayBookings = normalizedBookings.filter(b => isSameDay(new Date(b.date), clickedDate));
     const requiresMenuSelection = dayBookings.find(b => b.type === 'cook' && !b.isDishSelected);
     
-    if (requiresMenuSelection) {
+    // Also check if it's a plan day without a booking
+    const sub = user.subscription;
+    const isPlanDay = sub && sub.status === 'active' && 
+                     (new Date(sub.startDate) <= clickedDate) && (new Date(sub.expiryDate) >= clickedDate);
+    const hasBooking = dayBookings.some(b => b.type === 'cook' && b.status !== 'cancelled');
+
+    if (requiresMenuSelection || (isPlanDay && !hasBooking)) {
       setModalBookingDate(clickedDate);
       setIsModalOpen(true);
     }
@@ -128,7 +141,7 @@ export default function DashboardPage() {
     
     // Check if this day is covered by an active subscription
     const sub = user.subscription;
-    const isPlanDay = sub && sub.status === 'active' && sub.planId !== 'none' && 
+    const isPlanDay = sub && (sub.status === 'active' || sub.status === 'upcoming') && 
                      (new Date(sub.startDate) <= d) && (new Date(sub.expiryDate) >= d);
 
     const hasBooking = dayBookings.length > 0 && dayBookings.some(b => b.status !== 'cancelled');
@@ -137,7 +150,7 @@ export default function DashboardPage() {
     // 1. Existing cook booking has no dishes
     // 2. OR it is a plan day (Weekly/Monthly) but NO cook booking exists yet for this day
     const requiresAction = dayBookings.some(b => b.type === 'cook' && !b.isDishSelected && b.status !== 'cancelled') || 
-                           (isPlanDay && sub.planId !== 'day' && !dayBookings.some(b => b.type === 'cook' && b.status !== 'cancelled'));
+                           (isPlanDay && sub.planId !== 'daily' && !dayBookings.some(b => b.type === 'cook' && b.status !== 'cancelled'));
 
     return {
       date: d,
@@ -153,21 +166,28 @@ export default function DashboardPage() {
 
   const displayedBookings = normalizedBookings.filter(b => isSameDay(new Date(b.date), selectedDate) && b.status !== 'cancelled');
 
-  const activePlan = user.subscription?.status === 'active' ? user.subscription.planId : 'none';
+  const activePlan = (user.subscription?.status === 'active' || user.subscription?.status === 'upcoming') ? user.subscription.planId : 'none';
 
   return (
-    <AppLayout pageTitle="Home Operating System">
-       <div className="space-y-6 md:space-y-8 px-1 md:px-0 pb-20">
+     <AppLayout pageTitle="Home Operating System">
+        <div className="space-y-4 md:space-y-8 px-2 md:px-0">
           <MaidPendingCart />
 
           {activePlan !== 'none' && user.subscription ? (
              <div className="bg-green-50 border-2 border-green-200 rounded-3xl p-5 sm:p-6 shadow-sm gap-4">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="flex items-center gap-4">
-                       <div className="bg-green-100 p-2.5 rounded-full shadow-sm"><Sparkles className="w-6 h-6 text-green-600" /></div>
+                    <div className="flex items-center gap-3">
+                       <div className="bg-green-100 p-2 rounded-full shadow-sm shrink-0"><Sparkles className="w-5 h-5 text-green-600" /></div>
                        <div>
-                           <h3 className="font-black text-green-900 text-lg leading-none tracking-tight">👑 Active Plan: {activePlan.charAt(0).toUpperCase() + activePlan.slice(1)}</h3>
-                           <p className="text-sm font-bold text-green-700 mt-1.5">Your subscription is active until {format(new Date(user.subscription.expiryDate), 'MMM d')}.</p>
+                            <h3 className="font-extrabold text-green-900 text-sm md:text-lg leading-tight tracking-tight">
+                                {user.subscription.status === 'upcoming' ? 'Queued Plan: ' : 'Active Plan: '}
+                                {activePlan.charAt(0).toUpperCase() + activePlan.slice(1)}
+                            </h3>
+                            <p className="text-[11px] md:text-sm font-bold text-green-700 mt-0.5 md:mt-1.5 opacity-80">
+                                {user.subscription.status === 'upcoming' 
+                                    ? `Starts on ${format(new Date(user.subscription.startDate), 'MMM d')}` 
+                                    : `Active until ${format(new Date(user.subscription.expiryDate), 'MMM d')}.`}
+                            </p>
                        </div>
                     </div>
                     
@@ -188,7 +208,44 @@ export default function DashboardPage() {
                         </div>
                     )}
 
-                    <Button onClick={() => router.push('/plan-details')} variant="outline" className="border-green-300 text-green-700 hover:bg-green-100 font-bold bg-white w-full md:w-auto h-11 px-6 rounded-xl shrink-0">Manage Plan</Button>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                        <Button onClick={() => router.push('/plan-details')} variant="outline" className="border-green-300 text-green-700 hover:bg-green-100 font-bold bg-white h-11 px-6 rounded-xl shrink-0">Manage Plan</Button>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="ghost" className="text-green-700 hover:bg-green-100 font-bold h-11 px-4 rounded-xl flex items-center gap-2">
+                                    <Info className="w-4 h-4" />
+                                    Pricing Logic
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 p-5 rounded-3xl border-2 border-green-100 shadow-xl">
+                                <div className="space-y-3">
+                                    <h4 className="font-black text-green-900 flex items-center gap-2">
+                                        <IndianRupee className="w-4 h-4" /> Membership Pricing
+                                    </h4>
+                                    <p className="text-xs text-green-800/80 leading-relaxed font-medium">
+                                        Your subscription includes **Base Visits** (Standard prep time) at no extra cost. 
+                                    </p>
+                                    <div className="bg-green-50 p-3 rounded-2xl border border-green-100 space-y-2">
+                                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-green-600">
+                                            <span>Standard Usage</span>
+                                            <span>₹0</span>
+                                        </div>
+                                        <Separator className="bg-green-200/50" />
+                                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-orange-600">
+                                            <span>Overage (Extra time)</span>
+                                            <span>Standard Rate</span>
+                                        </div>
+                                    </div>
+                                    <p className="text-[10px] text-stone-400 font-medium italic">
+                                        Overage is calculated automatically for complex meals exceeding your plan's time limit.
+                                    </p>
+                                    <Button asChild variant="link" className="p-0 h-auto text-xs font-bold text-green-700 underline decoration-green-300">
+                                        <Link href="/plan-details#pricing-guide">View Full Guide →</Link>
+                                    </Button>
+                                </div>
+                            </PopoverContent>
+                        </Popover>
+                    </div>
                 </div>
              </div>
           ) : (
@@ -196,13 +253,13 @@ export default function DashboardPage() {
                 <div className="absolute right-0 top-0 opacity-5 -translate-y-4 translate-x-4 pointer-events-none group-hover:scale-110 transition-transform duration-700">
                     <ChefHat className="w-48 h-48" />
                 </div>
-                <div className="flex items-start gap-4 relative z-10">
-                   <div className="bg-orange-100 p-3 rounded-2xl shadow-sm shrink-0"><ChefHat className="w-7 h-7 text-orange-600" strokeWidth={2.5}/></div>
-                   <div>
-                       <h3 className="font-black text-orange-950 text-xl leading-tight tracking-tight">Tired of booking daily?</h3>
-                       <p className="text-sm font-bold text-orange-800/80 md:max-w-md mt-1.5 leading-relaxed">Subscribe to a Weekly or Monthly Cook plan and save up to 40% on every meal!</p>
-                   </div>
-                </div>
+                 <div className="flex items-start gap-3 relative z-10">
+                    <div className="bg-orange-100 p-2.5 rounded-2xl shadow-sm shrink-0"><ChefHat className="w-6 h-6 text-orange-600" strokeWidth={2.5}/></div>
+                    <div>
+                        <h3 className="font-extrabold text-orange-950 text-base md:text-xl leading-tight tracking-tight">Tired of booking daily?</h3>
+                        <p className="text-[11px] md:text-sm font-bold text-orange-800/80 md:max-w-md mt-1 leading-relaxed">Save up to 40% with Weekly or Monthly plans!</p>
+                    </div>
+                 </div>
                 <Button onClick={() => router.push('/pricing')} className="bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-bold w-full sm:w-auto shadow-lg shadow-orange-500/20 whitespace-nowrap h-12 px-6 rounded-xl transition-all relative z-10">
                    View Plans
                 </Button>
@@ -214,7 +271,7 @@ export default function DashboardPage() {
                 <h2 className="text-xl font-bold tracking-tight text-stone-900 leading-none">Your Week Ahead</h2>
              </div>
              
-             <div className="flex gap-3 overflow-x-auto pb-4 pt-1 custom-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+             <div className="flex gap-2 md:gap-3 overflow-x-auto pb-4 pt-1 custom-scrollbar -mx-4 px-4 md:mx-0 md:px-0 scroll-smooth">
                 {weekDays.map((day, i) => {
                    const isSelected = isSameDay(day.date, selectedDate);
                    
@@ -222,8 +279,8 @@ export default function DashboardPage() {
                      <button 
                        key={i} 
                        onClick={() => handleDateClick(day.date)}
-                       className={`flex flex-col items-center justify-center min-w-[85px] h-[95px] rounded-[1.25rem] border-2 transition-all flex-shrink-0 relative touch-manipulation focus-within:ring-4 outline-none ${
-                         isSelected ? 'ring-2 ring-stone-900 border-stone-900 shadow-md transform -translate-y-1' : ''
+                       className={`flex flex-col items-center justify-center min-w-[75px] md:min-w-[85px] h-[85px] md:h-[95px] rounded-2xl md:rounded-[1.25rem] border-2 transition-all flex-shrink-0 relative touch-manipulation focus-within:ring-4 outline-none ${
+                         isSelected ? 'ring-2 ring-stone-900 border-stone-900 shadow-md transform -translate-y-0.5 md:-translate-y-1' : ''
                        } ${
                          day.hasBooking 
                            ? `border-t-[3px] border-t-green-500 bg-green-50/70 shadow-sm ${isSelected ? 'border-green-500 focus-within:ring-green-500/20' : 'border-green-100 hover:border-green-300'}` 
@@ -231,22 +288,22 @@ export default function DashboardPage() {
                        }`}
                      >
                        {(day.requiresAction || (day.isPlanDay && !day.isActuallyBooked)) && !isSelected && (
-                         <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-orange-500 rounded-full border-2 border-white pointer-events-none animate-pulse"></span>
+                         <span className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-white pointer-events-none animate-pulse"></span>
                        )}
                        
-                       <span className={`text-[11px] font-bold uppercase tracking-wider mb-0.5 transition-colors ${day.hasBooking ? (isSelected ? 'text-green-800' : 'text-green-700/70') : (isSelected ? 'text-stone-700' : 'text-stone-400')}`}>
+                       <span className={`text-[10px] md:text-[11px] font-bold uppercase tracking-wider mb-0.5 transition-colors ${day.hasBooking ? (isSelected ? 'text-green-800' : 'text-green-700/70') : (isSelected ? 'text-stone-700' : 'text-stone-400')}`}>
                          {day.dayName}
                        </span>
-                       <span className={`text-2xl font-black mb-1 leading-none transition-colors ${day.hasBooking ? (isSelected ? 'text-green-900' : 'text-green-800') : (isSelected ? 'text-stone-900' : 'text-stone-800')}`}>
+                       <span className={`text-xl md:text-2xl font-black mb-0.5 md:mb-1 leading-none transition-colors ${day.hasBooking ? (isSelected ? 'text-green-900' : 'text-green-800') : (isSelected ? 'text-stone-900' : 'text-stone-800')}`}>
                          {day.dayNum}
                        </span>
                         {day.hasBooking ? (
-                          <span className={`text-[10px] font-bold flex items-center gap-1 mt-0.5 ${day.isActuallyBooked ? 'text-green-700' : 'text-orange-600'}`}>
-                             {day.serviceType === 'cook' ? <ChefHat className="w-3 h-3" strokeWidth={2.5}/> : <Sparkles className="w-3 h-3" strokeWidth={2.5}/>}
-                             {day.isActuallyBooked ? 'Scheduled' : 'Plan Day'}
+                          <span className={`text-[9px] md:text-[10px] font-bold flex items-center gap-1 mt-0.5 ${day.isActuallyBooked ? 'text-green-700' : 'text-orange-600'}`}>
+                             {day.serviceType === 'cook' ? <ChefHat className="w-2.5 h-2.5 md:w-3 md:h-3" strokeWidth={2.5}/> : <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3" strokeWidth={2.5}/>}
+                             {day.isActuallyBooked ? 'Booked' : 'Plan'}
                           </span>
                         ) : (
-                          <span className="text-[10px] font-bold text-stone-300 mt-0.5">No Plan</span>
+                          <span className="text-[9px] md:text-[10px] font-bold text-stone-300 mt-0.5">Empty</span>
                         )}
                      </button>
                    );
@@ -257,19 +314,19 @@ export default function DashboardPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
              <Card className="lg:col-span-2 shadow-sm border border-stone-100 rounded-[2rem] overflow-hidden bg-white min-h-[300px] flex flex-col">
                 <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 sm:px-8 py-6 bg-stone-50/50 border-b border-stone-100">
-                   <div>
-                      <CardTitle className="text-2xl font-bold tracking-tight text-stone-900 flex items-center gap-2">
-                        {isSameDay(selectedDate, today) ? "Today's Schedule" : `Bookings on ${format(selectedDate, 'MMM do')}`}
-                      </CardTitle>
-                   </div>
-                   <div className="flex gap-2">
-                        <Button onClick={() => router.push('/booking/maid')} variant="outline" className="active:scale-95 transition-all rounded-full font-bold px-4 h-11 w-full sm:w-auto">
+                    <div>
+                       <CardTitle className="text-xl md:text-2xl font-bold tracking-tight text-stone-900 flex items-center gap-2">
+                         {isSameDay(selectedDate, today) ? "Today" : format(selectedDate, 'MMM do')}
+                       </CardTitle>
+                    </div>
+                    <div className="flex gap-2 w-full sm:w-auto">
+                        <Button onClick={() => router.push('/booking/maid')} variant="outline" className="active:scale-95 transition-all rounded-full font-bold px-4 h-10 md:h-11 flex-1 sm:flex-none">
                             <Sparkles className="mr-2 h-4 w-4" /> Maid
                         </Button>
-                        <Button onClick={() => router.push('/booking/menu')} className="bg-green-500 hover:bg-green-600 active:scale-95 transition-all text-white rounded-full font-bold px-6 h-11 shadow-lg shadow-green-500/20 w-full sm:w-auto">
+                        <Button onClick={() => router.push('/booking/menu')} className="bg-green-500 hover:bg-green-600 active:scale-95 transition-all text-white rounded-full font-bold px-6 h-10 md:h-11 shadow-lg shadow-green-500/20 flex-1 sm:flex-none">
                             <PlusCircle className="mr-2 h-4 w-4" /> Cook
                         </Button>
-                   </div>
+                    </div>
                 </CardHeader>
                 <CardContent className="p-6 sm:p-8 space-y-4 flex-1">
                    {displayedBookings.length > 0 ? displayedBookings.map((booking) => {
@@ -325,7 +382,15 @@ export default function DashboardPage() {
                                {booking.status === 'pending' ? (
                                   <p>We are matching you with a verified professional.</p>
                                ) : booking.professional ? (
-                                  <p className="bg-stone-50 px-2 py-1 rounded inline-block">Assigned to: <span className="text-stone-800">{booking.professional?.name}</span> ({booking.professional?.rating}⭐)</p>
+                                  <div className="space-y-2">
+                                      <p className="bg-stone-50 px-2 py-1 rounded inline-block">Assigned to: <span className="text-stone-800">{booking.professional?.name}</span> ({booking.professional?.rating}⭐)</p>
+                                      {booking.otp && booking.status === 'confirmed' && (
+                                          <div className="flex items-center gap-2 mt-1">
+                                              <span className="text-[10px] font-black uppercase tracking-widest text-stone-400">Task OTP:</span>
+                                              <span className="bg-stone-900 text-white px-2 py-1 rounded-lg text-xs font-black tracking-widest leading-none">{booking.otp}</span>
+                                          </div>
+                                      )}
+                                  </div>
                                ) : null}
                                
                                {booking.type === 'cook' && !booking.isDishSelected && (

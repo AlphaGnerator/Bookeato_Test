@@ -13,10 +13,12 @@ export default function MaidBookingWizard() {
   const [step, setStep] = useState(1);
 
   const handleEstimatorNext = () => {
-    if (isInitialized && user.id !== 'guest' && user.contactNumber && user.pincode && user.address) {
-      setStep(3); // Skip to Schedule
+    // If user is logged in and has all required details, skip to step 3 (Schedule)
+    const hasProfileDetails = (user.contactNumber || user.email) && user.pincode && user.address;
+    if (isInitialized && user.id !== 'guest' && hasProfileDetails) {
+      setStep(3); 
     } else {
-      setStep(2); // Go to Details
+      setStep(2); // Go to Details for guests or incomplete profiles
     }
   };
 

@@ -25,43 +25,20 @@ import { useState, useMemo, useEffect } from 'react';
 import { defaultUser } from '@/lib/mock-data';
 import { Separator } from '@/components/ui/separator';
 
-function BookingRow({ booking }: { booking: Booking }) {
-    const firestore = useFirestore();
+function BookingRow({ booking, customer: providedCustomer }: { booking: Booking, customer?: UserProfile | null }) {
     const router = useRouter();
-    const [displayCustomer, setDisplayCustomer] = useState<UserProfile | null>(null);
-
-    const customerRef = useMemoFirebase(() => {
-        if(firestore && booking.customerId) {
-            return doc(firestore, 'customers', booking.customerId);
-        }
-        return null;
-    }, [firestore, booking.customerId]);
-
-    const {data: customer, isLoading} = useDoc<UserProfile>(customerRef);
     
-    useEffect(() => {
-        if (isLoading) {
-            setDisplayCustomer(null); // Explicitly set to null while loading
-            return;
-        }
-
-        if (customer) {
-            setDisplayCustomer(customer);
-        } else {
-            // Fallback to default user if customer is not found after loading
-            setDisplayCustomer({ ...defaultUser, id: booking.customerId, name: 'Unknown Customer' });
-        }
-    }, [isLoading, customer, booking.customerId]);
-
-    if (!displayCustomer) {
-        return (
-             <TableRow>
-                <TableCell colSpan={5}>
-                    <Skeleton className="h-8 w-full" />
-                </TableCell>
-            </TableRow>
-        )
-    }
+    const displayCustomer = useMemo(() => {
+        if (providedCustomer) return providedCustomer;
+        
+        // Fallback to denormalized data if available, or a generic placeholder
+        return {
+            id: booking.customerId,
+            name: booking.customerName || 'Unknown Customer',
+            contactNumber: booking.customerContact || 'N/A',
+            address: booking.customerAddress || 'N/A'
+        } as UserProfile;
+    }, [providedCustomer, booking]);
     
     const handleRowClick = () => {
         router.push(`/admin/bookings/${booking.id}?customerId=${booking.customerId}`);
@@ -70,6 +47,7 @@ function BookingRow({ booking }: { booking: Booking }) {
     const statusVariant = {
         pending: 'accent',
         confirmed: 'default',
+        in_progress: 'default',
         completed: 'default',
         cancelled: 'destructive'
     } as const;
@@ -125,66 +103,33 @@ export function BookingList() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   
   const allBookingsQuery = useMemoFirebase(() => {
-    // Attempt collectionGroup only in admin context
     if (firestore && firebaseUser && typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
       return query(collectionGroup(firestore, 'bookings'));
     }
     return null;
   }, [firestore, firebaseUser]);
 
-  // Try the standard collectionGroup first
-  const { data: collectionGroupBookings, isLoading: isCGLoading, error: cgError } = useCollection<Booking>(allBookingsQuery);
+  const { data: bookings, isLoading: isBookingsLoading, error } = useCollection<Booking>(allBookingsQuery);
 
-  // Fallback state for manual aggregation
-  const [manualBookings, setManualBookings] = useState<Booking[]>([]);
-  const [isManualLoading, setIsManualLoading] = useState(false);
-  const [manualError, setManualError] = useState<Error | null>(null);
-
-  // Fetch all customers for manual fallback
-  const customersRef = useMemoFirebase(() => firestore ? collection(firestore, 'customers') : null, [firestore]);
-  const { data: allCustomers } = useCollection<UserProfile>(customersRef);
-
-  useEffect(() => {
-    // If collectionGroup failed with permission error, we try the manual approach
-    if (cgError && allCustomers && allCustomers.length > 0) {
-      console.log("Collection Group failed, attempting manual aggregation for", allCustomers.length, "customers...");
-      setIsManualLoading(true);
-      
-      const unsubscribers: (() => void)[] = [];
-      const aggregateMap = new Map<string, Booking[]>();
-
-      allCustomers.forEach(customer => {
-        if (!customer.id) return;
-        const customerBookingsRef = collection(firestore!, 'customers', customer.id, 'bookings');
-        
-        try {
-          const unsub = onSnapshot(customerBookingsRef, (snapshot) => {
-            const customerBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Booking);
-            aggregateMap.set(customer.id!, customerBookings);
-            
-            // Flatten the map into a single array
-            const flatBookings: Booking[] = [];
-            aggregateMap.forEach(bookings => flatBookings.push(...bookings));
-            setManualBookings(flatBookings);
-            setIsManualLoading(false);
-          }, (err) => {
-            console.warn(`Could not fetch bookings for customer ${customer.id}:`, err);
-            // We don't set global error if one customer fails, just continue
-          });
-          unsubscribers.push(unsub);
-        } catch (e) {
-            console.error(e);
-        }
-      });
-
-      return () => unsubscribers.forEach(unsub => unsub());
+  // Optimization: Fetch all customers in one go to avoid N+1 queries in rows
+  const customersQuery = useMemoFirebase(() => {
+    if (firestore && bookings && bookings.length > 0) {
+        return collection(firestore, 'customers');
     }
-  }, [cgError, allCustomers, firestore]);
+    return null;
+  }, [firestore, bookings?.length]);
 
-  // Resolve final bookings and states
-  const bookings = cgError ? manualBookings : collectionGroupBookings;
-  const isLoading = cgError ? (isManualLoading && manualBookings.length === 0) : isCGLoading;
-  const error = (cgError && allCustomers && allCustomers.length > 0) ? null : cgError; 
+  const { data: allCustomers, isLoading: isCustomersLoading } = useCollection<UserProfile>(customersQuery);
+
+  const customerMap = useMemo(() => {
+    const map = new Map<string, UserProfile>();
+    if (allCustomers) {
+        allCustomers.forEach(c => {
+            if (c.id) map.set(c.id, c);
+        });
+    }
+    return map;
+  }, [allCustomers]);
 
   const filteredAndSortedBookings = useMemo(() => {
     if (!bookings) return [];
@@ -229,12 +174,11 @@ export function BookingList() {
     setSortOrder(current => current === 'asc' ? 'desc' : 'asc');
   }
 
-  const showLoading = isLoading || isUserLoading;
+  const showLoading = isBookingsLoading || isCustomersLoading || isUserLoading;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>All Booking Requests</CardTitle>
         <CardDescription>
           A real-time list of all customer booking requests across the platform. Click a row for details.
         </CardDescription>
@@ -263,7 +207,7 @@ export function BookingList() {
           </div>
         )}
 
-        {!isUserLoading && !firebaseUser && !isLoading && (
+        {!isUserLoading && !firebaseUser && !isBookingsLoading && (
             <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Access Denied</AlertTitle>
@@ -307,7 +251,11 @@ export function BookingList() {
                 </TableHeader>
                 <TableBody>
                     {filteredAndSortedBookings.map((booking) => (
-                        <BookingRow key={booking.id} booking={booking} />
+                        <BookingRow 
+                            key={booking.id} 
+                            booking={booking} 
+                            customer={customerMap.get(booking.customerId)}
+                        />
                     ))}
                 </TableBody>
                 </Table>

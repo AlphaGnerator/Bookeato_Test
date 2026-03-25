@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import { FirebaseClientProvider } from '@/firebase';
+import { AdminAuthGuard } from '@/components/admin-auth-guard';
 import { useCulinaryStore } from '@/hooks/use-culinary-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -163,9 +164,11 @@ function SanityCheckComponent() {
 export default function DebugCalculationPage() {
     return (
         <FirebaseClientProvider>
-            <AppLayout pageTitle="Debug Time Calculation">
-                <SanityCheckComponent />
-            </AppLayout>
+            <AdminAuthGuard>
+                <AppLayout pageTitle="Debug Time Calculation">
+                    <SanityCheckComponent />
+                </AppLayout>
+            </AdminAuthGuard>
         </FirebaseClientProvider>
     )
 }

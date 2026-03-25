@@ -14,108 +14,68 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { Loader2, UserCheck, Database, Utensils, BookOpen, CalendarX, Images, Library, Calculator } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/firebase';
-import { signInAnonymously } from 'firebase/auth';
+import { LoadingState } from "@/components/loading-state";
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 const formSchema = z.object({
-  username: z.string().min(1, 'Username is required.'),
+  email: z.string().email('Invalid email address.'),
   password: z.string().min(1, 'Password is required.'),
 });
 
-export function AdminLoginForm() {
+interface AdminLoginFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+
+export function AdminLoginForm({ className, ...props }: AdminLoginFormProps) {
   const router = useRouter();
   const auth = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { username: '', password: '' },
+    defaultValues: { email: '', password: '' },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
 
-    if (values.username === 'anirudh' && values.password === '1111111111') {
-        try {
-            if (!auth) throw new Error("Auth service not available.");
-            // Sign in anonymously to get an authenticated session for admin access
-            await signInAnonymously(auth);
-            toast({
-                title: 'Admin Login Successful',
-                description: "Welcome, Admin!",
-            });
-            setIsAdmin(true);
-        } catch (error: any) {
-            console.error("Admin anonymous sign-in failed", error);
-            toast({
-                variant: 'destructive',
-                title: 'Authentication Error',
-                description: 'Could not establish an admin session.',
-            });
-        }
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Login Failed',
-        description: 'Invalid username or password.',
-      });
+    try {
+        if (!auth) throw new Error("Auth service not available.");
+        // Sign in with email and password for a persistent session
+        await signInWithEmailAndPassword(auth, values.email, values.password);
+        toast({
+            title: 'Admin Login Successful',
+            description: "Welcome, Admin!",
+        });
+        // Redirect directly to admin dashboard — auth guard will handle verification
+        router.push('/admin');
+    } catch (error: any) {
+        console.error("Admin login failed", error);
+        toast({
+            variant: 'destructive',
+            title: 'Login Failed',
+            description: 'Invalid email or password.',
+        });
+        setIsLoading(false);
     }
-    setIsLoading(false);
   };
-  
-  if (isAdmin) {
-    return (
-        <div className="space-y-4">
-            <h3 className="font-medium text-center">Select an Admin Panel</h3>
-            <Button variant="outline" className="w-full justify-between" onClick={() => router.push('/admin/bookings')}>
-                 <span>Customer Bookings</span>
-                <BookOpen className="h-4 w-4" />
-            </Button>
-             <Button variant="outline" className="w-full justify-between" onClick={() => router.push('/admin/cook-requests')}>
-                 <span>Cook Approval Requests</span>
-                <UserCheck className="h-4 w-4" />
-            </Button>
-             <Button variant="outline" className="w-full justify-between" onClick={() => router.push('/admin/customers')}>
-                 <span>Customer Report</span>
-                <Database className="h-4 w-4" />
-            </Button>
-             <Button variant="outline" className="w-full justify-between" onClick={() => router.push('/admin/availability')}>
-                 <span>Slot Availability</span>
-                <CalendarX className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="w-full justify-between" onClick={() => router.push('/admin/carousel')}>
-                 <span>Carousel Images</span>
-                <Images className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="w-full justify-between" onClick={() => router.push('/admin/image-library')}>
-                 <span>Image Library</span>
-                <Library className="h-4 w-4" />
-            </Button>
-             <Button variant="outline" className="w-full justify-between" onClick={() => router.push('/admin/debug-calculation')}>
-                 <span>Debug Calculation</span>
-                <Calculator className="h-4 w-4" />
-            </Button>
-        </div>
-    )
-  }
 
   return (
-    <div>
+    <div className={cn("grid gap-6", className)} {...props}>
         <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
             control={form.control}
-            name="username"
+            name="email"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>Email Address</FormLabel>
                 <FormControl>
-                    <Input placeholder="anirudh" {...field} />
+                    <Input placeholder="admin@bookeato.com" {...field} />
                 </FormControl>
                 <FormMessage />
                 </FormItem>

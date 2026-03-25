@@ -8,12 +8,13 @@ import type { Booking, Dish, UserProfile } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, User, Calendar, Clock, MapPin, Mail, Phone, Flame, Utensils, Hash, CheckCircle, Hourglass, ChefHat } from 'lucide-react';
+import { AlertTriangle, User, Calendar, Clock, MapPin, Mail, Phone, Flame, Utensils, Hash, CheckCircle, Hourglass, ChefHat, Sparkles, Timer } from 'lucide-react';
 import { format, formatDistanceToNowStrict } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { AssignCook } from './assign-cook';
+import { AssignMaid } from './assign-maid';
 import { useSearchParams } from 'next/navigation';
 
 function BookingDetailsSkeleton() {
@@ -181,16 +182,18 @@ export function BookingDetails({ bookingId }: { bookingId: string }) {
   }, 0);
   const totalPortions = booking.items.reduce((acc, item) => acc + item.numberOfPortions, 0);
 
-  const statusVariant = {
-      pending: 'accent',
-      confirmed: 'default',
-      completed: 'default',
-      cancelled: 'destructive'
-  } as const;
+    const statusVariant = {
+        pending: 'accent',
+        confirmed: 'default',
+        completed: 'default',
+        in_progress: 'default',
+        cancelled: 'destructive'
+    } as const;
 
   const statusIcon = {
       pending: <Hourglass className="mr-2 h-4 w-4"/>,
       confirmed: <CheckCircle className="mr-2 h-4 w-4"/>,
+      in_progress: <Timer className="mr-2 h-4 w-4 animate-pulse" />,
       completed: <CheckCircle className="mr-2 h-4 w-4" />,
       cancelled: <AlertTriangle className="mr-2 h-4 w-4"/>
   }
@@ -206,10 +209,17 @@ export function BookingDetails({ bookingId }: { bookingId: string }) {
                             Scheduled for {format(new Date(booking.bookingDate), 'EEE, MMM d, yyyy @ p')}
                         </CardDescription>
                     </div>
-                    <Badge variant={statusVariant[booking.status] || 'secondary'} className="text-base capitalize font-bold px-4 py-1.5 rounded-full border-none">
-                        {statusIcon[booking.status]}
-                        {booking.status}
-                    </Badge>
+                    <div className="flex flex-col items-end gap-2">
+                        <Badge variant={statusVariant[booking.status] || 'secondary'} className="text-base capitalize font-bold px-4 py-1.5 rounded-full border-none">
+                            {statusIcon[booking.status]}
+                            {booking.status}
+                        </Badge>
+                        {booking.otp && booking.status === 'confirmed' && (
+                            <div className="bg-stone-900 text-white px-3 py-1 rounded-lg text-xs font-black tracking-widest">
+                                OTP: {booking.otp}
+                            </div>
+                        )}
+                    </div>
                 </CardHeader>
                 <CardContent className="pt-2">
                     <div className="flex items-center gap-3 mb-6 p-4 bg-stone-50 rounded-2xl border border-stone-100">
@@ -244,7 +254,13 @@ export function BookingDetails({ bookingId }: { bookingId: string }) {
                 </CardContent>
             </Card>
 
-            <AssignCook bookingId={booking.id} customerId={booking.customerId} bookingDate={booking.bookingDate} />
+            {booking.status === 'pending' && (
+                booking.type === 'maid' ? (
+                    <AssignMaid bookingId={booking.id} customerId={booking.customerId} bookingDate={booking.bookingDate} bookingTime={booking.time} />
+                ) : (
+                    <AssignCook bookingId={booking.id} customerId={booking.customerId} bookingDate={booking.bookingDate} bookingTime={booking.time} />
+                )
+            )}
 
             <Card className="rounded-[2rem] border-stone-100 shadow-sm overflow-hidden bg-stone-50/30">
                 <CardHeader className="px-8 pt-8">

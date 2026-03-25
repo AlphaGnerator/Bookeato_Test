@@ -259,14 +259,8 @@ export function AddDishForm({ dish }: AddDishFormProps) {
 
   return (
     <>
-    <div className="space-y-6">
-      <Button variant="outline" onClick={() => router.back()}>
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Dish Playbook
-      </Button>
-      <Card>
+    <Card>
         <CardHeader>
-          <CardTitle>{isEditMode ? 'Edit Dish' : 'Create New Dish'}</CardTitle>
           <CardDescription>
             {isEditMode 
                 ? 'Update the details for this dish.' 
@@ -524,7 +518,6 @@ export function AddDishForm({ dish }: AddDishFormProps) {
             </Form>
         </CardContent>
       </Card>
-    </div>
     <ImagePicker
         isOpen={isPickerOpen}
         onClose={() => setIsPickerOpen(false)}

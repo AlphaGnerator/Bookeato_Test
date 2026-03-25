@@ -26,6 +26,7 @@ interface CulinaryStore {
   cancelCurrentPlan: () => Promise<void>;
   requestPlanModification: () => Promise<void>;
   removeDishes: (dishIds: string[]) => void;
+  refreshDishes: () => Promise<void>;
   addOrUpdateDraftBooking: (draft: DraftBooking) => void;
   removeDraftBooking: (bookingDate: string) => void;
   getDraftBookingForSlot: (bookingDate: string) => DraftBooking | undefined;
@@ -386,6 +387,14 @@ export const CulinaryStoreProvider = ({ children }: { children: React.ReactNode 
     if (dishIds.length === 0) return;
   }, []);
 
+  const refreshDishes = useCallback(async () => {
+    // Since we use useCollection (real-time), manual refresh is mostly redundant,
+    // but we can provide it for UX or to handle edge cases by re-mounting or similar logic.
+    // For now, we'll just log and rely on Firebase's auto-sync.
+    console.log("Refreshing dishes...");
+    return Promise.resolve();
+  }, []);
+
   const addOrUpdateDraftBooking = useCallback((draft: DraftBooking) => {
     setDraftBookings(prevDrafts => {
       const existingIndex = prevDrafts.findIndex(d => isSameDay(new Date(d.bookingDate), new Date(draft.bookingDate)));
@@ -580,6 +589,7 @@ export const CulinaryStoreProvider = ({ children }: { children: React.ReactNode 
     cancelCurrentPlan,
     requestPlanModification,
     removeDishes,
+    refreshDishes,
     addOrUpdateDraftBooking,
     removeDraftBooking,
     getDraftBookingForSlot,

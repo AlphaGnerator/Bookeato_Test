@@ -32,10 +32,19 @@ service cloud.firestore {
      * to manage the catalog and system configurations.
      */
     function isAdmin() {
-      return isSignedIn();
+      // Admin UID for admin@bookeato.com
+      return isSignedIn() && request.auth.uid == 'Ao5a9rOM90SraQjEnavrbagQ0c32';
     }
 
     // --- Collection Rules ---
+
+    /**
+     * @description CollectionGroup rule for bookings.
+     * Required for admin's collectionGroup query to list ALL bookings across customers.
+     */
+    match /{path=**}/bookings/{bookingId} {
+      allow read: if isAdmin();
+    }
 
     /**
      * @description Rules for the CustomerProfile entity.
@@ -119,6 +128,22 @@ service cloud.firestore {
     match /pricing_configs/{pincode} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+    
+    match /maids/{maidId} {
+      allow get: if isSignedIn() && (request.auth.uid == maidId || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && request.auth.uid == maidId;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /cooks/{cookId} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
   }
 }

@@ -81,17 +81,25 @@ export type Booking = {
         numberOfPortions: number;
         notes?: string;
     }[];
-    status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+    status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'in_progress';
     totalCost: number;
     type?: 'cook' | 'maid';
     service?: string;
     notes?: string; // For special requests like expert curation
+    otp?: string; // 4-digit OTP for task verification
+    startTime?: string; // ISO 8601 when task actually started
+    endTime?: string; // ISO 8601 when task actually ended
 
-    // Denormalized customer data for cook access
+    // Denormalized customer data for cook/maid access
     customerName?: string;
     customerAddress?: string;
     customerPincode?: string;
     customerContact?: string;
+    
+    // Assigned professional
+    maidId?: string;
+    maidName?: string;
+    time?: string;
 }
 
 export type CookProfile = {
@@ -105,6 +113,19 @@ export type CookProfile = {
     specialties: string[];
     totalEarnings?: number;
     status: 'pending' | 'approved' | 'rejected';
+}
+
+export type MaidProfile = {
+    id: string;
+    name: string;
+    contactNumber: string;
+    pincode?: string;
+    status: 'pending' | 'approved' | 'rejected';
+    kycDocumentUrl?: string;
+    aadhaarNumber?: string;
+    experience?: number;
+    rating?: number;
+    joinedDate?: string;
 }
 
 export type CookAvailability = {

@@ -55,8 +55,8 @@ export function LandingHeader() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-surface/80 backdrop-blur-sm">
-      <div className="container mx-auto flex h-20 items-center justify-between px-6">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-surface/80 backdrop-blur-sm border-b md:border-none">
+      <div className="container mx-auto flex h-16 md:h-20 items-center justify-between px-6">
         <Logo />
         <nav className="hidden md:flex items-center gap-8">
           {getNavLinks(firebaseUser).map((link) => (

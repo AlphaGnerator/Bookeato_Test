@@ -3,6 +3,7 @@
 import { AppLayout } from '@/components/app-layout';
 import { BookingDetails } from './booking-details';
 import { FirebaseClientProvider } from '@/firebase';
+import { AdminAuthGuard } from '@/components/admin-auth-guard';
 import React, { Suspense, use } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -17,17 +18,19 @@ export default function AdminBookingDetailPage({ params }: { params: Promise<{ b
 
   return (
     <FirebaseClientProvider>
-      <AppLayout pageTitle="Booking Details">
-        <Suspense fallback={<Skeleton className="h-screen w-full" />}>
-          <div className="space-y-6">
-            <Button variant="outline" onClick={() => router.push('/admin/bookings')}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to All Bookings
-            </Button>
-            <BookingDetails bookingId={bookingId} />
-          </div>
-        </Suspense>
-      </AppLayout>
+      <AdminAuthGuard>
+        <AppLayout pageTitle="Booking Details">
+          <Suspense fallback={<Skeleton className="h-screen w-full" />}>
+            <div className="space-y-6">
+              <Button variant="outline" onClick={() => router.push('/admin/bookings')}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to All Bookings
+              </Button>
+              <BookingDetails bookingId={bookingId} />
+            </div>
+          </Suspense>
+        </AppLayout>
+      </AdminAuthGuard>
     </FirebaseClientProvider>
   );
 }

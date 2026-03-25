@@ -10,6 +10,7 @@ import { ChefHat, Lightbulb, Loader2, Sparkles, TriangleAlert } from 'lucide-rea
 import { Skeleton } from '@/components/ui/skeleton';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { LoadingState } from "@/components/loading-state";
 
 type MealType = 'Breakfast' | 'Lunch' | 'Dinner';
 
@@ -100,11 +101,8 @@ export function MealIdeasGenerator() {
           </div>
 
           {isPending && (
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
+            <div className="mt-6 border-t pt-6">
+                <LoadingState type="cook" message="Consulting our digital chef for the perfect meal..." />
             </div>
           )}
 

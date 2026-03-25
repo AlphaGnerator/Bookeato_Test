@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useFirebaseApp, useFirestore, useCollection, useMemoFirebase, useUser, deleteDocumentByPathNonBlocking } from '@/firebase';
+import { useFirebaseApp, useFirestore, useCollection, useMemoFirebase, useUser, deleteDocumentNonBlocking } from '@/firebase';
 import { collection, doc, serverTimestamp, query, orderBy, setDoc, writeBatch } from 'firebase/firestore';
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL, uploadString } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
@@ -139,7 +139,7 @@ export function ImageLibraryManager() {
 
   const handleDeleteImage = (id: string) => {
     if (!firestore) return;
-    deleteDocumentByPathNonBlocking(firestore, `uploadedImages/${id}`);
+    deleteDocumentNonBlocking(doc(firestore, 'uploadedImages', id));
     toast({ title: 'Image Removed', description: 'The image has been removed from your library.', variant: 'destructive' });
     refetchImages();
   };
@@ -265,7 +265,6 @@ export function ImageLibraryManager() {
       <div className="lg:col-span-2">
         <Card>
           <CardHeader>
-            <CardTitle>Image Library</CardTitle>
             <CardDescription>A central place for all your application's images.</CardDescription>
           </CardHeader>
           <CardContent>

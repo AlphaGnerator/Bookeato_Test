@@ -16,20 +16,22 @@ import {
 import { Input } from '@/components/ui/input';
 import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { Loader2, TestTube } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from "@/hooks/use-toast";
+import { LoadingState } from "@/components/loading-state";
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword, signInAnonymously } from 'firebase/auth';
 import { doc } from 'firebase/firestore';
 import type { UserProfile } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import { defaultUser } from '@/lib/mock-data';
+import { cn } from '@/lib/utils'; // Added for cn utility
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
   password: z.string().min(6, 'Password must be at least 6 characters.'),
 });
 
-export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
+export function LoginForm({ onSuccess, className, ...props }: { onSuccess?: () => void; className?: string; [key: string]: any }) { // Modified signature
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
@@ -147,7 +149,9 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   }
 
   return (
-    <div>
+    <>
+      {isLoading && <LoadingState fullPage type="processing" message="Verifying your digital identity..." />}
+      <div className={cn("grid gap-6", className)} {...props}>
         <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -196,6 +200,7 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
             )}
             Continue as Demo Customer
         </Button>
-    </div>
+      </div>
+    </>
   );
 }

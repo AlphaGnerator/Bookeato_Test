@@ -5,8 +5,8 @@ import { useCulinaryStore } from '@/hooks/use-culinary-store';
 import { isSameDay, format, parseISO, differenceInHours } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Utensils, Hash, Clock, AlertTriangle, BadgeCheck, Pencil, Ban, Info, XCircle, IndianRupee, Sparkles, Wallet, Minus, Plus, Trash2, ArrowLeft, Lock, Loader2, ChevronDown, List, Calendar as CalendarIcon, Sunrise, Sun, Moon, MapPin, User as UserIcon, ChefHat } from 'lucide-react';
+import { Utensils, Hash, Clock, AlertTriangle, BadgeCheck, Pencil, Ban, XCircle, IndianRupee, Sparkles, Wallet, Minus, Plus, Trash2, ArrowLeft, Lock, Loader2, ChevronDown, List, Calendar as CalendarIcon, Sunrise, Sun, Moon, MapPin, User as UserIcon, ChefHat } from 'lucide-react';
+import { LoadingState } from "@/components/loading-state";
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -47,6 +47,13 @@ export function BookingSummary({ date }: { date: string }) {
   
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (isInitialized) {
+      setIsLoading(false);
+    }
+  }, [isInitialized]);
 
   const originalDraft = useMemo(() => {
     try {
@@ -280,21 +287,8 @@ export function BookingSummary({ date }: { date: string }) {
     router.push(`/booking/menu?date=${date}&${params.toString()}`);
   }
 
-  if (!isInitialized) {
-     return (
-        <div className="container mx-auto space-y-8 pt-10">
-            <Skeleton className="h-40 w-full" />
-            <div className="grid lg:grid-cols-12 gap-8">
-                <div className="lg:col-span-8 space-y-6">
-                    <Skeleton className="h-64 w-full" />
-                    <Skeleton className="h-64 w-full" />
-                </div>
-                <div className="lg:col-span-4">
-                    <Skeleton className="h-96 w-full" />
-                </div>
-            </div>
-        </div>
-    );
+  if (isLoading) {
+     return <LoadingState fullPage type="processing" message="Crafting your session summary..." />;
   }
 
   if (items.length === 0) {

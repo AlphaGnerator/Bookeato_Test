@@ -81,7 +81,7 @@ export function MaidPendingCart() {
   };
 
   const handleUpdateAddress = () => {
-    setPendingBooking(prev => {
+    setPendingBooking((prev: any) => {
         const updated = { ...prev, address: newAddress };
         localStorage.setItem('bookeato_pending_maid_booking', JSON.stringify(updated));
         return updated;
@@ -117,8 +117,8 @@ export function MaidPendingCart() {
 
   return (
     <div className="w-full max-w-4xl mx-auto mb-8 bg-white rounded-[2rem] shadow-lg shadow-stone-200/50 border-t-4 border-t-orange-500 border-x border-b border-stone-100 overflow-hidden">
-      <div className="p-6 sm:p-8">
-        <div className="flex flex-col md:flex-row md:items-stretch justify-between gap-8 md:gap-12">
+      <div className="p-4 sm:p-8">
+        <div className="flex flex-col md:flex-row md:items-stretch justify-between gap-6 md:gap-12">
           
           {/* Left Side: Summary */}
           <div className="flex-1 flex flex-col">
@@ -162,9 +162,9 @@ export function MaidPendingCart() {
               </div>
               
               <div className="pt-4 mt-2 border-t border-stone-200">
-                <div className="flex justify-between items-center text-base">
-                  <span className="text-stone-900 font-bold">Total Payable:</span>
-                  <span className="text-orange-600 font-black text-2xl">{pendingBooking.price || '₹0'}</span>
+                <div className="flex justify-between items-center text-sm md:text-base">
+                  <span className="text-stone-900 font-bold">Total:</span>
+                  <span className="text-orange-600 font-black text-xl md:text-2xl">{pendingBooking.price || '₹0'}</span>
                 </div>
               </div>
             </div>

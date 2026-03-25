@@ -219,6 +219,53 @@ export function PlanDetailsView() {
                     </CardContent>
                 </Card>
 
+                <Card id="pricing-guide" className="border-2 border-orange-100 shadow-sm bg-orange-50/20">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-xl md:text-2xl font-headline text-stone-900">
+                             <div className="bg-orange-100 p-2 rounded-xl">
+                                <IndianRupee className="h-6 w-6 text-orange-600" />
+                             </div>
+                             Pricing & Overage Guide
+                        </CardTitle>
+                        <CardDescription className="text-stone-500 font-medium tracking-tight">How your subscription handles complex meal preparation.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="p-5 rounded-3xl bg-white border border-orange-100 space-y-3 shadow-sm">
+                                <h4 className="font-extrabold text-orange-950 text-sm uppercase tracking-tight flex items-center gap-2">
+                                    <BadgeCheck className="w-4 h-4 text-green-500" />
+                                    Included Base Visit
+                                </h4>
+                                <p className="text-[11px] md:text-xs text-orange-800/80 leading-relaxed font-bold">
+                                    Every visit in your plan includes a **Standard Prep Time** (based on your family size). This is part of your subscription and costs ₹0.
+                                </p>
+                            </div>
+                            <div className="p-5 rounded-3xl bg-white border border-orange-100 space-y-3 shadow-sm">
+                                <h4 className="font-extrabold text-orange-950 text-sm uppercase tracking-tight flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-orange-500" />
+                                    Overage Fee
+                                </h4>
+                                <p className="text-[11px] md:text-xs text-orange-800/80 leading-relaxed font-bold">
+                                    If you select a complex menu that exceeds the standard time, you only pay for the **extra minutes** at the standard daily rate.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-[1.75rem] p-6 border border-stone-100 space-y-4 shadow-sm">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-stone-400">Why Overage?</h4>
+                            <p className="text-xs md:text-sm text-stone-600 leading-relaxed font-bold">
+                                To keep our subscriptions affordable, we base them on standard meal times. For days when you want something extra special (like a 5-course dinner), the overage fee ensures our cooks are fairly compensated for their additional time.
+                            </p>
+                            <div className="flex items-center gap-3 pt-2">
+                                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                                <span className="text-[10px] md:text-[11px] font-black text-stone-500 uppercase tracking-widest bg-stone-50 px-3 py-1.5 rounded-full border border-stone-100">
+                                    Payments are auto-deducted from your wallet
+                                </span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
             </div>
             
             <AlertDialogContent>

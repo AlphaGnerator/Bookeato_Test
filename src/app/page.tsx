@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { LandingHeader } from '@/components/landing-header';
 import { ChefHat, Shield, Check, ArrowRight, IndianRupee, Flame, Soup, Activity, Loader2, Sparkles, Baby, HeartPulse } from 'lucide-react';
+import { BottomNav } from '@/components/bottom-nav';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -788,6 +789,9 @@ export default function WelcomePage() {
           </section>
         </main>
         
+        <div className="md:hidden pb-16"></div>
+        <BottomNav isGuest={true} />
+
         {/* Footer */}
         <footer className="bg-[#0F172A] text-[#9CA3AF] relative pt-32 pb-12 overflow-hidden px-4">
             <div className="absolute top-0 left-0 w-full h-32 bg-surface" style={{clipPath: "ellipse(100% 55% at 48% 44%)"}}></div>
@@ -821,6 +825,9 @@ export default function WelcomePage() {
                         <h3 className="font-bold text-white text-sm uppercase tracking-widest">Portals</h3>
                         <ul className="space-y-2 mt-4 text-sm font-medium">
                             <li><Link href="/cook/login" className="hover:text-white transition-colors">Cook Login</Link></li>
+                            <li><Link href="/cook/signup" className="hover:text-white transition-colors">Join as Cook</Link></li>
+                            <li><Link href="/maid/dashboard" className="hover:text-white transition-colors">Maid Dashboard</Link></li>
+                            <li><Link href="/maid/signup" className="hover:text-white transition-colors">Join as Maid Partner</Link></li>
                             <li><Link href="/admin/login" className="hover:text-white transition-colors">Admin Panel</Link></li>
                         </ul>
                     </div>

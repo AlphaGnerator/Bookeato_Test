@@ -17,7 +17,7 @@ import { Skeleton } from './ui/skeleton';
 import { useAuth, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter, usePathname } from 'next/navigation';
-import { LogIn, LogOut, UserPlus, ChefHat, User, Soup } from 'lucide-react';
+import { LogIn, LogOut, UserPlus, ChefHat, User, Soup, BookOpen, Flame } from 'lucide-react';
 import { Separator } from './ui/separator';
 
 export function Header({ title }: { title: string }) {
@@ -57,10 +57,10 @@ export function Header({ title }: { title: string }) {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-surface px-4 text-text-primary md:px-6">
-      <div className="flex items-center gap-4">
-        <SidebarTrigger className="md:hidden" />
-        <h1 className="text-lg font-semibold font-headline">{title}</h1>
+    <header className="sticky top-0 z-30 flex h-14 md:h-16 items-center justify-between border-b bg-surface px-4 text-text-primary md:px-6">
+      <div className="flex items-center gap-3 md:gap-4">
+        <SidebarTrigger className="hidden md:flex" />
+        <h1 className="text-base md:text-lg font-semibold font-headline">{title}</h1>
       </div>
        {isInitialized ? (
         <DropdownMenu>
@@ -90,7 +90,7 @@ export function Header({ title }: { title: string }) {
                         <span>Profile</span>
                     </Link>
                 </DropdownMenuItem>
-                 {!isCook && (
+                  {!isCook && !pathname.startsWith('/admin') && (
                     <>
                         <DropdownMenuItem asChild className="h-11">
                             <Link href="/cooks">
@@ -100,6 +100,22 @@ export function Header({ title }: { title: string }) {
                         </DropdownMenuItem>
                          <DropdownMenuItem asChild className="h-11">
                             <Link href="/order-history">Order History</Link>
+                        </DropdownMenuItem>
+                    </>
+                 )}
+                 {pathname.startsWith('/admin') && (
+                    <>
+                        <DropdownMenuItem asChild className="h-11">
+                            <Link href="/admin/bookings">
+                                <BookOpen className="mr-2 h-4 w-4" />
+                                <span>Bookings Hub</span>
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild className="h-11">
+                            <Link href="/admin/dishes">
+                                <Flame className="mr-2 h-4 w-4" />
+                                <span>Manage Dishes</span>
+                            </Link>
                         </DropdownMenuItem>
                     </>
                  )}

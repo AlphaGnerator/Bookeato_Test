@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Utensils, Hash, Clock, AlertTriangle, BadgeCheck, ArrowLeft, Lock, Star, ShoppingBasket, Loader2, User as UserIcon, Wallet, MapPin, Minus, Plus, Trash2 } from 'lucide-react';
+import { Utensils, Hash, Clock, AlertTriangle, BadgeCheck, ArrowLeft, Lock, Star, ShoppingBasket, Loader2, User as UserIcon, Wallet, MapPin, Minus, Plus, Trash2, ShieldCheck, Info, CheckCircle2, ChevronRight, Receipt, CreditCard, ArrowRight, Sparkles, ChefHat } from 'lucide-react';
+import { LoadingState } from "@/components/loading-state";
 import { Separator } from '@/components/ui/separator';
 import { useUser, useFirestore, useMemoFirebase } from '@/firebase';
 import { cn } from '@/lib/utils';
@@ -317,22 +318,16 @@ export default function UnifiedCheckoutPage() {
             };
             await executeUnifiedCheckout(planToPurchase, 0); // No recharge needed here
             router.push('/dashboard');
-        } catch (error: any) {
-            console.error("Checkout failed:", error);
         } finally {
             setIsSubmitting(false);
         }
     }
     
+    // Derived loading state for full-page overlay
+    const isPageLoading = !isInitialized || isSubmitting;
+
     if (!isInitialized) {
-        return (
-             <div className="max-w-xl mx-auto pt-6 pb-32 px-4 space-y-6">
-                <Skeleton className="h-10 w-32" />
-                <Skeleton className="h-8 w-48 mt-4" />
-                <Skeleton className="h-40 w-full mt-8" />
-                <Skeleton className="h-40 w-full" />
-            </div>
-        );
+        return <LoadingState fullPage type="processing" message="Syncing your culinary journey..." />;
     }
     
     if (!currentDraft || !guestConfig) {
@@ -355,6 +350,7 @@ export default function UnifiedCheckoutPage() {
 
     return (
       <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
+        {isSubmitting && <LoadingState fullPage type="processing" message="Securing your booking..." />}
         <div className="max-w-xl mx-auto pt-6 pb-32 px-4 space-y-6">
             <Button variant="ghost" onClick={() => router.push('/booking/menu')}>
                 <ArrowLeft className="mr-2 h-4 w-4" />

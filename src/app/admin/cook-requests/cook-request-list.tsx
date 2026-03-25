@@ -1,6 +1,6 @@
 'use client';
 import { useState, useMemo } from 'react';
-import { useFirestore, useCollection, useMemoFirebase, updateDocumentNonBlocking, deleteDocumentByPathNonBlocking, useUser } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase, updateDocumentNonBlocking, deleteDocumentNonBlocking, useUser } from '@/firebase';
 import { collection, doc, query, where, writeBatch } from 'firebase/firestore';
 import type { CookProfile } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,22 +28,19 @@ export function CookRequestList() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'approved' | 'pending' | 'rejected'>('all');
 
 
-  const pendingCooksQuery = useMemoFirebase(() => {
-    if (firestore && firebaseUser && !isUserLoading) {
-      return query(collection(firestore, 'cooks'), where('status', '==', 'pending'));
-    }
-    return null;
-  }, [firestore, firebaseUser, isUserLoading]);
-
-  const allCooksQuery = useMemoFirebase(() => {
+  const cooksCollectionRef = useMemoFirebase(() => {
     if (firestore && firebaseUser && !isUserLoading) {
         return collection(firestore, 'cooks');
     }
     return null;
   }, [firestore, firebaseUser, isUserLoading]);
 
-  const { data: pendingCooks, isLoading: isPendingLoading, error: pendingError } = useCollection<CookProfile>(pendingCooksQuery);
-  const { data: allCooks, isLoading: isAllLoading, error: allError } = useCollection<CookProfile>(allCooksQuery);
+  const { data: allCooks, isLoading: isAllLoading, error: allError } = useCollection<CookProfile>(cooksCollectionRef);
+
+  const pendingCooks = useMemo(() => {
+    if (!allCooks) return [];
+    return allCooks.filter(cook => cook.status === 'pending');
+  }, [allCooks]);
 
   const filteredCooks = useMemo(() => {
     if (!allCooks) return [];
@@ -68,7 +65,7 @@ export function CookRequestList() {
     if (!firestore || !cookId) return;
 
     if (confirm(`Are you sure you want to permanently remove ${cookName}? This action cannot be undone.`)) {
-        deleteDocumentByPathNonBlocking(firestore, `cooks/${cookId}`);
+        deleteDocumentNonBlocking(doc(firestore, 'cooks', cookId));
         toast({
             title: 'Cook Removed',
             description: `${cookName} has been removed from the platform.`,
@@ -77,8 +74,8 @@ export function CookRequestList() {
     }
   }
 
-  const isLoading = isUserLoading || isPendingLoading || isAllLoading;
-  const error = pendingError || allError;
+  const isLoading = isUserLoading || isAllLoading;
+  const error = allError;
 
   if (isUserLoading) {
     return (
@@ -105,28 +102,28 @@ export function CookRequestList() {
     <div className="space-y-8">
         <Card>
             <CardHeader>
-                <CardTitle>Pending Cook Applications</CardTitle>
+                <CardTitle className="text-lg">Pending Applications</CardTitle>
                 <CardDescription>
                 Review and approve or reject new cooks who have signed up.
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                {isPendingLoading && (
+                {isAllLoading && (
                 <div className="space-y-2">
                     <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />
                 </div>
                 )}
                 
-                {pendingError && (
+                {allError && (
                     <Alert variant="destructive">
                         <AlertTriangle className="h-4 w-4" />
                         <AlertTitle>Error Fetching Pending Requests</AlertTitle>
-                        <AlertDescription>{pendingError.message}</AlertDescription>
+                        <AlertDescription>{allError.message}</AlertDescription>
                     </Alert>
                 )}
 
-                {!isPendingLoading && !pendingError && (
+                {!isAllLoading && !allError && (
                 pendingCooks && pendingCooks.length > 0 ? (
                     <div className="border rounded-md">
                         <Table>
@@ -174,7 +171,7 @@ export function CookRequestList() {
         
         <Card>
             <CardHeader>
-                <CardTitle>All Registered Cooks</CardTitle>
+                <CardTitle className="text-lg">Full Registry</CardTitle>
                 <CardDescription>A complete list of all cooks on the platform.</CardDescription>
             </CardHeader>
             <CardContent>

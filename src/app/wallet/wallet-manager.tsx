@@ -6,8 +6,9 @@ import { useCulinaryStore } from '@/hooks/use-culinary-store';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Plus, Wallet, Clock, CheckCircle2, AlertTriangle, ArrowUpRight, ArrowDownLeft, CreditCard, Loader2, Sparkles, Delete } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Loader2, Delete } from 'lucide-react';
+import { LoadingState } from "@/components/loading-state";
 import { useRouter, useSearchParams } from 'next/navigation';
 
 const keypadLayout = [
@@ -29,7 +30,7 @@ export function WalletManager() {
   const requiredAmount = searchParams.get('requiredAmount');
 
   const [amount, setAmount] = useState(requiredAmount || '');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Renamed from isSubmitting for full-page loading
 
   const handleKeypadClick = (key: string) => {
     if (key === '<') {
@@ -54,7 +55,7 @@ export function WalletManager() {
       return;
     }
 
-    setIsSubmitting(true);
+    setIsLoading(true); // Use isLoading for full-page processing
     // Simulate payment gateway interaction
     await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -65,7 +66,7 @@ export function WalletManager() {
       description: `₹${numericAmount.toLocaleString('en-IN')} has been successfully added to your wallet.`,
     });
 
-    setIsSubmitting(false);
+    setIsLoading(false); // Reset loading state
     
     if (redirectUrl) {
         router.push(redirectUrl);
@@ -75,6 +76,8 @@ export function WalletManager() {
         setAmount('');
     }
   };
+
+  if (isLoading) return <LoadingState fullPage type="generic" message="Securing your digital wallet..." />;
 
   return (
     <div className="max-w-md mx-auto space-y-6">
@@ -126,10 +129,7 @@ export function WalletManager() {
             ))}
           </div>
 
-          <Button onClick={handleAddFunds} disabled={isSubmitting || !amount} size="lg" className="w-full">
-            {isSubmitting ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : null}
+          <Button onClick={handleAddFunds} disabled={!amount} size="lg" className="w-full">
             Add ₹{Number(amount || 0).toLocaleString('en-IN')} to Wallet
           </Button>
         </CardContent>
