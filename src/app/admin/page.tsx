@@ -63,6 +63,30 @@ const adminModules = [
     stats: 'Active Windows'
   },
   {
+    title: 'Live Kitchen',
+    description: 'Manage real-time stall orders for Bookeato Live.',
+    href: '/admin/live/orders',
+    icon: Flame, // Using Flame for live kitchen
+    color: 'from-red-500 to-orange-600',
+    stats: 'Active Orders'
+  },
+  {
+    title: 'Live Menu',
+    description: 'Manage the Bookeato Live food stall menu items.',
+    href: '/admin/live/menu',
+    icon: Utensils,
+    color: 'from-emerald-500 to-green-600',
+    stats: 'Stall Items'
+  },
+  {
+    title: 'Live Societies',
+    description: 'Manage which societies have active pop-up stalls.',
+    href: '/admin/live/societies',
+    icon: Database,
+    color: 'from-purple-500 to-indigo-600',
+    stats: 'Active Stalls'
+  },
+  {
     title: 'Maid Requests',
     description: 'Review and approve professional maid applications.',
     href: '/admin/maid-requests',

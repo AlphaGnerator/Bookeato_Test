@@ -75,9 +75,9 @@ export function CustomerList() {
                 <TableBody>
                     {customers.map((customer) => (
                     <TableRow key={customer.id}>
-                        <TableCell className="font-medium">{customer.name}</TableCell>
+                        <TableCell className="font-medium">{customer.name || 'Anonymous'}</TableCell>
                         <TableCell>{customer.email}</TableCell>
-                        <TableCell className="text-right">{customer.calorieTarget.toLocaleString()} kcal</TableCell>
+                        <TableCell className="text-right">{(customer.calorieTarget || 0).toLocaleString()} kcal</TableCell>
                     </TableRow>
                     ))}
                 </TableBody>

@@ -76,14 +76,16 @@ export type Booking = {
     bookingDate: string; // ISO 8601 format
     mealType: 'Breakfast' | 'Lunch' | 'Dinner';
     items: {
-        dishId: string;
-        dishName: string;
-        numberOfPortions: number;
+        dishId?: string;
+        dishName?: string;
+        choreName?: string;
+        numberOfPortions?: number;
+        estimatedTime?: number;
         notes?: string;
     }[];
-    status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'in_progress';
+    status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'delivered' | 'in_progress';
     totalCost: number;
-    type?: 'cook' | 'maid';
+    type?: 'cook' | 'maid' | 'subscription';
     service?: string;
     notes?: string; // For special requests like expert curation
     otp?: string; // 4-digit OTP for task verification
@@ -99,7 +101,22 @@ export type Booking = {
     // Assigned professional
     maidId?: string;
     maidName?: string;
+    partnerPhotoUrl?: string;
+    partnerRating?: number;
     time?: string;
+
+    // Feedback & Rating
+    customerRating?: number;
+    customerFeedback?: {
+        issueTypes: string[];
+        freeform: string;
+    };
+    tipAmount?: number;
+    cancelPenalty?: number;
+    refundAmount?: number;
+    earnings?: number; // Admin profit
+    estimatedArrivalTime?: string; // ISO 8601 or formatted time
+    partnerImage?: string;
 }
 
 export type CookProfile = {
@@ -113,19 +130,31 @@ export type CookProfile = {
     specialties: string[];
     totalEarnings?: number;
     status: 'pending' | 'approved' | 'rejected';
+    profilePhotoUrl?: string;
+    aadhaarPhotoUrl?: string;
+    contractUrl?: string;
+    qualification?: string;
+    aadhaarNumber?: string;
+    gender?: 'Male' | 'Female' | 'Other';
 }
 
 export type MaidProfile = {
     id: string;
     name: string;
     contactNumber: string;
+    address?: string;
     pincode?: string;
     status: 'pending' | 'approved' | 'rejected';
-    kycDocumentUrl?: string;
+    kycDocumentUrl?: string; // Legacy field for Aadhaar
+    profilePhotoUrl?: string;
+    aadhaarPhotoUrl?: string;
+    contractUrl?: string;
+    qualification?: string;
     aadhaarNumber?: string;
     experience?: number;
     rating?: number;
     joinedDate?: string;
+    gender?: 'Male' | 'Female' | 'Other';
 }
 
 export type CookAvailability = {
@@ -225,5 +254,22 @@ export type Transaction = {
         planType?: 'weekly' | 'monthly';
         bookingId?: string;
         description: string;
+        tipFor?: string; // Partner name or ID
     };
+}
+
+export type MarketplaceProduct = {
+    id: string;
+    name: string;
+    price: number;
+    image: string;
+    description: string;
+    ingredients: string[];
+    isHealthy: boolean;
+    unit?: string;
+}
+
+export type MarketplaceCartItem = {
+    product: MarketplaceProduct;
+    quantity: number;
 }

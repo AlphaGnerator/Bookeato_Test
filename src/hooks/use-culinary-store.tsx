@@ -1,7 +1,7 @@
-'use client';
+'use client'; 
 
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';
-import type { CookingSlot, UserProfile, Booking, Dish, DraftBooking, DraftBookingItem, Transaction, Subscription } from '@/lib/types';
+import type { CookingSlot, UserProfile, Booking, Dish, DraftBooking, DraftBookingItem, Transaction, Subscription, MarketplaceProduct, MarketplaceCartItem } from '@/lib/types';
 import { defaultUser } from '@/lib/mock-data';
 import { useUser, useFirestore, useMemoFirebase, setDocumentNonBlocking, useDoc, addDocumentNonBlocking, updateDocumentNonBlocking, useCollection } from '@/firebase';
 import { doc, collection, getDocs, writeBatch, updateDoc, onSnapshot, query, serverTimestamp } from 'firebase/firestore';
@@ -33,14 +33,26 @@ interface CulinaryStore {
   submitAllDraftBookings: (totalCost?: number) => Promise<void>;
   clearDraftsAndSubmitCurationRequest: (bookingDate: string) => Promise<void>;
   cancelSlot: (bookingId: string) => void;
+  rescheduleBooking: (bookingId: string, newDate: string, newTime: string) => Promise<void>;
+  updateBookingRating: (bookingId: string, rating: number, feedback?: { issueTypes: string[]; freeform: string }) => Promise<void>;
+  submitTip: (bookingId: string, amount: number, partnerName: string) => Promise<void>;
+  generateSubscriptionBookings: () => Promise<void>;
   setGuestConfig: (config: { pincode: string; familySize: number; address?: string; city?: string; state?: string } | null) => void;
   executeUnifiedCheckout: (planDetails: any, requiredRecharge: number) => Promise<void>;
+  
+  // Marketplace
+  marketplaceCart: MarketplaceCartItem[];
+  addToMarketplaceCart: (product: MarketplaceProduct) => void;
+  removeFromMarketplaceCart: (productId: string) => void;
+  updateMarketplaceQuantity: (productId: string, quantity: number) => void;
+  clearMarketplaceCart: () => void;
 }
 
 const CulinaryStoreContext = createContext<CulinaryStore | undefined>(undefined);
 
 const DRAFT_BOOKINGS_STORAGE_KEY = 'culinary-canvas-draft-bookings';
 const GUEST_CONFIG_STORAGE_KEY = 'culinary-canvas-guest-config';
+const MARKETPLACE_CART_STORAGE_KEY = 'bookeato-marketplace-cart';
 
 
 const PLAN_TIERS = {
@@ -79,6 +91,7 @@ export const CulinaryStoreProvider = ({ children }: { children: React.ReactNode 
   
   const [slots, setSlots] = useState<CookingSlot[]>([]);
   const [draftBookings, setDraftBookings] = useState<DraftBooking[]>([]);
+  const [marketplaceCart, setMarketplaceCart] = useState<MarketplaceCartItem[]>([]);
   const [guestConfig, setGuestConfigState] = useState<{ pincode: string; familySize: number; address?: string; city?: string; state?: string } | null>(null);
 
 
@@ -94,6 +107,10 @@ export const CulinaryStoreProvider = ({ children }: { children: React.ReactNode 
       const storedGuestConfig = localStorage.getItem(GUEST_CONFIG_STORAGE_KEY);
       if (storedGuestConfig) {
         setGuestConfigState(JSON.parse(storedGuestConfig));
+      }
+      const storedMarketplaceCart = localStorage.getItem(MARKETPLACE_CART_STORAGE_KEY);
+      if (storedMarketplaceCart) {
+        setMarketplaceCart(JSON.parse(storedMarketplaceCart));
       }
     } catch (error) {
       console.error("Failed to load data from localStorage:", error);
@@ -129,6 +146,15 @@ export const CulinaryStoreProvider = ({ children }: { children: React.ReactNode 
       }
     }
   }, [userProfileFromDb, isUserLoading, isProfileLoading, firebaseUser, userProfileRef]);
+
+  const isInitialized = !isUserLoading && !isProfileLoading && !areBookingsLoading && !areDishesLoading;
+
+  // AUTO-GENERATE SUBSCRIPTION BOOKINGS
+  useEffect(() => {
+    if (user.subscription && user.subscription.status === 'active' && isInitialized) {
+        // ...
+    }
+  }, [user.subscription, isInitialized]);
 
   const updateUserProfile = useCallback((profile: Partial<UserProfile>) => {
     setUser(currentUser => ({ ...currentUser, ...profile }));
@@ -519,6 +545,113 @@ export const CulinaryStoreProvider = ({ children }: { children: React.ReactNode 
     updateDocumentNonBlocking(bookingRef, { status: 'cancelled' });
   }, [firestore, firebaseUser, bookings]);
 
+  const generateSubscriptionBookings = useCallback(async () => {
+    if (!firestore || !firebaseUser || !user.subscription || !userBookingsRef) return;
+    if (user.subscription.status !== 'active' && user.subscription.status !== 'upcoming') return;
+
+    const sub = user.subscription;
+    const start = parseISO(sub.startDate);
+    const end = parseISO(sub.expiryDate);
+    const days = sub.planId === 'weekly' ? 7 : 30;
+
+    const existingBookings = bookings.filter(b => b.type === 'subscription'); // Mark them for visibility
+    if (existingBookings.length >= days) return; // Already generated
+
+    const batch = writeBatch(firestore);
+    for (let i = 0; i < days; i++) {
+        const date = addDays(start, i);
+        const dateStr = date.toISOString();
+        
+        // Check if already exists for this date
+        const alreadyExists = bookings.some(b => isSameDay(parseISO(b.bookingDate), date));
+        if (alreadyExists) continue;
+
+        const newBookingRef = doc(userBookingsRef);
+        const subscriptionBooking: Omit<Booking, 'id'> = {
+            customerId: firebaseUser.uid,
+            bookingDate: dateStr,
+            mealType: 'Lunch', // Default or from config? The user didn't specify, so pick Lunch
+            status: 'confirmed',
+            type: 'cook', // Default for subscription
+            service: 'Subscription Booking',
+            items: [],
+            totalCost: 0, // Paid via sub
+            customerName: user.name,
+            customerAddress: user.address,
+            customerContact: user.contactNumber,
+            time: sub.config?.timeSlot || '12:00 PM'
+        };
+        batch.set(newBookingRef, subscriptionBooking);
+    }
+    await batch.commit();
+  }, [firestore, firebaseUser, user, userBookingsRef, bookings]);
+
+
+  const updateBookingRating = useCallback(async (bookingId: string, rating: number, feedback?: { issueTypes: string[]; freeform: string }) => {
+    if (!firestore || !firebaseUser) return;
+    const bookingRef = doc(firestore, 'customers', firebaseUser.uid, 'bookings', bookingId);
+    
+    await updateDoc(bookingRef, {
+        customerRating: rating,
+        customerFeedback: feedback || null,
+        status: 'completed' // Ensure it's marked as history once rated? Usually it already is.
+    });
+
+    // Also update Partner rating algorithm (Simplified: this would normally be a cloud function)
+    const booking = bookings.find(b => b.id === bookingId);
+    if (!booking) return;
+
+    const partnerId = booking.cookId || booking.maidId;
+    if (partnerId) {
+        const partnerRef = doc(firestore, booking.cookId ? 'cooks' : 'maids', partnerId);
+        // This is simplified as we don't have totalRatings/currentRating easily accessible here 
+        // without fetching the partner document. 
+        // For now, we update the booking, and global ratings would be handled by a weekly job or cloud function.
+    }
+  }, [firestore, firebaseUser, bookings]);
+
+  const submitTip = useCallback(async (bookingId: string, amount: number, partnerName: string) => {
+    if (!firestore || !firebaseUser || !user.walletBalance) return;
+    if (user.walletBalance < amount) throw new Error("Insufficient balance for tip");
+
+    const batch = writeBatch(firestore);
+    
+    // 1. Deduct from wallet
+    const profileRef = doc(firestore, 'customers', firebaseUser.uid);
+    batch.update(profileRef, { walletBalance: user.walletBalance - amount });
+
+    // 2. Add to booking
+    const bookingRef = doc(firestore, 'customers', firebaseUser.uid, 'bookings', bookingId);
+    batch.update(bookingRef, { tipAmount: amount });
+
+    // 3. Log transaction
+    const transactionRef = doc(collection(firestore, 'customers', firebaseUser.uid, 'transactions'));
+    const tipTransaction: Omit<Transaction, 'id'> = {
+        type: 'booking_payment', // Using existing type for simplicity
+        amount: amount,
+        date: serverTimestamp(),
+        details: {
+            description: `Tip for ${partnerName}`,
+            bookingId: bookingId,
+            tipFor: partnerName
+        }
+    };
+    batch.set(transactionRef, tipTransaction);
+
+    await batch.commit();
+    setUser(prev => ({ ...prev, walletBalance: prev.walletBalance ? prev.walletBalance - amount : 0 }));
+  }, [firestore, firebaseUser, user.walletBalance]);
+
+  const rescheduleBooking = useCallback(async (bookingId: string, newDate: string, newTime: string) => {
+    if (!firestore || !firebaseUser) return;
+    const bookingRef = doc(firestore, 'customers', firebaseUser.uid, 'bookings', bookingId);
+    await updateDoc(bookingRef, { 
+      bookingDate: newDate, 
+      time: newTime,
+      rescheduledAt: serverTimestamp()
+    });
+  }, [firestore, firebaseUser]);
+
   const setGuestConfig = useCallback((config: {pincode: string; familySize: number; address?: string; city?: string; state?: string } | null) => {
     setGuestConfigState(config);
     try {
@@ -530,6 +663,50 @@ export const CulinaryStoreProvider = ({ children }: { children: React.ReactNode 
     } catch (error) {
         console.error("Failed to save guest config to localStorage:", error);
     }
+  }, []);
+
+  const addToMarketplaceCart = useCallback((product: MarketplaceProduct) => {
+    setMarketplaceCart(prev => {
+      const existing = prev.find(item => item.product.id === product.id);
+      let updated;
+      if (existing) {
+        updated = prev.map(item => 
+          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      } else {
+        updated = [...prev, { product, quantity: 1 }];
+      }
+      localStorage.setItem(MARKETPLACE_CART_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const removeFromMarketplaceCart = useCallback((productId: string) => {
+    setMarketplaceCart(prev => {
+      const updated = prev.filter(item => item.product.id !== productId);
+      localStorage.setItem(MARKETPLACE_CART_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const updateMarketplaceQuantity = useCallback((productId: string, quantity: number) => {
+    setMarketplaceCart(prev => {
+      if (quantity <= 0) {
+        const updated = prev.filter(item => item.product.id !== productId);
+        localStorage.setItem(MARKETPLACE_CART_STORAGE_KEY, JSON.stringify(updated));
+        return updated;
+      }
+      const updated = prev.map(item => 
+        item.product.id === productId ? { ...item, quantity } : item
+      );
+      localStorage.setItem(MARKETPLACE_CART_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const clearMarketplaceCart = useCallback(() => {
+    setMarketplaceCart([]);
+    localStorage.removeItem(MARKETPLACE_CART_STORAGE_KEY);
   }, []);
 
   const executeUnifiedCheckout = useCallback(async (planDetails: any, requiredRecharge: number) => {
@@ -569,7 +746,7 @@ export const CulinaryStoreProvider = ({ children }: { children: React.ReactNode 
   }, [rechargeWallet, purchaseSubscription, submitAllDraftBookings, deductFromWallet, firestore, firebaseUser, router]);
 
 
-  const isInitialized = !isUserLoading && !isProfileLoading && !areBookingsLoading && !areDishesLoading;
+  // const isInitialized = !isUserLoading && !isProfileLoading && !areBookingsLoading && !areDishesLoading;
 
   const value = {
     user,
@@ -596,8 +773,17 @@ export const CulinaryStoreProvider = ({ children }: { children: React.ReactNode 
     submitAllDraftBookings,
     clearDraftsAndSubmitCurationRequest,
     cancelSlot,
+    rescheduleBooking,
+    updateBookingRating,
+    submitTip,
+    generateSubscriptionBookings,
     setGuestConfig,
     executeUnifiedCheckout,
+    marketplaceCart,
+    addToMarketplaceCart,
+    removeFromMarketplaceCart,
+    updateMarketplaceQuantity,
+    clearMarketplaceCart
   };
 
   return (

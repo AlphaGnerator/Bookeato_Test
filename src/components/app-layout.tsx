@@ -1,4 +1,4 @@
-'use client';
+'use client'; 
 
 import {
   Sidebar,
@@ -21,6 +21,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarTrigger } from './ui/sidebar';
 import { BottomNav } from './bottom-nav';
 import { cn } from '@/lib/utils';
+import { UnifiedCart } from './unified-cart';
+import { BookingMiniStatus } from './booking-mini-status';
 
 const customerNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiresAuth: true },
@@ -48,6 +50,7 @@ const adminNavItems = [
     { href: '/admin/bookings', label: 'Bookings', icon: BookOpen, requiresAuth: true },
     { href: '/admin/customers', label: 'Customers', icon: Database, requiresAuth: true },
     { href: '/admin/cook-requests', label: 'Cook Requests', icon: UserCheck, requiresAuth: true },
+    { href: '/admin/maid-requests', label: 'Maid Requests', icon: UserCheck, requiresAuth: true },
     { href: '/admin/dishes', label: 'Dish Playbook', icon: Flame, requiresAuth: true },
     { href: '/admin/availability', label: 'Slot Availability', icon: CalendarX, requiresAuth: true },
     { href: '/admin/carousel', label: 'Carousel', icon: Images, requiresAuth: true },
@@ -61,13 +64,13 @@ const publicNavItems = [
     { href: '/login', label: 'Customer Login', icon: LogIn, requiresAuth: false, separator: true },
     { href: '/signup', label: 'Customer Signup', icon: UserPlus, requiresAuth: false },
     { href: '/cook/login', label: 'Cook Login', icon: ChefHat, separator: true, requiresAuth: false },
-    { href: '/cook/signup', label: 'Become a Cook', icon: UserPlus, requiresAuth: false },
+    { href: '/partner-signup', label: 'Become a Partner', icon: UserPlus, requiresAuth: false },
 ]
 
 export function AppLayout({ children, pageTitle }: { children: React.ReactNode; pageTitle: string }) {
   const pathname = usePathname();
   const { user, isUserLoading } = useUser();
-  const [userRole, setUserRole] = React.useState<'customer' | 'cook' | 'admin' | null>(null);
+  const [userRole, setUserRole] = React.useState<'customer' | 'cook' | 'maid' | 'admin' | null>(null);
 
   React.useEffect(() => {
     if (pathname.startsWith('/admin')) {
@@ -75,7 +78,7 @@ export function AppLayout({ children, pageTitle }: { children: React.ReactNode; 
     } else if (pathname.startsWith('/cook/')) {
         setUserRole('cook');
     } else if (pathname.startsWith('/maid/')) {
-        setUserRole('maid' as any);
+        setUserRole('maid');
     } else if (user) {
         setUserRole('customer');
     } else {
@@ -84,7 +87,7 @@ export function AppLayout({ children, pageTitle }: { children: React.ReactNode; 
   }, [user, pathname]);
 
 
-  if (isUserLoading && pageTitle !== 'Welcome') {
+  if (isUserLoading && pageTitle !== 'Welcome' && pageTitle !== 'Partner Login' && pageTitle !== 'Partner Signup') {
     return (
         <div className="flex items-center justify-center h-screen">
             <div className="text-center">
@@ -100,13 +103,13 @@ export function AppLayout({ children, pageTitle }: { children: React.ReactNode; 
     itemsToShow = customerNavItems;
   } else if (userRole === 'cook') {
     itemsToShow = cookNavItems;
-  } else if (userRole as any === 'maid') {
+  } else if (userRole === 'maid') {
     itemsToShow = maidNavItems;
   } else if (userRole === 'admin') {
     itemsToShow = adminNavItems;
   }
 
-  if (pathname === '/' || pathname === '/admin/login') {
+  if (pathname === '/' || pathname === '/admin/login' || pathname === '/partner-signup') {
     return <main className="flex-1 min-h-screen">{children}</main>;
   }
 
@@ -142,9 +145,15 @@ export function AppLayout({ children, pageTitle }: { children: React.ReactNode; 
         <div className="flex-1">
           <Header title={pageTitle} />
           <main className={cn("flex-1 p-4 md:p-6 lg:p-8", (userRole === 'customer' || !userRole) && "pb-24 md:pb-8")}>
-            {children}
+          {children}
           </main>
-          {(userRole === 'customer' || !userRole) && <BottomNav isGuest={!userRole} />}
+          {(userRole === 'customer' || !userRole) && (
+            <>
+                {userRole === 'customer' && <BookingMiniStatus />}
+                <BottomNav isGuest={!userRole} />
+                <UnifiedCart />
+            </>
+          )}
         </div>
       </div>
     </SidebarProvider>

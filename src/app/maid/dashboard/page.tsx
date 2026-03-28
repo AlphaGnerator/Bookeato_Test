@@ -18,7 +18,13 @@ import {
     LogOut,
     User,
     Sparkles,
-    Check
+    Check,
+    Briefcase,
+    GraduationCap,
+    Star,
+    FileText,
+    ShieldCheck,
+    CreditCard
 } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -34,6 +40,7 @@ import { Input } from '@/components/ui/input';
 import type { Booking, MaidProfile } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function MaidDashboard() {
     const auth = useAuth();
@@ -48,6 +55,8 @@ export default function MaidDashboard() {
     const [maidSession, setMaidSession] = useState<{ id: string; name: string } | null>(null);
     const [isCheckingSession, setIsCheckingSession] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
+    const [profile, setProfile] = useState<MaidProfile | null>(null);
+    const [activeTab, setActiveTab] = useState('schedule');
 
     const effectiveMaidId = maidSession?.id || auth?.currentUser?.uid;
 
@@ -70,11 +79,24 @@ export default function MaidDashboard() {
         
         if (sessionId && sessionName) {
             setMaidSession({ id: sessionId, name: sessionName });
-        } else if (!auth?.currentUser && !isAssignmentsLoading) {
-            // Keep it flexible
         }
         setIsCheckingSession(false);
-    }, [auth?.currentUser, isAssignmentsLoading, router]);
+    }, []);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (!firestore || !effectiveMaidId) return;
+            try {
+                const docSnap = await getDoc(doc(firestore, 'maids', effectiveMaidId));
+                if (docSnap.exists()) {
+                    setProfile(docSnap.data() as MaidProfile);
+                }
+            } catch (e) {
+                console.error("Error fetching profile", e);
+            }
+        };
+        fetchProfile();
+    }, [firestore, effectiveMaidId]);
 
     useEffect(() => {
         const timer = setInterval(() => setNow(new Date()), 1000);
@@ -192,18 +214,27 @@ export default function MaidDashboard() {
                     </div>
                 </div>
 
-                {/* Task List */}
-                <div className="space-y-6">
-                    <h2 className="text-xl font-black text-stone-900 tracking-tight">Today's Schedule</h2>
-                    
-                    {assignments?.length === 0 ? (
-                        <Card className="border-dashed border-2 border-stone-100 py-16 text-center rounded-[2.5rem] bg-transparent">
-                            <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Clock className="w-8 h-8 text-stone-200" />
-                            </div>
-                            <p className="text-stone-400 font-bold max-w-[200px] mx-auto">No tasks assigned for today yet.</p>
-                        </Card>
-                    ) : (
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 bg-stone-100 rounded-2xl h-14 p-1 mb-8">
+                        <TabsTrigger value="schedule" className="rounded-xl font-black uppercase tracking-widest text-[10px] data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                            <Clock className="w-3.5 h-3.5 mr-2" /> Schedule
+                        </TabsTrigger>
+                        <TabsTrigger value="profile" className="rounded-xl font-black uppercase tracking-widest text-[10px] data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                            <User className="w-3.5 h-3.5 mr-2" /> My Profile
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="schedule" className="space-y-6">
+                        <h2 className="text-xl font-black text-stone-900 tracking-tight">Today's Schedule</h2>
+                        
+                        {assignments?.length === 0 ? (
+                            <Card className="border-dashed border-2 border-stone-100 py-16 text-center rounded-[2.5rem] bg-transparent">
+                                <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Clock className="w-8 h-8 text-stone-200" />
+                                </div>
+                                <p className="text-stone-400 font-bold max-w-[200px] mx-auto">No tasks assigned for today yet.</p>
+                            </Card>
+                        ) : (
                         assignments?.map((booking: any) => {
                             const isInProgress = booking.status === 'in_progress';
                             const isCompleted = booking.status === 'completed';
@@ -329,9 +360,99 @@ export default function MaidDashboard() {
                                     </CardContent>
                                 </Card>
                             );
-                        })
-                    )}
-                </div>
+                        }) ) }
+                    </TabsContent>
+
+                    <TabsContent value="profile" className="space-y-8">
+                        {/* Profile Header */}
+                        <div className="bg-white p-8 rounded-[2.5rem] border-2 border-stone-100 shadow-sm space-y-6">
+                            <div className="flex items-center gap-6">
+                                <div className="w-24 h-24 bg-stone-100 rounded-[2rem] overflow-hidden flex items-center justify-center text-stone-300 relative border-4 border-white shadow-xl">
+                                    {profile?.profilePhotoUrl ? (
+                                        <img src={profile.profilePhotoUrl} alt={profile.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <User className="w-10 h-10" />
+                                    )}
+                                </div>
+                                <div className="space-y-1">
+                                    <h2 className="text-2xl font-black text-stone-900">{profile?.name || maidSession?.name}</h2>
+                                    <div className="flex items-center gap-2">
+                                        <Badge className="bg-green-100 text-green-700 hover:bg-green-100 font-bold px-3 py-1 rounded-full text-xs">
+                                            VERIFIED PARTNER
+                                        </Badge>
+                                        <div className="flex items-center gap-1 text-amber-500">
+                                            <Star className="w-4 h-4 fill-current" />
+                                            <span className="font-black text-sm">{profile?.rating || '5.0'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-4 bg-stone-50 rounded-2xl flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                                        <Briefcase className="w-5 h-5 text-stone-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Experience</p>
+                                        <p className="font-bold text-stone-900">{profile?.experience || 0} Years</p>
+                                    </div>
+                                </div>
+                                <div className="p-4 bg-stone-50 rounded-2xl flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                                        <GraduationCap className="w-5 h-5 text-stone-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Qualification</p>
+                                        <p className="font-bold text-stone-900 truncate max-w-[100px]">{profile?.qualification || 'Verified'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Professional Details Section */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-black text-stone-900 px-4">Professional Details</h3>
+                            <div className="bg-white rounded-[2.5rem] border-2 border-stone-100 divide-y divide-stone-50 overflow-hidden">
+                                <ProfileItem icon={<MapPin className="w-4 h-4" />} label="Permanent Address" value={profile?.address || 'Verified during onboarding'} />
+                                <ProfileItem icon={<User className="w-4 h-4" />} label="Gender" value={profile?.gender || 'Not Specified'} />
+                                <ProfileItem icon={<CreditCard className="w-4 h-4" />} label="KYC (Aadhaar/ID)" value={profile?.aadhaarNumber ? `********${profile.aadhaarNumber.slice(-4)}` : 'Not Available'} />
+                                <ProfileItem icon={<Phone className="w-4 h-4" />} label="Registered Phone" value={profile?.contactNumber || 'N/A'} />
+                            </div>
+                        </div>
+
+                        {/* Verified Documents */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-black text-stone-900 px-4">Verified Documents</h3>
+                            <div className="grid gap-3">
+                                {profile?.aadhaarPhotoUrl && (
+                                    <a href={profile.aadhaarPhotoUrl} target="_blank" className="flex items-center justify-between p-4 bg-stone-50 rounded-2xl border-2 border-stone-100 hover:bg-stone-100 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <ShieldCheck className="w-5 h-5 text-green-600" />
+                                            <span className="font-bold text-sm">Aadhaar Card Copy</span>
+                                        </div>
+                                        <ExternalLink className="w-4 h-4 text-stone-400" />
+                                    </a>
+                                )}
+                                {profile?.contractUrl && (
+                                    <a href={profile.contractUrl} target="_blank" className="flex items-center justify-between p-4 bg-stone-50 rounded-2xl border-2 border-stone-100 hover:bg-stone-100 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <FileText className="w-5 h-5 text-blue-600" />
+                                            <span className="font-bold text-sm">Service Contract Signed</span>
+                                        </div>
+                                        <ExternalLink className="w-4 h-4 text-stone-400" />
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="p-6 bg-amber-50 rounded-[2rem] border border-amber-100 border-dashed">
+                             <p className="text-xs font-bold text-amber-700 leading-relaxed text-center">
+                                To update any of these details, please visit our office or contact support. These are verified professional records.
+                             </p>
+                        </div>
+                    </TabsContent>
+                </Tabs>
             </div>
 
             {/* OTP Dialog */}
@@ -376,4 +497,18 @@ export default function MaidDashboard() {
 
 function Shield({ className }: { className?: string }) {
     return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>;
+}
+
+function ProfileItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
+    return (
+        <div className="p-6 flex items-start gap-4">
+            <div className="w-10 h-10 bg-stone-50 rounded-xl flex items-center justify-center text-stone-400 shrink-0">
+                {icon}
+            </div>
+            <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">{label}</p>
+                <p className="font-bold text-stone-900 text-sm leading-relaxed">{value}</p>
+            </div>
+        </div>
+    );
 }

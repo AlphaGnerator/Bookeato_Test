@@ -95,6 +95,8 @@ export function AssignMaid({
         batch.update(bookingRef, {
             maidId: maid.id,
             maidName: maid.name,
+            partnerPhotoUrl: maid.profilePhotoUrl || '',
+            partnerRating: maid.rating || 4.5,
             status: 'confirmed',
             otp: otp,
             customerName: customerData.name || '',

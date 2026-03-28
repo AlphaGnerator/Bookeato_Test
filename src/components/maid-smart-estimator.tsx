@@ -13,7 +13,10 @@ export function MaidSmartEstimator({ onNext, onBack }: { onNext?: () => void, on
     utensils: false,
     bathroom: false,
     laundry: false,
+    misc: false,
   });
+  
+  const [miscTime, setMiscTime] = useState(30);
 
   const [bathrooms, setBathrooms] = useState(1);
 
@@ -31,7 +34,8 @@ export function MaidSmartEstimator({ onNext, onBack }: { onNext?: () => void, on
     (chores.sweeping ? sweepingTime : 0) +
     (chores.utensils ? utensilsTime : 0) +
     (chores.bathroom ? bathroomTime : 0) +
-    (chores.laundry ? laundryTime : 0);
+    (chores.laundry ? laundryTime : 0) +
+    (chores.misc ? miscTime : 0);
 
   // tier mapping for sticky bottom cart
   let slotLabel = 'Select Chores';
@@ -61,9 +65,62 @@ export function MaidSmartEstimator({ onNext, onBack }: { onNext?: () => void, on
     setChores(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const handleNext = () => {
+    if (slotReady) {
+      const selectedChores = Object.entries(chores)
+        .filter(([_, checked]) => checked)
+        .map(([name, _]) => {
+          let estimatedTime = 0;
+          let choreName = "";
+          
+          switch(name) {
+            case 'sweeping': 
+              estimatedTime = sweepingTime; 
+              choreName = "Sweeping & Mopping";
+              break;
+            case 'utensils': 
+              estimatedTime = utensilsTime; 
+              choreName = "Utensils & Kitchen Reset";
+              break;
+            case 'bathroom': 
+              estimatedTime = bathroomTime; 
+              choreName = `${bathrooms} Bathroom Sanitization`;
+              break;
+            case 'laundry': 
+              estimatedTime = laundryTime; 
+              choreName = "Laundry & Ironing";
+              break;
+            case 'misc': 
+              estimatedTime = miscTime; 
+              choreName = `Miscellaneous Chores (${miscTime}m)`;
+              break;
+          }
+          
+          return { choreName, estimatedTime };
+        });
+
+      localStorage.setItem('bookeato_maid_estimate', JSON.stringify({
+        totalTime,
+        slotLabel,
+        price: slotPrice,
+        chores: selectedChores
+      }));
+      if (onNext) onNext();
+    }
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto bg-white min-h-[500px] flex flex-col shadow-[0_0_40px_-15px_rgba(0,0,0,0.1)] rounded-[2.5rem] overflow-hidden border border-stone-100 relative pb-28 md:pb-24">
-      <div className="p-6 sm:p-8 space-y-10 flex-1">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="absolute top-6 left-6 z-20 text-stone-400 hover:text-stone-800 font-bold p-2 transition-colors flex items-center gap-1.5 bg-white/80 backdrop-blur-sm border border-stone-100 shadow-sm rounded-xl active:scale-95 group"
+        >
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" /> 
+          <span className="text-sm">Back</span>
+        </button>
+      )}
+      <div className="p-6 sm:p-8 space-y-10 flex-1 pt-20 sm:pt-24">
         
         {/* 1. Top Section: Context Gatherer */}
         <div className="space-y-6">
@@ -186,7 +243,6 @@ export function MaidSmartEstimator({ onNext, onBack }: { onNext?: () => void, on
                 <span className="text-sm font-bold text-stone-500 bg-stone-100 px-3 py-1 rounded-full min-w-[70px] text-center">{bathroomTime} mins</span>
               </div>
             </div>
-
             {/* Laundry & Ironing */}
             <div 
               className={cn(
@@ -203,22 +259,53 @@ export function MaidSmartEstimator({ onNext, onBack }: { onNext?: () => void, on
               </div>
               <span className="text-sm font-bold text-stone-500 bg-stone-100 px-3 py-1 rounded-full">{laundryTime} mins</span>
             </div>
+            
+            {/* Miscellaneous */}
+            <div className={cn(
+                "flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border-2 transition-colors gap-4", 
+                chores.misc ? "border-green-500 bg-green-50/30" : "border-stone-100 bg-white"
+            )}>
+              <div className="flex items-center gap-3 flex-1 cursor-pointer touch-manipulation" onClick={() => toggleChore('misc')}>
+                <div className={cn("w-6 h-6 rounded-md flex items-center justify-center border-2 transition-colors", chores.misc ? "bg-green-500 border-green-500 text-white" : "border-stone-300")}>
+                  {chores.misc && <Check className="w-4 h-4" strokeWidth={3} />}
+                </div>
+                <span className="font-bold text-stone-800">Miscellaneous Chores</span>
+              </div>
+              
+              <div className="flex items-center gap-4 justify-between sm:justify-end pl-9 sm:pl-0">
+                <div className={cn("flex items-center bg-stone-50 border border-stone-200 rounded-xl p-1 transition-opacity", !chores.misc && "opacity-50 pointer-events-none")}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setMiscTime(30); }}
+                    className={cn(
+                      "px-3 py-1 text-xs font-black rounded-lg transition-all",
+                      miscTime === 30 ? "bg-white text-stone-900 shadow-sm" : "text-stone-400 hover:text-stone-600"
+                    )}
+                  >
+                    30M
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setMiscTime(60); }}
+                    className={cn(
+                      "px-3 py-1 text-xs font-black rounded-lg transition-all",
+                      miscTime === 60 ? "bg-white text-stone-900 shadow-sm" : "text-stone-400 hover:text-stone-600"
+                    )}
+                  >
+                    1H
+                  </button>
+                </div>
+                <span className="text-sm font-bold text-stone-500 bg-stone-100 px-3 py-1 rounded-full min-w-[70px] text-center">
+                  {chores.misc ? miscTime : 0} mins
+                </span>
+              </div>
+            </div>
 
           </div>
         </div>
       </div>
 
       {/* 4. Bottom Section: The Dynamic Pricing Cart */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-stone-100 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] p-4 sm:px-8 sm:py-5 flex items-center justify-between z-10">
+      <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-stone-100 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] p-4 sm:px-6 py-5 flex items-center justify-end z-10 transition-transform">
         <div className="flex items-center gap-4 sm:gap-6">
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="text-stone-400 hover:text-stone-800 font-bold p-2 transition-colors flex items-center gap-1.5 bg-stone-50 hover:bg-stone-100 rounded-full sm:rounded-xl sm:px-4"
-            >
-              <ArrowLeft className="w-5 h-5" /> <span className="hidden sm:inline">Back</span>
-            </button>
-          )}
           <div className="flex flex-col">
             {!slotReady && (
               <span className="text-sm font-bold text-stone-400">Select chores to estimate</span>
@@ -235,7 +322,7 @@ export function MaidSmartEstimator({ onNext, onBack }: { onNext?: () => void, on
         </div>
         <button 
           disabled={!slotReady}
-          onClick={onNext}
+          onClick={handleNext}
           className="bg-orange-500 hover:bg-orange-600 disabled:bg-stone-100 disabled:text-stone-400 disabled:cursor-not-allowed disabled:shadow-none text-white text-sm sm:text-base font-bold py-3 px-5 sm:px-8 rounded-full shadow-lg shadow-orange-500/20 transition-all active:scale-95 flex items-center gap-2"
         >
           Next: Location details

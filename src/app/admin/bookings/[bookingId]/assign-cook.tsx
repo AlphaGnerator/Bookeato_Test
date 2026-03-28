@@ -94,6 +94,8 @@ export function AssignCook({
         batch.update(bookingRef, {
             cookId: cook.id,
             cookName: cook.name,
+            partnerPhotoUrl: cook.profilePhotoUrl || '',
+            partnerRating: cook.rating || 4.5,
             status: 'confirmed',
             customerName: customerData.name || '',
             customerAddress: customerData.address || '',

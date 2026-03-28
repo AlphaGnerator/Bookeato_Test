@@ -55,6 +55,25 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/order-history',
+        destination: '/bookings',
+        permanent: true,
+      },
+      {
+        source: '/profile',
+        destination: '/account',
+        permanent: true,
+      },
+      {
+        source: '/pricing',
+        destination: '/services',
+        permanent: true,
+      },
+    ]
+  },
 };
 
 export default nextConfig;

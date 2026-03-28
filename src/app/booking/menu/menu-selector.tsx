@@ -22,6 +22,12 @@ import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Logo } from '@/components/logo';
 import { Badge } from '@/components/ui/badge';
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem,
+} from "@/components/ui/carousel";
+import Autoplay from 'embla-carousel-autoplay';
 
 function DishCard({ dish, onPortionChange, portions, onSideChange, sideSelection }: { dish: Dish, onPortionChange: (newPortion: number) => void, portions: number, onSideChange: (dishId: string, side: 'rice' | 'roti', value: string | number) => void, sideSelection: { rice: string, roti: number } }) {
     const safeDietaryTags = dish.dietaryTags || [];
@@ -249,6 +255,25 @@ export function MenuSelector() {
         });
     }, [activeDishes, activeCourse, activeCuisines, activeSearchTerm, activeDiet]);
     
+    const plugin = React.useRef(
+        Autoplay({ delay: 5000, stopOnInteraction: true })
+    );
+
+    const slides = [
+        {
+            title: "Chef at Home",
+            subtitle: "Gourmet meals prepared in your own kitchen. Select your favorite dishes and schedule.",
+            image: "/marketplace/chef_bg_clean.png",
+            badges: ["30% OFF FIRST SERVICE", "Verified professional Chefs"]
+        },
+        {
+            title: "Customizable Menus",
+            subtitle: "From daily home-style cooking to special occasion feasts. Tailored to your taste.",
+            image: "/marketplace/chef_bg_clean.png",
+            badges: ["Flexible Portions", "Nutritious & Fresh"]
+        }
+    ];
+
     const handleCuisineChange = (cuisine: string) => {
         setStagedCuisines(prev => 
             prev.includes(cuisine) 
@@ -345,34 +370,69 @@ export function MenuSelector() {
     const confirmButtonText = totalItems > 0 ? `Review ${totalItems} Item(s) & Schedule` : `Select Dishes`;
 
     return (
-        <div className="container mx-auto py-4 md:py-8 px-4">
-            <div className="sticky top-0 bg-background/90 backdrop-blur-md z-30 py-4 -mx-4 px-4 mb-6 border-b">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="icon" onClick={handleBack} className="h-10 w-10 touch-manipulation active:scale-90">
-                            <ArrowLeft className="h-6 w-6"/>
-                        </Button>
-                        <Logo className="scale-75 origin-left hidden sm:flex" />
-                    </div>
-                     <h1 className="font-headline text-xl md:text-3xl flex items-center gap-3 text-text-primary">
-                        <ChefHat className="h-6 w-6 md:h-8 md:w-8 hidden xs:flex"/>
-                        Select Dishes
-                    </h1>
-                    <div className="sm:hidden">
-                        <Logo className="scale-50 origin-right" />
-                    </div>
-                    <Button variant="ghost" size="icon" onClick={handleBack} className="h-10 w-10 hidden sm:flex touch-manipulation active:scale-90">
-                        <X className="h-6 w-6"/>
+        <div className="bg-stone-50 min-h-screen pb-32">
+            {/* Premium Service Carousel */}
+            <div className="relative w-full h-64 md:h-80 overflow-hidden mb-8">
+                <Carousel 
+                    plugins={[plugin.current]}
+                    className="w-full h-full"
+                    onMouseEnter={plugin.current.stop}
+                    onMouseLeave={plugin.current.reset}
+                >
+                    <CarouselContent className="h-full -ml-0">
+                        {slides.map((slide, idx) => (
+                            <CarouselItem key={idx} className="h-full pl-0">
+                                <div className="relative w-full h-64 md:h-80 overflow-hidden">
+                                    <Image 
+                                        src={slide.image} 
+                                        alt={slide.title} 
+                                        fill 
+                                        className="object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-stone-900/90 via-stone-900/40 to-transparent p-6 md:p-12 flex flex-col justify-end">
+                                        <div className="container mx-auto px-0 max-w-4xl">
+                                            <div className="flex flex-wrap gap-2 mb-4">
+                                                {slide.badges.map((badge, bIdx) => (
+                                                    <Badge key={bIdx} className={cn(
+                                                        "text-white font-black px-3 py-1 rounded-full text-[10px] uppercase tracking-widest border-none px-4",
+                                                        badge.includes('OFF') ? "bg-orange-500" : "bg-white/20 backdrop-blur-md"
+                                                    )}>
+                                                        {badge}
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                            <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter leading-none mb-3">{slide.title}</h1>
+                                            <p className="text-white/80 text-sm md:text-lg font-bold max-w-xl leading-snug">
+                                                {slide.subtitle}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                </Carousel>
+                
+                <div className="absolute top-6 left-6 z-10">
+                    <Button 
+                        variant="ghost" 
+                        className="rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/40 border-none px-4 py-2"
+                        onClick={handleBack}
+                    >
+                        <ArrowLeft className="w-5 h-5 mr-2" /> Back
                     </Button>
                 </div>
-                <div className="mt-4 space-y-3">
+            </div>
+
+            <div className="container mx-auto max-w-4xl px-4 sm:px-6">
+                <div className="sticky top-4 z-30 bg-white/95 backdrop-blur-md p-4 rounded-[2.5rem] shadow-xl shadow-stone-200/30 border border-stone-100 mb-8 space-y-4">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-300" strokeWidth={3} />
                         <Input
-                            placeholder="Search menu..."
+                            placeholder="What do you want to eat today?"
                             value={stagedSearchTerm}
                             onChange={(e) => setStagedSearchTerm(e.target.value)}
-                            className="pl-10 h-11 md:h-12 text-base"
+                            className="pl-12 h-14 border-none bg-transparent focus-visible:ring-0 text-xl font-black tracking-tight placeholder:text-stone-300"
                         />
                     </div>
                     <div className="flex flex-wrap items-center gap-2">

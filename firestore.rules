@@ -33,7 +33,7 @@ service cloud.firestore {
      */
     function isAdmin() {
       // Admin UID for admin@bookeato.com
-      return isSignedIn() && request.auth.uid == 'Ao5a9rOM90SraQjEnavrbagQ0c32';
+      return isSignedIn() && (request.auth.uid == 'Ao5a9rOM90SraQjEnavrbagQ0c32' || request.auth.token.email == 'admin@bookeato.com');
     }
 
     // --- Collection Rules ---
@@ -144,6 +144,30 @@ service cloud.firestore {
       allow create: if isSignedIn();
       allow update: if isAdmin();
       allow delete: if isAdmin();
+    }
+
+    // --- Bookeato Live Rules ---
+    match /liveSocieties/{societyId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /liveItems/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /liveCustomers/{uid} {
+      allow read, write: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+    }
+
+    match /liveOrders/{orderId} {
+      // Owner can read their own. Admin can read all.
+      allow read: if isSignedIn() && (resource == null || resource.data.customer.uid == request.auth.uid || isAdmin());
+      // Owner can create order for themselves
+      allow create: if isSignedIn() && request.resource.data.customer.uid == request.auth.uid;
+      // Admin handles lifecycle updates
+      allow update, delete: if isAdmin();
     }
   }
 }

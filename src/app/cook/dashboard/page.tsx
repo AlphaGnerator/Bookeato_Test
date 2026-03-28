@@ -1,258 +1,319 @@
-
 'use client';
 
-import Link from 'next/link';
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useAuth, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { AppLayout } from '@/components/app-layout';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { format, isToday, differenceInMinutes } from 'date-fns';
-import { ArrowRight, CalendarPlus, CookingPot, Wallet, Soup, Lock, Unlock, Phone, AlertTriangle } from 'lucide-react';
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, doc } from 'firebase/firestore';
-import type { Booking, UserProfile, Assignment, CookProfile } from '@/lib/types';
-import { useDoc } from '@/firebase/firestore/use-doc';
-import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { 
+    Phone, 
+    MapPin, 
+    Clock, 
+    ExternalLink,
+    LogOut,
+    User,
+    Sparkles,
+    Check,
+    Briefcase,
+    GraduationCap,
+    Star,
+    FileText,
+    ShieldCheck,
+    CreditCard,
+    ChefHat,
+    Timer,
+    Play
+} from 'lucide-react';
+import { format, differenceInSeconds } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Booking, CookProfile } from '@/lib/types';
+import { useRouter } from 'next/navigation';
+import { signOut } from 'firebase/auth';
 
-function SessionCard({ booking }: { booking: Booking }) {
+export default function CookDashboard() {
+    const auth = useAuth();
     const firestore = useFirestore();
-    const [isUnlocked, setIsUnlocked] = useState(true);
+    const router = useRouter();
+    const { toast } = useToast();
+    
+    const [activeTab, setActiveTab] = useState('schedule');
+    const [profile, setProfile] = useState<CookProfile | null>(null);
+    const [now, setNow] = useState(new Date());
+    const [isLoading, setIsLoading] = useState(false);
 
-    const customerRef = useMemoFirebase(() => {
-        if(firestore && booking.customerId) {
-            return doc(firestore, 'customers', booking.customerId);
+    const effectiveCookId = auth?.currentUser?.uid;
+
+    const assignmentsQuery = useMemoFirebase(() => {
+        if (firestore && effectiveCookId) {
+            return query(
+                collection(firestore, 'assignments'),
+                where('cookId', '==', effectiveCookId)
+            );
         }
         return null;
-    }, [firestore, booking.customerId]);
+    }, [firestore, effectiveCookId]);
 
-    const {data: customer, isLoading} = useDoc<UserProfile>(customerRef);
-    
-    if (isLoading) {
-        return <Skeleton className="h-40 w-full" />
-    }
-    
-    const dishTitle = (booking.items && booking.items.length > 1) ? `${booking.items.length} dishes` : (booking.items?.[0]?.dishName);
-    
-    const Wrapper = isUnlocked ? Link : 'div';
-    // The key change is here: link to the bookingId instead of a dish slug
-    const wrapperProps = isUnlocked ? { href: `/cook/tutorials/${booking.id}?customerId=${booking.customerId}` } : {};
+    const { data: assignments, isLoading: isAssignmentsLoading } = useCollection<any>(assignmentsQuery);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (!firestore || !effectiveCookId) return;
+            try {
+                const docSnap = await getDoc(doc(firestore, 'cooks', effectiveCookId));
+                if (docSnap.exists()) {
+                    setProfile(docSnap.data() as CookProfile);
+                }
+            } catch (e) {
+                console.error("Error fetching profile", e);
+            }
+        };
+        fetchProfile();
+    }, [firestore, effectiveCookId]);
+
+    useEffect(() => {
+        const timer = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const handleLogout = async () => {
+        if (auth) {
+            await signOut(auth);
+        }
+        router.push('/');
+    };
+
+    if (isAssignmentsLoading) return (
+        <AppLayout pageTitle="Loading Dashboard">
+            <div className="p-8 text-center animate-pulse space-y-4">
+                <div className="h-12 w-12 bg-orange-100 rounded-full mx-auto" />
+                <p className="text-stone-400 font-black uppercase tracking-widest text-xs">Syncing Culinary Schedule...</p>
+            </div>
+        </AppLayout>
+    );
 
     return (
-        <Wrapper {...wrapperProps}>
-            <Card className={cn(
-                "transition-all",
-                isUnlocked ? "cursor-pointer hover:border-primary hover:shadow-lg" : "cursor-not-allowed bg-muted/50 text-muted-foreground",
-            )}>
-                <CardHeader>
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <CardTitle className={cn("text-xl flex items-center gap-2", !isUnlocked && "text-muted-foreground/80")}>
-                                <CookingPot className="h-5 w-5"/>
-                                {dishTitle}
-                            </CardTitle>
-                             <div className="text-sm mt-3 space-y-2">
-                                <p><strong>Pincode:</strong> {booking.customerPincode || '--'}</p>
-                                <p><strong>Time:</strong> {format(new Date(booking.bookingDate), 'EEE, MMM d, h:mm a')}</p>
+        <AppLayout pageTitle="Partner Dashboard">
+            <div className="space-y-8 pb-24">
+                {/* Header Stats */}
+                <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-1">
+                        <h1 className="text-3xl font-black tracking-tight text-stone-900">Chef {profile?.name || 'Partner'}</h1>
+                        <p className="text-stone-500 font-bold flex items-center gap-2">
+                             <ChefHat className="w-4 h-4 text-orange-500" /> Active Service Partner
+                        </p>
+                    </div>
+                    <Button variant="outline" size="icon" onClick={handleLogout} className="rounded-full h-12 w-12 border-2 border-stone-100">
+                        <LogOut className="w-5 h-5 text-stone-400" />
+                    </Button>
+                </div>
+
+                {/* Dashboard Summary */}
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-stone-900 text-white p-6 rounded-[2rem] space-y-2 shadow-xl shadow-stone-900/10">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Total Sessions</p>
+                        <p className="text-4xl font-black">{assignments?.length || 0}</p>
+                    </div>
+                    <div className="bg-orange-50 border-2 border-orange-100 p-6 rounded-[2rem] space-y-2">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-orange-600">Earnings</p>
+                        <p className="text-4xl font-black text-orange-900">₹0</p>
+                    </div>
+                </div>
+
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 bg-stone-100 rounded-2xl h-14 p-1 mb-8">
+                        <TabsTrigger value="schedule" className="rounded-xl font-black uppercase tracking-widest text-[10px] data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                            <Clock className="w-3.5 h-3.5 mr-2" /> Schedule
+                        </TabsTrigger>
+                        <TabsTrigger value="profile" className="rounded-xl font-black uppercase tracking-widest text-[10px] data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                            <User className="w-3.5 h-3.5 mr-2" /> My Profile
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="schedule" className="space-y-6">
+                        <h2 className="text-xl font-black text-stone-900 tracking-tight">Upcoming Sessions</h2>
+                        
+                        {assignments?.length === 0 ? (
+                            <Card className="border-dashed border-2 border-stone-100 py-16 text-center rounded-[2.5rem] bg-transparent">
+                                <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <ChefHat className="w-8 h-8 text-stone-200" />
+                                </div>
+                                <p className="text-stone-400 font-bold max-w-[200px] mx-auto">No cooking sessions assigned yet.</p>
+                            </Card>
+                        ) : (
+                            assignments?.map((booking: any) => (
+                                <Card key={booking.id} className="rounded-[2.5rem] border-2 border-stone-100 overflow-hidden bg-white">
+                                    <CardContent className="p-8 space-y-6">
+                                        <div className="flex justify-between items-start">
+                                            <div className="space-y-1">
+                                                <h3 className="text-2xl font-black tracking-tight text-stone-900">
+                                                    {booking.customerName || 'Premium Customer'}
+                                                </h3>
+                                                <p className="text-sm font-bold flex items-center gap-2 text-stone-400">
+                                                    <Clock className="w-4 h-4" /> {booking.bookingDate ? format(new Date(booking.bookingDate), 'EEE, MMM d, hh:mm a') : 'TBD'}
+                                                </p>
+                                            </div>
+                                            <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 font-bold">
+                                                {booking.status?.toUpperCase() || 'ASSIGNED'}
+                                            </Badge>
+                                        </div>
+
+                                        <div className="grid gap-4">
+                                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-stone-50 border border-stone-100">
+                                                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                                                    <Phone className="w-5 h-5" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Customer Contact</p>
+                                                    <p className="font-bold">{booking.customerContact || 'Revealed 1hr Before'}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-stone-50 border border-stone-100">
+                                                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                                                    <MapPin className="w-5 h-5" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Address</p>
+                                                    <p className="font-bold line-clamp-1">{booking.customerAddress || 'Premium Address'}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="p-5 rounded-3xl bg-stone-50 border border-stone-100">
+                                                <p className="text-[10px] font-black uppercase tracking-widest mb-3 flex items-center gap-2 text-stone-400">
+                                                    <Sparkles className="w-3.5 h-3.5" /> Menu Details
+                                                </p>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {booking.items?.map((item: any, idx: number) => (
+                                                        <Badge key={idx} variant="outline" className="px-3 py-1 rounded-full border-none font-bold text-xs bg-white text-stone-600 shadow-sm">
+                                                            {item.dishName}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <Button 
+                                            asChild
+                                            className="w-full h-16 rounded-2xl bg-stone-900 text-white hover:bg-stone-800 font-black text-lg shadow-xl"
+                                        >
+                                            <Link href={`/cook/tutorials/${booking.id}?customerId=${booking.customerId}`}>
+                                                VIEW SESSION DETAILS <ArrowRight className="w-5 h-5 ml-2" />
+                                            </Link>
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        )}
+                    </TabsContent>
+
+                    <TabsContent value="profile" className="space-y-8">
+                        {/* Profile Header */}
+                        <div className="bg-white p-8 rounded-[2.5rem] border-2 border-stone-100 shadow-sm space-y-6">
+                            <div className="flex items-center gap-6">
+                                <div className="w-24 h-24 bg-stone-100 rounded-[2rem] overflow-hidden flex items-center justify-center text-stone-300 relative border-4 border-white shadow-xl">
+                                    {profile?.profilePhotoUrl ? (
+                                        <img src={profile.profilePhotoUrl} alt={profile.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <ChefHat className="w-10 h-10" />
+                                    )}
+                                </div>
+                                <div className="space-y-1">
+                                    <h2 className="text-2xl font-black text-stone-900">{profile?.name || 'Chef Partner'}</h2>
+                                    <div className="flex items-center gap-2">
+                                        <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 font-bold px-3 py-1 rounded-full text-xs">
+                                            CERTIFIED CHEF
+                                        </Badge>
+                                        <div className="flex items-center gap-1 text-amber-500">
+                                            <Star className="w-4 h-4 fill-current" />
+                                            <span className="font-black text-sm">{profile?.rating || '5.0'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-4 bg-stone-50 rounded-2xl flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                                        <Briefcase className="w-5 h-5 text-stone-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Experience</p>
+                                        <p className="font-bold text-stone-900">{profile?.experience || 0} Years</p>
+                                    </div>
+                                </div>
+                                <div className="p-4 bg-stone-50 rounded-2xl flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                                        <GraduationCap className="w-5 h-5 text-stone-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Qualification</p>
+                                        <p className="font-bold text-stone-900 truncate max-w-[100px]">{profile?.qualification || 'Culinary Artist'}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <Badge variant={isUnlocked ? 'default' : 'secondary'}>
-                            {isUnlocked ? <Unlock className="mr-2 h-4 w-4"/> : <Lock className="mr-2 h-4 w-4"/>}
-                            {isUnlocked ? "Details Unlocked" : "Locked"}
-                        </Badge>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    {isUnlocked ? (
-                         <Button variant="outline" className="w-full">
-                            View Details & Start
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                    ) : (
-                        <p className="text-xs text-center p-2 rounded-md bg-background/50">
-                            Customer details will be revealed 1 hour before the session starts.
-                        </p>
-                    )}
-                </CardContent>
-            </Card>
-        </Wrapper>
-    )
-}
 
-function AssignedBooking({ assignment }: { assignment: Assignment }) {
-    const firestore = useFirestore();
-    const bookingRef = useMemoFirebase(() => {
-        if (firestore) {
-            return doc(firestore, 'customers', assignment.customerId, 'bookings', assignment.id);
-        }
-        return null;
-    }, [firestore, assignment]);
-
-    const { data: booking, isLoading } = useDoc<Booking>(bookingRef);
-
-    if (isLoading) {
-        return <Skeleton className="h-40 w-full" />;
-    }
-
-    if (!booking) {
-        return null; // Or some error/placeholder if a booking is expected but not found
-    }
-
-    return <SessionCard booking={booking} />;
-}
-
-
-function CookDashboardContent() {
-  const { user: firebaseUser, isUserLoading } = useUser();
-  const firestore = useFirestore();
-
-  const assignmentsQuery = useMemoFirebase(() => {
-    if (firestore && firebaseUser) {
-        return query(collection(firestore, 'assignments'), where('cookId', '==', firebaseUser.uid));
-    }
-    return null;
-  }, [firestore, firebaseUser]);
-
-  const { data: assignments, isLoading: areAssignmentsLoading, error } = useCollection<Assignment>(assignmentsQuery);
-  const { data: cookProfile, isLoading: isProfileLoading } = useDoc<CookProfile>(useMemoFirebase(() => firestore && firebaseUser ? doc(firestore, 'cooks', firebaseUser.uid) : null, [firestore, firebaseUser]));
-
-  const isInitialized = !isUserLoading && !areAssignmentsLoading && !isProfileLoading;
-  
-  const upcomingAssignments = useMemo(() => {
-    if (!assignments) return [];
-    return assignments
-        .filter(assignment => new Date(assignment.bookingDate) >= new Date())
-        .sort((a, b) => new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime());
-  }, [assignments]);
-
-
-  const todaysEarnings = upcomingAssignments
-    .filter(assignment => isToday(new Date(assignment.bookingDate)))
-    .reduce((total) => total + 500, 0); // Mock price logic, needs real data
-    
-  const totalWalletBalance = 15000; // Mock total balance
-
-  if (isUserLoading) {
-      return <DashboardSkeleton />;
-  }
-
-  // This is a more reliable check. If a cook profile exists for this UID, they are a cook.
-  if (!isUserLoading && !cookProfile) {
-      return (
-          <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Cook Profile Not Found</AlertTitle>
-              <AlertDescription>
-                  We could not find a cook profile associated with your account.
-                   <Link href="/cook/login" className="ml-2 font-bold underline">Login Here</Link> or <Link href="/cook/signup" className="ml-2 font-bold underline">Sign Up</Link>.
-              </AlertDescription>
-          </Alert>
-      )
-  }
-
-  if (!isInitialized) {
-    return <DashboardSkeleton />;
-  }
-
-  return (
-    <div className="space-y-8">
-      <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-8 rounded-lg border border-primary/20 shadow-sm">
-        <h1 className="font-headline text-4xl text-foreground">Welcome back, {cookProfile?.name || 'Cook'}!</h1>
-        <p className="text-muted-foreground mt-2 max-w-2xl">
-          Manage your availability, view your upcoming sessions, and update your profile.
-        </p>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="lg:col-span-2 bg-card">
-          <CardHeader>
-            <CardTitle>Your Upcoming Sessions</CardTitle>
-            <CardDescription>Here are the cooking sessions assigned to you.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {upcomingAssignments.length > 0 ? (
-                <div className="space-y-4">
-                    {upcomingAssignments.map(assignment => (
-                       <AssignedBooking key={assignment.id} assignment={assignment} />
-                    ))}
-                </div>
-            ) : (
-                 <div className="text-center text-muted-foreground border-2 border-dashed rounded-lg p-8">
-                    <Soup className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-                    <p className="font-semibold">No Upcoming Sessions</p>
-                    <p className="text-sm">You have no bookings assigned to you yet.</p>
-                </div>
-            )}
-          </CardContent>
-        </Card>
-        
-        <div className="space-y-6">
-            <Card className="bg-gradient-to-br from-primary/90 to-primary text-primary-foreground">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Wallet className="h-6 w-6"/>
-                    My Wallet
-                </CardTitle>
-                <CardDescription className="text-primary-foreground/80">Your total available balance.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-4xl font-bold">₹{totalWalletBalance.toLocaleString('en-IN')}</p>
-                <div className="text-xs text-primary-foreground/80 mt-4 border-t border-primary-foreground/30 pt-2">
-                    <span className="font-semibold">Today's Earnings:</span> ₹{todaysEarnings.toLocaleString('en-IN')}
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="hover:border-accent transition-colors bg-accent/90 text-accent-foreground">
-                <Link href="/cook/availability" className="block h-full">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle>Manage Availability</CardTitle>
-                            <CardDescription className="text-accent-foreground/80">Set the times you are available to cook.</CardDescription>
+                        {/* Professional Details Section */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-black text-stone-900 px-4">Professional Details</h3>
+                            <div className="bg-white rounded-[2.5rem] border-2 border-stone-100 divide-y divide-stone-50 overflow-hidden">
+                                <ProfileItem icon={<MapPin className="w-4 h-4" />} label="Permanent Address" value={profile?.address || 'Verified during onboarding'} />
+                                <ProfileItem icon={<User className="w-4 h-4" />} label="Gender" value={profile?.gender || 'Not Specified'} />
+                                <ProfileItem icon={<CreditCard className="w-4 h-4" />} label="KYC (Aadhaar/ID)" value={profile?.aadhaarNumber ? `********${profile.aadhaarNumber.slice(-4)}` : 'Not Available'} />
+                                <ProfileItem icon={<Phone className="w-4 h-4" />} label="Registered Phone" value={profile?.contactNumber || 'N/A'} />
+                            </div>
                         </div>
-                        <CalendarPlus className="h-8 w-8"/>
-                    </CardHeader>
-                </Link>
-            </Card>
-        </div>
-      </div>
-    </div>
-  );
+
+                        {/* Verified Documents */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-black text-stone-900 px-4">Verified Documents</h3>
+                            <div className="grid gap-3">
+                                {profile?.aadhaarPhotoUrl && (
+                                    <a href={profile.aadhaarPhotoUrl} target="_blank" className="flex items-center justify-between p-4 bg-stone-50 rounded-2xl border-2 border-stone-100 hover:bg-stone-100 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <ShieldCheck className="w-5 h-5 text-green-600" />
+                                            <span className="font-bold text-sm">Aadhaar Card Copy</span>
+                                        </div>
+                                        <ExternalLink className="w-4 h-4 text-stone-400" />
+                                    </a>
+                                )}
+                                {profile?.contractUrl && (
+                                    <a href={profile.contractUrl} target="_blank" className="flex items-center justify-between p-4 bg-stone-50 rounded-2xl border-2 border-stone-100 hover:bg-stone-100 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <FileText className="w-5 h-5 text-blue-600" />
+                                            <span className="font-bold text-sm">Service Contract Signed</span>
+                                        </div>
+                                        <ExternalLink className="w-4 h-4 text-stone-400" />
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="p-6 bg-orange-50 rounded-[2rem] border border-orange-100 border-dashed">
+                             <p className="text-xs font-bold text-orange-700 leading-relaxed text-center">
+                                To update any of these details, please visit our office or contact support. These are verified professional records.
+                             </p>
+                        </div>
+                    </TabsContent>
+                </Tabs>
+            </div>
+        </AppLayout>
+    );
 }
 
-function DashboardSkeleton() {
-  return (
-    <div className="space-y-8">
-      <div className="p-8 rounded-lg">
-        <Skeleton className="h-10 w-1/2" />
-        <Skeleton className="h-5 w-3/4 mt-4" />
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <Skeleton className="h-7 w-48" />
-            <Skeleton className="h-4 w-64 mt-2" />
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-24 w-full" />
-          </CardContent>
-        </Card>
-        <div className="space-y-6">
-            <Skeleton className="h-28 w-full" />
-            <Skeleton className="h-28 w-full" />
+function ProfileItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
+    return (
+        <div className="p-6 flex items-start gap-4">
+            <div className="w-10 h-10 bg-stone-50 rounded-xl flex items-center justify-center text-stone-400 shrink-0">
+                {icon}
+            </div>
+            <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">{label}</p>
+                <p className="font-bold text-stone-900 text-sm leading-relaxed">{value}</p>
+            </div>
         </div>
-      </div>
-    </div>
-  )
-}
-
-export default function CookDashboardPage() {
-  return (
-    <AppLayout pageTitle="Cook Dashboard">
-      <CookDashboardContent />
-    </AppLayout>
-  );
+    );
 }

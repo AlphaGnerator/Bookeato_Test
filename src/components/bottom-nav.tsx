@@ -3,11 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, CalendarDays, List, Sparkles, Wallet, User, ChefHat } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, List, Sparkles, Wallet, User, ChefHat, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const customerNavItems = [
-  { href: '/dashboard', label: 'UC', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/services', label: 'Services', icon: Sparkles },
   { href: '/bookings', label: 'Bookings', icon: List },
   { href: '/account', label: 'Account', icon: User },

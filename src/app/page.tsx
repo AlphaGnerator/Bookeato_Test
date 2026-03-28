@@ -383,8 +383,17 @@ export default function WelcomePage() {
       <LandingHeader />
       <div>
         <main>
+          {/* Bookeato Live Banner */}
+          <div className="bg-orange-600 text-white px-4 py-3 text-center flex flex-col sm:flex-row items-center justify-center gap-2 relative z-50">
+             <Badge className="bg-white/20 text-white hover:bg-white/30 border-none px-2 border-none rounded-md inline-flex font-black tracking-widest text-[10px]">NEW</Badge>
+             <span className="font-medium text-sm">We are setting up Live Kitchens in select societies!</span>
+             <Link href="/live" className="font-black text-sm underline hover:text-stone-200 transition-colors ml-2 flex items-center gap-1">
+                Order from Bookeato Live <ArrowRight className="w-4 h-4" />
+             </Link>
+          </div>
+
           {/* New Top Hero Section */}
-          <section className="relative bg-surface overflow-hidden section min-h-[80vh] flex items-center pt-20">
+          <section className="relative bg-surface overflow-hidden section min-h-[80vh] flex items-center pt-10">
             {/* ... hero content ... */}
             <div className="container mx-auto px-6 relative z-10">
               <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-center">

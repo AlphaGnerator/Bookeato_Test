@@ -62,9 +62,18 @@ export function MaidCheckoutDetails({ onBack, onNext }: { onBack?: () => void, o
 
   return (
     <div className="w-full max-w-xl mx-auto bg-white min-h-[600px] flex flex-col shadow-[0_0_40px_-15px_rgba(0,0,0,0.1)] rounded-[2.5rem] overflow-hidden border border-stone-100 relative pb-24 md:pb-28">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="absolute top-6 left-6 z-20 text-stone-400 hover:text-stone-800 font-bold p-2 transition-colors flex items-center gap-1.5 bg-white/80 backdrop-blur-sm border border-stone-100 shadow-sm rounded-xl active:scale-95 group"
+        >
+          <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" /> 
+          <span className="text-sm">Back</span>
+        </button>
+      )}
       
       {/* 1. Top Progress Bar */}
-      <div className="px-6 sm:px-8 py-5 border-b border-stone-100 bg-stone-50/80">
+      <div className="px-6 sm:px-8 py-5 border-b border-stone-100 bg-stone-50/80 pl-20 sm:pl-24">
         <div className="flex items-center justify-between text-xs sm:text-sm font-bold tracking-wide">
           <div className="flex items-center gap-2 text-stone-400">
             <CheckCircle2 className="w-4 h-4 text-green-500 fill-green-100 flex-shrink-0" />
@@ -173,12 +182,7 @@ export function MaidCheckoutDetails({ onBack, onNext }: { onBack?: () => void, o
         </form>
       </div>
 
-      {/* 5. Sticky Bottom Bar */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-stone-100 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] p-4 sm:px-6 py-5 flex items-center justify-between z-10 transition-transform">
-        <button type="button" onClick={onBack} className="text-stone-400 hover:text-stone-700 font-bold text-sm sm:text-base flex items-center transition-colors px-2 py-2">
-          <ChevronLeft className="w-5 h-5 mr-1" strokeWidth={2.5} />
-          Back <span className="hidden sm:inline">&nbsp;to Chores</span>
-        </button>
+      <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-stone-100 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] p-4 sm:px-6 py-5 flex items-center justify-end z-10 transition-transform">
         <button 
           form="details-form"
           type="submit"

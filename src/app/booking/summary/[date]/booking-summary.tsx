@@ -5,7 +5,7 @@ import { useCulinaryStore } from '@/hooks/use-culinary-store';
 import { isSameDay, format, parseISO, differenceInHours } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Utensils, Hash, Clock, AlertTriangle, BadgeCheck, Pencil, Ban, XCircle, IndianRupee, Sparkles, Wallet, Minus, Plus, Trash2, ArrowLeft, Lock, Loader2, ChevronDown, List, Calendar as CalendarIcon, Sunrise, Sun, Moon, MapPin, User as UserIcon, ChefHat } from 'lucide-react';
+import { Utensils, Hash, Clock, AlertTriangle, BadgeCheck, Pencil, Ban, XCircle, IndianRupee, Sparkles, Wallet, Minus, Plus, Trash2, ArrowLeft, Lock, Loader2, ChevronDown, List, Calendar as CalendarIcon, Sunrise, Sun, Moon, MapPin, User as UserIcon, ChefHat, Star } from 'lucide-react';
 import { LoadingState } from "@/components/loading-state";
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
@@ -44,6 +44,10 @@ export function BookingSummary({ date }: { date: string }) {
   const { user: firebaseUser } = useUser();
   const router = useRouter();
   const { toast } = useToast();
+  
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const bookingType = searchParams.get('type') || 'trial';
+  const [selectedPlan, setSelectedPlan] = useState<'day' | 'weekly' | 'monthly'>(bookingType === 'membership' ? 'monthly' : 'day');
   
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -141,7 +145,8 @@ export function BookingSummary({ date }: { date: string }) {
 
   const priceScenario = useMemo(() => {
     if (timeResult?.total_minutes && user && originalDraft) {
-      const planType = user.subscription?.planId && (user.subscription.status === 'active' || user.subscription.status === 'upcoming') ? user.subscription.planId : 'day';
+      const isSubscriber = !!(user.subscription && (user.subscription.status === 'active' || user.subscription.status === 'upcoming'));
+      const planType = isSubscriber ? (user.subscription!.planId as 'day' | 'weekly' | 'monthly') : selectedPlan;
       
       return calculatePriceScenarios(
         timeResult.total_minutes,
@@ -151,7 +156,7 @@ export function BookingSummary({ date }: { date: string }) {
       );
     }
     return null;
-  }, [timeResult, user, originalDraft, familySizeForCalc, mealCategory]);
+  }, [timeResult, user, originalDraft, familySizeForCalc, mealCategory, selectedPlan]);
 
   const getMealTypeFromTime = (isoDate: string): 'Breakfast' | 'Lunch' | 'Dinner' => {
     const hour = new Date(isoDate).getHours();
@@ -257,13 +262,14 @@ export function BookingSummary({ date }: { date: string }) {
     
     setIsSubmitting(true);
     try {
-        const planType = user.subscription?.planId && (user.subscription.status === 'active' || user.subscription.status === 'upcoming') ? user.subscription.planId : 'day';
+        const isSubscriber = !!(user.subscription && (user.subscription.status === 'active' || user.subscription.status === 'upcoming'));
+        const planTypeToUse = isSubscriber ? (user.subscription!.planId as 'day' | 'weekly' | 'monthly') : selectedPlan;
         
         const checkoutData = {
-            type: planType,
+            type: planTypeToUse,
             cost: priceScenario.current_bill.amount,
             configuration: {
-                ...(user.subscription?.config || {
+                ...(isSubscriber ? user.subscription!.config : {
                     people: `${familySizeForCalc} people`,
                     meals: originalDraft.mealType,
                     diet: 'Veg',
@@ -275,6 +281,7 @@ export function BookingSummary({ date }: { date: string }) {
 
         await executeUnifiedCheckout(checkoutData, 0);
         toast({ title: "Booking Confirmed!", description: "Your cook has been requested." });
+        router.push('/dashboard');
     } catch (error: any) {
         console.error("Checkout error:", error);
     } finally {
@@ -576,6 +583,52 @@ export function BookingSummary({ date }: { date: string }) {
                             </Card>
                         )})}
                     </div>
+
+                    {/* Plan Selection UI - Only show if not already a subscriber */}
+                    {!(user.subscription && (user.subscription.status === 'active' || user.subscription.status === 'upcoming')) && (
+                        <div className="space-y-6 pt-4">
+                            <h2 className="text-lg md:text-xl font-bold font-headline flex items-center gap-2 px-1">
+                                <Sparkles className="h-5 w-5 text-amber-500" />
+                                Choose Your Plan
+                            </h2>
+                            <div className="grid gap-4">
+                                {[
+                                    { id: 'day', name: 'One-time Trial', desc: 'Single session experience', price: 'Standard Rates' },
+                                    { id: 'weekly', name: 'Weekly Pass', desc: '7 days of commitment', price: '15% Off' },
+                                    { id: 'monthly', name: 'Monthly Membership', desc: 'Best for daily meals', price: '30% Off' },
+                                ].map((plan) => (
+                                    <Card 
+                                        key={plan.id}
+                                        className={cn(
+                                            "cursor-pointer border-2 transition-all rounded-[1.5rem] overflow-hidden group active:scale-[0.98]",
+                                            selectedPlan === plan.id ? 'border-primary bg-primary/5 shadow-md' : 'border-stone-100 hover:border-stone-200 bg-white'
+                                        )}
+                                        onClick={() => setSelectedPlan(plan.id as any)}
+                                    >
+                                        <CardContent className="p-4 flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <div className={cn(
+                                                    "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors",
+                                                    selectedPlan === plan.id ? 'bg-primary text-white' : 'bg-stone-50 text-stone-400 group-hover:bg-stone-100'
+                                                )}>
+                                                    {plan.id === 'day' ? <Clock className="w-6 h-6" /> : <Star className="w-6 h-6" />}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-black text-sm text-stone-900 leading-tight">{plan.name}</h4>
+                                                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-1">{plan.desc}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <Badge className={cn("text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter", selectedPlan === plan.id ? 'bg-primary' : 'bg-stone-100 text-stone-500')}>
+                                                    {plan.price}
+                                                </Badge>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-6 pb-10">
