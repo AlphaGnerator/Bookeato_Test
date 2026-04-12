@@ -1,0 +1,71 @@
+src/app/admin/bookings/[bookingId]/booking-details.tsx(181,54): error TS18048: 'item.numberOfPortions' is possibly 'undefined'.
+src/app/admin/bookings/[bookingId]/booking-details.tsx(183,67): error TS18048: 'item.numberOfPortions' is possibly 'undefined'.
+src/app/admin/bookings/[bookingId]/booking-details.tsx(213,41): error TS7053: Element implicitly has an 'any' type because expression of type '"cancelled" | "pending" | "confirmed" | "completed" | "delivered" | "in_progress"' can't be used to index type '{ readonly pending: "accent"; readonly confirmed: "default"; readonly completed: "default"; readonly in_progress: "default"; readonly cancelled: "destructive"; }'.
+  Property 'delivered' does not exist on type '{ readonly pending: "accent"; readonly confirmed: "default"; readonly completed: "default"; readonly in_progress: "default"; readonly cancelled: "destructive"; }'.
+src/app/admin/bookings/[bookingId]/booking-details.tsx(214,30): error TS7053: Element implicitly has an 'any' type because expression of type '"cancelled" | "pending" | "confirmed" | "completed" | "delivered" | "in_progress"' can't be used to index type '{ pending: Element; confirmed: Element; in_progress: Element; completed: Element; cancelled: Element; }'.
+  Property 'delivered' does not exist on type '{ pending: Element; confirmed: Element; in_progress: Element; completed: Element; cancelled: Element; }'.
+src/app/admin/bookings/[bookingId]/booking-details.tsx(277,26): error TS2322: Type 'number | undefined' is not assignable to type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+src/app/admin/bookings/[bookingId]/booking-details.tsx(278,26): error TS2322: Type '"cook" | "maid" | "subscription" | undefined' is not assignable to type '"cook" | "maid" | undefined'.
+  Type '"subscription"' is not assignable to type '"cook" | "maid" | undefined'.
+src/app/admin/cook-requests/cook-request-list.tsx(319,56): error TS2304: Cannot find name 'cn'.
+src/app/admin/dishes/add/add-dish-form.tsx(213,9): error TS2554: Expected 3 arguments, but got 2.
+src/app/admin/dishes/add/add-dish-form.tsx(226,32): error TS2345: Argument of type 'DocumentReference<DocumentData, DocumentData>' is not assignable to parameter of type 'CollectionReference<DocumentData, DocumentData>'.
+  Types of property 'type' are incompatible.
+    Type '"document"' is not assignable to type '"collection"'.
+src/app/admin/dishes/add/ingredients-manager.tsx(28,5): error TS2322: Type '({ name: any; quantity: number; unit: any; prepNote: any; prepTimeMinutes: number; providedBy: "Customer" | "Cook"; isKeyIngredient: boolean; } | null)[]' is not assignable to type 'Omit<Ingredient, "id">[]'.
+  Type '{ name: any; quantity: number; unit: any; prepNote: any; prepTimeMinutes: number; providedBy: "Customer" | "Cook"; isKeyIngredient: boolean; } | null' is not assignable to type 'Omit<Ingredient, "id">'.
+    Type 'null' is not assignable to type 'Omit<Ingredient, "id">'.
+src/app/admin/dishes/add/ingredients-manager.tsx(53,29): error TS2677: A type predicate's type must be assignable to its parameter's type.
+  Type 'Omit<Ingredient, "id">' is not assignable to type '{ name: any; quantity: number; unit: any; prepNote: any; prepTimeMinutes: number; providedBy: "Customer" | "Cook"; isKeyIngredient: boolean; }'.
+    Property 'prepNote' is optional in type 'Omit<Ingredient, "id">' but required in type '{ name: any; quantity: number; unit: any; prepNote: any; prepTimeMinutes: number; providedBy: "Customer" | "Cook"; isKeyIngredient: boolean; }'.
+src/app/admin/dishes/add/instructions-manager.tsx(39,5): error TS2322: Type '({ stepNumber: number; instruction_en: any; instruction_hi: any; imageUrl: any; timeMinutes: number; time_category: "ACTIVE" | "PASSIVE" | "PRE_PREP"; specialInstruction: any; } | null)[]' is not assignable to type 'Omit<RecipeInstruction, "id">[]'.
+  Type '{ stepNumber: number; instruction_en: any; instruction_hi: any; imageUrl: any; timeMinutes: number; time_category: "ACTIVE" | "PASSIVE" | "PRE_PREP"; specialInstruction: any; } | null' is not assignable to type 'Omit<RecipeInstruction, "id">'.
+    Type 'null' is not assignable to type 'Omit<RecipeInstruction, "id">'.
+src/app/admin/dishes/add/instructions-manager.tsx(64,31): error TS2677: A type predicate's type must be assignable to its parameter's type.
+  Type 'Omit<RecipeInstruction, "id">' is not assignable to type '{ stepNumber: number; instruction_en: any; instruction_hi: any; imageUrl: any; timeMinutes: number; time_category: "ACTIVE" | "PASSIVE" | "PRE_PREP"; specialInstruction: any; }'.
+    Property 'instruction_hi' is optional in type 'Omit<RecipeInstruction, "id">' but required in type '{ stepNumber: number; instruction_en: any; instruction_hi: any; imageUrl: any; timeMinutes: number; time_category: "ACTIVE" | "PASSIVE" | "PRE_PREP"; specialInstruction: any; }'.
+src/app/admin/image-library/image-library-manager.tsx(50,43): error TS2339: Property 'refetch' does not exist on type 'UseCollectionResult<UploadedImage>'.
+src/app/admin/maid-requests/maid-request-list.tsx(308,56): error TS2304: Cannot find name 'cn'.
+src/app/booking/booking-stepper.tsx(83,27): error TS7053: Element implicitly has an 'any' type because expression of type '"weekly" | "monthly" | "day"' can't be used to index type '{ daily: number; weekly: number; monthly: number; } | { daily: number; weekly: number; monthly: number; } | { daily: number; weekly: number; monthly: number; } | { daily: number; weekly: number; monthly: number; } | { ...; } | { ...; } | { ...; } | { ...; }'.
+  Property 'day' does not exist on type '{ daily: number; weekly: number; monthly: number; } | { daily: number; weekly: number; monthly: number; } | { daily: number; weekly: number; monthly: number; } | { daily: number; weekly: number; monthly: number; } | { ...; } | { ...; } | { ...; } | { ...; }'.
+src/app/booking/menu/menu-selector.tsx(328,15): error TS2322: Type '({ dishId: string; dishName: string; numberOfPortions: number; notes: string | undefined; } | null)[]' is not assignable to type 'DraftBookingItem[]'.
+  Type '{ dishId: string; dishName: string; numberOfPortions: number; notes: string | undefined; } | null' is not assignable to type 'DraftBookingItem'.
+    Type 'null' is not assignable to type 'DraftBookingItem'.
+src/app/booking/menu/menu-selector.tsx(343,37): error TS2677: A type predicate's type must be assignable to its parameter's type.
+  Type 'DraftBookingItem' is not assignable to type '{ dishId: string; dishName: string; numberOfPortions: number; notes: string | undefined; }'.
+    Property 'notes' is optional in type 'DraftBookingItem' but required in type '{ dishId: string; dishName: string; numberOfPortions: number; notes: string | undefined; }'.
+src/app/booking/slots/slot-selector.tsx(169,25): error TS2322: Type '{ from: Date; to: Date; } | undefined' is not assignable to type 'Matcher | Matcher[]'.
+  Type 'undefined' is not assignable to type 'Matcher | Matcher[]'.
+src/app/bookings/cancel/page.tsx(66,42): error TS2339: Property 'firestore' does not exist on type 'UseDocResult<Booking>'.
+src/app/bookings/reschedule/page.tsx(75,41): error TS2339: Property 'firestore' does not exist on type 'UseDocResult<Booking>'.
+src/app/cook/dashboard/page.tsx(202,46): error TS2304: Cannot find name 'Link'.
+src/app/cook/dashboard/page.tsx(203,71): error TS2304: Cannot find name 'ArrowRight'.
+src/app/cook/dashboard/page.tsx(204,47): error TS2304: Cannot find name 'Link'.
+src/app/cook/login/login-form.tsx(141,9): error TS2554: Expected 3 arguments, but got 2.
+src/app/cook/login/login-form.tsx(166,17): error TS2554: Expected 3 arguments, but got 2.
+src/app/cooks/cooks-list.tsx(13,5): error TS2741: Property 'status' is missing in type '{ id: string; name: string; experience: number; rating: number; specialties: string[]; contactNumber: string; address: string; pincode: string; }' but required in type 'CookProfile'.
+src/app/cooks/cooks-list.tsx(23,5): error TS2741: Property 'status' is missing in type '{ id: string; name: string; experience: number; rating: number; specialties: string[]; contactNumber: string; address: string; pincode: string; }' but required in type 'CookProfile'.
+src/app/cooks/cooks-list.tsx(33,5): error TS2741: Property 'status' is missing in type '{ id: string; name: string; experience: number; rating: number; specialties: string[]; contactNumber: string; address: string; pincode: string; }' but required in type 'CookProfile'.
+src/app/dashboard/page.tsx(109,42): error TS2304: Cannot find name 'CarouselApi'.
+src/app/dashboard/page.tsx(379,53): error TS2304: Cannot find name 'setIsNavigating'.
+src/app/dashboard/timeline-view.tsx(103,24): error TS18048: 'bookingForDay' is possibly 'undefined'.
+src/app/dashboard/timeline-view.tsx(104,30): error TS18048: 'bookingForDay' is possibly 'undefined'.
+src/app/dashboard/timeline-view.tsx(105,27): error TS18048: 'bookingForDay' is possibly 'undefined'.
+src/app/order-history/order-history.tsx(122,37): error TS7053: Element implicitly has an 'any' type because expression of type '"cancelled" | "pending" | "confirmed" | "completed" | "delivered" | "in_progress"' can't be used to index type '{ readonly pending: "accent"; readonly confirmed: "default"; readonly completed: "default"; readonly cancelled: "destructive"; }'.
+  Property 'delivered' does not exist on type '{ readonly pending: "accent"; readonly confirmed: "default"; readonly completed: "default"; readonly cancelled: "destructive"; }'.
+src/app/order-history/order-history.tsx(123,26): error TS7053: Element implicitly has an 'any' type because expression of type '"cancelled" | "pending" | "confirmed" | "completed" | "delivered" | "in_progress"' can't be used to index type '{ pending: Element; confirmed: Element; completed: Element; cancelled: Element; }'.
+  Property 'delivered' does not exist on type '{ pending: Element; confirmed: Element; completed: Element; cancelled: Element; }'.
+src/app/plan-details/plan-details-view.tsx(236,38): error TS2304: Cannot find name 'BadgeCheck'.
+src/app/profile/page.tsx(4,10): error TS2300: Duplicate identifier 'ProfileForm'.
+src/app/profile/page.tsx(5,10): error TS2300: Duplicate identifier 'Button'.
+src/app/profile/page.tsx(6,10): error TS2300: Duplicate identifier 'ArrowLeft'.
+src/app/profile/page.tsx(7,10): error TS2300: Duplicate identifier 'useRouter'.
+src/app/profile/page.tsx(12,10): error TS2300: Duplicate identifier 'ProfileForm'.
+src/app/profile/page.tsx(13,10): error TS2300: Duplicate identifier 'Button'.
+src/app/profile/page.tsx(14,10): error TS2300: Duplicate identifier 'ArrowLeft'.
+src/app/profile/page.tsx(15,10): error TS2300: Duplicate identifier 'useRouter'.
+src/app/services/page.tsx(93,29): error TS2322: Type '{ icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; ... 4 more ...; imageSrc: string; }' is not assignable to type 'IntrinsicAttributes & ServiceBlockProps'.
+  Property 'imageSrc' does not exist on type 'IntrinsicAttributes & ServiceBlockProps'.
+src/app/services/page.tsx(101,29): error TS2322: Type '{ icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; ... 4 more ...; imageSrc: string; }' is not assignable to type 'IntrinsicAttributes & ServiceBlockProps'.
+  Property 'imageSrc' does not exist on type 'IntrinsicAttributes & ServiceBlockProps'.

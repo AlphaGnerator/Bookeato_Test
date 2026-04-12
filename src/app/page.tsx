@@ -40,63 +40,63 @@ import { collection } from 'firebase/firestore';
 const heroCarouselDishes = [
     {
         id: 1,
-        name: 'Avocado Toast',
-        tags: ['Low-oil', 'Chef-curated', 'Delhi Cook'],
-        image: 'https://images.unsplash.com/photo-1484723091739-30a097e8f929?q=80&w=1547&auto=format&fit=crop',
-        hint: 'avocado toast',
-        calories: 350,
-        protein: 12,
-        carbs: 25,
-    },
-    {
-        id: 2,
-        name: 'Grilled Salmon',
-        tags: ['High-protein', 'Chef-curated', 'Mumbai Cook'],
-        image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=1770&auto=format&fit=crop',
-        hint: 'grilled salmon',
-        calories: 550,
-        protein: 40,
-        carbs: 5,
-    },
-    {
-        id: 3,
-        name: 'Quinoa Salad',
-        tags: ['Vegan', 'Chef-curated', 'Bangalore Cook'],
-        image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1770&auto=format&fit=crop',
-        hint: 'quinoa salad',
-        calories: 420,
-        protein: 15,
+        name: 'Dal Makhani',
+        tags: ['Creamy', 'Chef-curated', 'Delhi Cook'],
+        image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=1770&auto=format&fit=crop',
+        hint: 'dal makhani',
+        calories: 320,
+        protein: 14,
         carbs: 35,
     },
     {
+        id: 2,
+        name: 'Paneer Butter Masala',
+        tags: ['Rich', 'Chef-curated', 'Mumbai Cook'],
+        image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=1636&auto=format&fit=crop',
+        hint: 'paneer butter masala',
+        calories: 450,
+        protein: 20,
+        carbs: 15,
+    },
+    {
+        id: 3,
+        name: 'Authentic Biryani',
+        tags: ['Spiced', 'Chef-curated', 'Hyderabad Cook'],
+        image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=1770&auto=format&fit=crop',
+        hint: 'authentic biryani',
+        calories: 480,
+        protein: 24,
+        carbs: 40,
+    },
+    {
         id: 4,
-        name: 'Chicken Curry',
-        tags: ['Authentic', 'Chef-curated', 'Chennai Cook'],
-        image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?q=80&w=1674&auto=format&fit=crop',
-        hint: 'chicken curry',
-        calories: 600,
-        protein: 35,
-        carbs: 20,
+        name: 'Palak Paneer',
+        tags: ['Healthy', 'Chef-curated', 'Bangalore Cook'],
+        image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=1770&auto=format&fit=crop',
+        hint: 'palak paneer',
+        calories: 390,
+        protein: 18,
+        carbs: 12,
     },
     {
         id: 5,
-        name: 'Paneer Bowl',
-        tags: ['High-protein', 'Chef-curated', 'Pune Cook'],
-        image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=1636&auto=format&fit=crop',
-        hint: 'paneer bowl',
-        calories: 480,
-        protein: 25,
-        carbs: 30,
+        name: 'Chole Bhature',
+        tags: ['Indulgent', 'Chef-curated', 'Delhi Cook'],
+        image: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?q=80&w=1770&auto=format&fit=crop',
+        hint: 'chole bhature',
+        calories: 550,
+        protein: 16,
+        carbs: 65,
     },
     {
         id: 6,
-        name: 'Millet Khichdi',
-        tags: ['Gut-friendly', 'Chef-curated', 'Hyderabad Cook'],
-        image: 'https://picsum.photos/seed/khichdi/600/400',
-        hint: 'millet khichdi',
-        calories: 380,
-        protein: 14,
-        carbs: 45,
+        name: 'Masala Dosa',
+        tags: ['Crispy', 'Chef-curated', 'Chennai Cook'],
+        image: 'https://images.unsplash.com/photo-1589301760014-d929f39ce9b1?q=80&w=1770&auto=format&fit=crop',
+        hint: 'masala dosa',
+        calories: 280,
+        protein: 6,
+        carbs: 42,
     }
 ];
 
@@ -126,7 +126,7 @@ const pricingPlans = [
       "Dedicated multi-cuisine cook or premium maid assigned.",
       "Highest priority for scheduling and customized instructions.",
       "Free access to nutritionist consultation (for cooks).",
-      "Complimentary access to Pure Pantry early deals.",
+      "Complimentary access to Nourish Store early deals.",
       "Save up to 40% compared to daily visits.",
     ],
     cta: "Subscribe Now",
@@ -275,7 +275,7 @@ const heroSlides = [
         title: 'Authentic Indian Meals', 
         subtitle: 'Chef-designed, home-cooked daily. Starting at just ₹200/visit.',
         badge: 'Disruption-Free Monthly Plans',
-        cta: 'Find a Cook',
+        cta: 'Learn More',
         link: '#services',
         imageUrl: '/carousel/carousel_cook_v4.png'
     },
@@ -284,7 +284,7 @@ const heroSlides = [
         title: 'Trusted Home Keepers', 
         subtitle: 'Vetted, reliable maids that respect your space. Zero absenteeism.',
         badge: '100% Disruption-Free Guarantee',
-        cta: 'Book a Maid',
+        cta: 'Learn More',
         link: '#services',
         imageUrl: '/carousel/carousel_maid_v4.png'
     },
@@ -293,16 +293,16 @@ const heroSlides = [
         title: 'Compassionate Elder Care', 
         subtitle: 'Warm, trained specialists for your loved ones at home.',
         badge: 'Trained & Vetted',
-        cta: 'Get Support',
+        cta: 'Learn More',
         link: '#services',
         imageUrl: '/carousel/carousel_elderly_v4.png'
     },
     { 
         id: 'pantry',
-        title: '100% Pure Pantry', 
+        title: 'Just Nourish Store', 
         subtitle: 'A2 Kulfis, ancient grains, and cold-pressed oils. Zero adulteration.',
         badge: 'Zero Chemicals',
-        cta: 'Shop Pure Grocery',
+        cta: 'Learn More',
         link: '#services',
         imageUrl: '/carousel/carousel_pantry_v4.png'
     }
@@ -313,14 +313,38 @@ export default function WelcomePage() {
   const carouselRef = useMemoFirebase(() => firestore ? collection(firestore, 'carouselImages') : null, [firestore]);
   const { data: dbImages } = useCollection<{ title: string; imageUrl: string }>(carouselRef);
   
+  const { dishes } = useCulinaryStore();
+  const displayDishes = React.useMemo(() => {
+     return dishes && dishes.length > 0 
+      ? dishes.filter(d => d.isActive).slice(0, 6).map((d) => ({
+          id: d.id,
+          name: d.displayName_en || 'Delicious Dish',
+          tags: d.dietaryTags && d.dietaryTags.length > 0 ? d.dietaryTags.slice(0, 3) : ['Chef-curated'],
+          image: d.heroImageUrl || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=1770&auto=format&fit=crop',
+          hint: d.displayName_en?.toLowerCase() || '',
+          calories: d.calories || 350,
+          protein: d.protein_grams || 15,
+          carbs: d.carbs_grams || 30
+      })) 
+      : heroCarouselDishes;
+  }, [dishes]);
+  
   const [activeService, setActiveService] = React.useState('Cook');
 
   // Persistence Logic
   React.useEffect(() => {
-    const savedService = localStorage.getItem('bookeato_active_service');
-    if (savedService) {
-      setActiveService(savedService);
+    const savedService = typeof window !== 'undefined' ? localStorage.getItem('bookeato_active_service') : null;
+    if (savedService && ['Cook', 'Maid', 'Elder help', 'Nourish Store'].includes(savedService)) {
+        setActiveService(savedService);
     }
+    
+    const handleServiceChange = (e: any) => {
+        if (e.detail && ['Cook', 'Maid', 'Elder help', 'Nourish Store'].includes(e.detail)) {
+            setActiveService(e.detail);
+        }
+    };
+    window.addEventListener('bookeato_service_change', handleServiceChange);
+    return () => window.removeEventListener('bookeato_service_change', handleServiceChange);
   }, []);
 
   React.useEffect(() => {
@@ -332,10 +356,10 @@ export default function WelcomePage() {
   }, []);
 
   const services = [
-    { id: 'Cook', name: 'Cook', icon: '/icons/icon_cook.png', color: 'bg-orange-500/10 text-orange-600 ring-orange-500/20' },
+    { id: 'Cook', name: 'Cook', icon: '/icons/icon_cook_new.png', color: 'bg-orange-500/10 text-orange-600 ring-orange-500/20' },
     { id: 'Maid', name: 'Maid', icon: '/icons/icon_maid.png', color: 'bg-green-500/10 text-green-600 ring-green-500/20' },
     { id: 'Elder help', name: 'Elder Care', icon: '/icons/icon_elder.png', color: 'bg-purple-500/10 text-purple-600 ring-purple-500/20' },
-    { id: 'Pure Pantry', name: 'Pure Pantry', icon: '/icons/icon_pantry.png', color: 'bg-emerald-500/10 text-emerald-600 ring-emerald-500/20' },
+    { id: 'Nourish Store', name: 'Nourish Store', icon: '/icons/icon_pantry.png', color: 'bg-emerald-500/10 text-emerald-600 ring-emerald-500/20' },
   ];
 
   return (
@@ -343,12 +367,15 @@ export default function WelcomePage() {
       <LandingHeader />
       <div className="pt-16 md:pt-20 bg-surface">
         <main>
-          {/* Bookeato Live Banner */}
-          <div className="bg-orange-600 text-white px-4 py-3 text-center flex flex-col sm:flex-row items-center justify-center gap-2 relative z-50">
-             <Badge className="bg-white/20 text-white hover:bg-white/30 border-none px-2 border-none rounded-md inline-flex font-black tracking-widest text-[10px]">NEW</Badge>
+          {/* Desktop Bookeato Live Banner */}
+          <div className="hidden md:flex bg-orange-600 text-white px-4 py-2 text-center flex-row items-center justify-center gap-3 relative z-50">
+             <span className="relative flex h-3 w-3">
+                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-100 opacity-75"></span>
+                 <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] border border-red-300"></span>
+             </span>
              <span className="font-medium text-sm">We are setting up Live Kitchens in select societies!</span>
-             <Link href="/live" className="font-black text-sm underline hover:text-stone-200 transition-colors ml-2 flex items-center gap-1">
-                Order from Bookeato Live <ArrowRight className="w-4 h-4" />
+             <Link href="/live" className="font-black text-sm hover:text-stone-200 transition-colors ml-2 flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10">
+                Order from Bookeato Live <ArrowRight className="w-3.5 h-3.5" />
              </Link>
           </div>
 
@@ -357,7 +384,7 @@ export default function WelcomePage() {
              <Carousel
                  key={carouselImages.length}
                  opts={{ align: "start", loop: true }}
-                 plugins={[ Autoplay({ delay: 5000, stopOnInteraction: false }) ]}
+                 plugins={[ Autoplay({ delay: 3500, stopOnInteraction: false }) ]}
                  className="w-full h-full absolute inset-0"
              >
                  <CarouselContent className="h-full ml-0">
@@ -377,15 +404,15 @@ export default function WelcomePage() {
                                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-transparent pointer-events-none" />
                                  
                                  {/* Slide Specific Content */}
-                                 <div className="relative z-20 container mx-auto px-6 pb-20 md:pb-32 text-left flex flex-col items-start gap-4">
-                                     <Badge className="bg-orange-500/90 text-white border-none shadow-lg px-4 py-1.5 text-sm uppercase tracking-widest font-black">{slide.badge}</Badge>
+                                 <div className="relative z-20 container mx-auto px-6 pt-24 md:pt-0 pb-20 md:pb-32 text-left flex flex-col items-start gap-4">
+                                     <Badge className="bg-orange-500/90 text-white border-none shadow-lg px-4 py-1.5 text-[10px] md:text-sm uppercase tracking-widest font-black">{slide.badge}</Badge>
                                      <div className="max-w-2xl">
-                                       <h3 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight drop-shadow-2xl leading-tight">{slide.title}</h3>
+                                       <h3 className="text-3xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight drop-shadow-2xl leading-tight">{slide.title}</h3>
                                        <p className="text-lg md:text-2xl text-stone-200 font-bold max-w-[90%] drop-shadow-md">{slide.subtitle}</p>
                                      </div>
                                      <div className="flex gap-4 mt-6 items-center flex-wrap">
                                        <Button asChild variant="cta" size="lg" className="rounded-2xl shadow-2xl touch-manipulation active:scale-95 group/btn border border-white/20 relative z-30 font-bold text-lg h-14 px-8">
-                                           <a href="#services" onClick={(e) => { e.preventDefault(); setActiveService(slide.title.includes('Cook') ? 'Cook' : slide.title.includes('Maid') ? 'Maid' : slide.title.includes('Elder') ? 'Elder help' : 'Pure Pantry'); document.getElementById('services-grid')?.scrollIntoView({behavior: 'smooth'}); }}>
+                                           <a href="#services" onClick={(e) => { e.preventDefault(); setActiveService(slide.id === 'cook' ? 'Cook' : slide.id === 'maid' ? 'Maid' : slide.id === 'elder' ? 'Elder help' : 'Nourish Store'); document.getElementById('services-grid')?.scrollIntoView({behavior: 'smooth'}); }}>
                                                {slide.cta} <ArrowRight className="ml-3 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
                                            </a>
                                        </Button>
@@ -395,6 +422,14 @@ export default function WelcomePage() {
                          </CarouselItem>
                      ))}
                  </CarouselContent>
+                 
+                 {/* Carousel Controls */}
+                 <div className="absolute inset-y-0 left-2 md:left-10 flex items-center z-40 pointer-events-none">
+                     <CarouselPrevious className="pointer-events-auto relative left-0 top-0 translate-y-0 translate-x-0 h-10 w-10 md:h-12 md:w-12 bg-black/20 hover:bg-black/40 text-white border-white/20 backdrop-blur-md transition-all hover:scale-110" />
+                 </div>
+                 <div className="absolute inset-y-0 right-2 md:right-10 flex items-center z-40 pointer-events-none lg:pr-80">
+                     <CarouselNext className="pointer-events-auto relative right-0 top-0 translate-y-0 translate-x-0 h-10 w-10 md:h-12 md:w-12 bg-black/20 hover:bg-black/40 text-white border-white/20 backdrop-blur-md transition-all hover:scale-110" />
+                 </div>
              </Carousel>
 
              {/* Global Floating Header OVER the carousel */}
@@ -416,91 +451,97 @@ export default function WelcomePage() {
              </div>
           </section>
 
-          {/* Service Hub Section - 2x2 Grid for Mobile Fluidity */}
-          <section id="services-grid" className="bg-white pt-16 md:pt-24 pb-8 relative z-20">
-            <div className="container mx-auto px-6 text-center mb-10 md:mb-12">
-               <Badge className="bg-primary/10 text-primary font-bold py-1 px-4 text-[10px] md:text-xs uppercase tracking-widest border-none mb-4">Explore Our Services</Badge>
-               <h2 className="text-3xl md:text-5xl font-black text-stone-900 tracking-tight leading-tight">What do you need help with today?</h2>
-            </div>
+          {/* Service Hub Section - Swiggy Style Pills */}
+          {/* Service Hub Section - Swiggy Style Pills */}
+          {/* Service Hub Section - Swiggy Style Pills */}
+          <section id="services-grid" className="bg-stone-950 pt-8 relative z-20">
+             <div className="container mx-auto px-6 text-center md:pb-4 text-white">
+                 <h2 className="text-xl md:text-3xl font-black tracking-tight leading-tight drop-shadow-md">What do you need help with today?</h2>
+             </div>
 
-            <div className="container mx-auto px-4 md:px-6">
-              {/* Grid layout: 2 cols on mobile, 4 on desktop */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 max-w-6xl mx-auto">
-                {services.map((service) => {
-                  const isActive = activeService === service.id;
-                  return (
-                    <button
-                      key={service.id}
-                      onClick={() => setActiveService(service.id)}
-                      className={cn(
-                        "flex flex-col items-center justify-center p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] border transition-all duration-300 group relative overflow-hidden h-[160px] md:h-[280px] cursor-pointer shadow-sm hover:shadow-lg",
-                        isActive 
-                          ? `bg-white border-transparent ${service.color.split(' ')[2]} ring-4 md:ring-8 ring-stone-100 scale-[1.02] z-10 shadow-xl` 
-                          : "bg-surface border-surface-border hover:border-primary/30 hover:-translate-y-1"
-                      )}
-                    >
-                      {isActive && (
-                        <div className={cn("absolute inset-0 opacity-10 pointer-events-none", service.color.split(' ')[0])} />
-                      )}
+             <div className="container mx-auto px-1 md:px-6 relative z-30 mt-6">
+                <div className="flex justify-between w-full overflow-visible items-end relative -mb-[2px] md:-mb-[3px] px-1 md:px-4 gap-1 md:gap-4">
+                    {services.map((service) => {
+                        const isActive = activeService === service.id;
+                        
+                        // Swiggy Dynamic Background logic - active tab perfectly merges with the container below
+                        const getActiveThemeBg = (id: string) => {
+                            switch(id) {
+                                case 'Cook': return 'bg-orange-50';
+                                case 'Maid': return 'bg-teal-50';
+                                case 'Elder help': return 'bg-purple-50';
+                                case 'Nourish Store': return 'bg-emerald-50';
+                                default: return 'bg-stone-50';
+                            }
+                        };
+                        const activeThemeBg = getActiveThemeBg(activeService);
 
-                      <div className={cn(
-                        "relative w-16 h-16 md:w-32 md:h-32 rounded-xl md:rounded-[2rem] transition-transform duration-300 p-1",
-                        isActive ? "scale-110 drop-shadow-md" : "scale-100 group-hover:scale-105"
-                      )}>
-                        <Image 
-                          src={service.icon}
-                          alt={service.name}
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
+                        return (
+                            <button
+                                key={service.id}
+                                onClick={() => setActiveService(service.id)}
+                                className={cn(
+                                    "relative flex flex-col items-center transition-all duration-300 ease-in-out cursor-pointer flex-1 min-w-0 border-b-0",
+                                    isActive 
+                                       ? `${activeThemeBg} rounded-t-[1.2rem] md:rounded-t-[2.5rem] pt-4 pb-6 md:pt-6 md:pb-12 shadow-[0_-15px_30px_-5px_rgba(0,0,0,0.4)] z-40 border-0`
+                                       : "bg-white/5 hover:bg-white/10 rounded-[1rem] md:rounded-[2rem] pt-3 pb-4 mx-0.5 md:mx-1 z-10 border border-white/10 text-white backdrop-blur-md transform scale-95 opacity-80 hover:opacity-100 mb-2 md:mb-4"
+                                )}
+                            >
+                                {/* Flared Corner Visual Illusions for Active Tab to blend perfectly */}
+                                {isActive && (
+                                   <>
+                                      {/* Fill the bottom gap */}
+                                      <div className={`absolute inset-x-0 bottom-0 h-4 md:h-6 ${activeThemeBg} z-40 translate-y-[2px] md:translate-y-[3px]`}></div>
+                                      
+                                      {/* Left Flare Curve */}
+                                      <svg 
+                                        className="absolute bottom-0 -left-3 md:-left-4 w-3 h-3 md:w-4 md:h-4 z-50 text-current translate-y-[2px] md:translate-y-[3px]" 
+                                        style={{ color: activeService === 'Cook' ? '#fff7ed' : activeService === 'Maid' ? '#f0fdfa' : activeService === 'Elder help' ? '#faf5ff' : activeService === 'Nourish Store' ? '#ecfdf5' : '#fafaf9' }}
+                                        viewBox="0 0 24 24" 
+                                        fill="currentColor"
+                                      >
+                                          <path d="M0,24 L24,24 L24,0 C24,13.25 13.25,24 0,24 Z" />
+                                      </svg>
 
-                      <div className="text-center mt-3 md:mt-4">
-                        <span className={cn(
-                          "font-black text-sm md:text-2xl transition-all block tracking-tight leading-none",
-                          isActive ? "text-stone-900" : "text-stone-600 group-hover:text-stone-900"
-                        )}>
-                          {service.name}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Dynamic Connecting Pointer (NOTCH) - Desktop Only */}
-            <div className="hidden lg:block container mx-auto px-6 relative h-12 max-w-6xl">
-               <div 
-                 className="absolute bottom-0 transition-all duration-500 ease-in-out flex justify-center"
-                 style={{ 
-                   width: '25%', 
-                   left: `${services.findIndex(s => s.id === activeService) * 25}%` 
-                 }}
-               >
-                 <div className={cn(
-                   "w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-b-[20px] transition-colors duration-500",
-                   services.find(s => s.id === activeService)?.color.split(' ')[1].replace('text-', 'border-b-') || 'border-b-primary'
-                 )}></div>
-               </div>
-            </div>
+                                      {/* Right Flare Curve */}
+                                      <svg 
+                                        className="absolute bottom-0 -right-3 md:-right-4 w-3 h-3 md:w-4 md:h-4 z-50 text-current scale-x-[-1] translate-y-[2px] md:translate-y-[3px]" 
+                                        style={{ color: activeService === 'Cook' ? '#fff7ed' : activeService === 'Maid' ? '#f0fdfa' : activeService === 'Elder help' ? '#faf5ff' : activeService === 'Nourish Store' ? '#ecfdf5' : '#fafaf9' }}
+                                        viewBox="0 0 24 24" 
+                                        fill="currentColor"
+                                      >
+                                          <path d="M0,24 L24,24 L24,0 C24,13.25 13.25,24 0,24 Z" />
+                                      </svg>
+                                   </>
+                                )}
+                                
+                                <div className={cn(
+                                    "relative transition-transform duration-300", 
+                                    isActive ? "w-10 h-10 md:w-16 md:h-16 drop-shadow-lg scale-110 mb-2" : "w-8 h-8 md:w-12 md:h-12 mb-1"
+                                )}>
+                                    <Image src={service.icon} alt={service.name} fill className="object-contain" />
+                                </div>
+                                <span className={cn(
+                                    "font-black tracking-tight mt-1 transition-all text-center leading-[1.1] mb-1 md:mb-0",
+                                    isActive ? "text-stone-900 text-[10px] md:text-xl scale-100 px-1" : "text-[8px] md:text-sm font-semibold scale-90 px-0.5"
+                                )}>
+                                    {service.name}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+             </div>
           </section>
 
-          {/* Dynamic Content Container with Thematic Border & Mobile Badge */}
+          {/* Dynamic Content Container */}
           <div className={cn(
-            "relative z-10 border-t-[6px] md:border-t-[8px] transition-colors duration-500 py-12 md:py-20 bg-background",
-            services.find(s => s.id === activeService)?.color.split(' ')[1].replace('text-', 'border-') || 'border-primary'
+            "relative z-10 py-12 md:py-20 shadow-[0_-20px_40px_rgba(0,0,0,0.05)] pt-12 md:pt-20 mt-0 transition-colors duration-500",
+            (activeService === 'Cook' ? 'bg-orange-50' : 
+             activeService === 'Maid' ? 'bg-teal-50' : 
+             activeService === 'Elder help' ? 'bg-purple-50' : 
+             activeService === 'Nourish Store' ? 'bg-emerald-50' : 'bg-stone-50')
           )}>
-            {/* Mobile Context Badge */}
-            <div className="container mx-auto px-6 flex justify-center -translate-y-16">
-               <div className={cn(
-                 "px-6 py-2 rounded-full text-white font-black text-xs uppercase tracking-widest shadow-lg flex items-center gap-2",
-                 services.find(s => s.id === activeService)?.color.split(' ')[1].replace('text-', 'bg-') || 'bg-primary'
-               )}>
-                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                 Now Viewing: {activeService}
-               </div>
-            </div>
 
             {activeService === 'Cook' && (
               <section className="dish-slider">
@@ -524,7 +565,7 @@ export default function WelcomePage() {
                     className="w-full"
                 >
                     <CarouselContent className="-ml-4 px-4">
-                        {heroCarouselDishes.map((dish) => (
+                        {displayDishes.map((dish) => (
                             <CarouselItem key={dish.id} className="pl-4 basis-[85%] sm:basis-1/2 lg:basis-1/4">
                                  <div className="p-1 h-full">
                                     <Card className="overflow-hidden rounded-[2rem] shadow-sm hover:shadow-md transition-shadow border-none h-full bg-surface">
@@ -572,7 +613,7 @@ export default function WelcomePage() {
                 </Carousel>
                  <div className="text-center mt-12 px-4">
                   <Button asChild variant="cta" size="lg" className="w-full sm:w-auto h-14 px-12 font-bold text-lg shadow-xl touch-manipulation active:scale-95 transition-all">
-                    <Link href="/pricing">Explore Today's Menu</Link>
+                    <Link href="/booking/cook">Book a Cook</Link>
                   </Button>
                 </div>
               </section>
@@ -582,10 +623,10 @@ export default function WelcomePage() {
               <MaidServiceTab />
             )}
 
-            {activeService === 'Pure Pantry' && (
+            {activeService === 'Nourish Store' && (
               <section className="container mx-auto px-6 text-center py-10">
                 <Badge className="bg-emerald-500/10 text-emerald-600 font-bold py-1 px-4 text-xs uppercase tracking-widest border-none mb-4">New Launch</Badge>
-                <h2 className="section-title">Pure Pantry</h2>
+                <h2 className="section-title">Nourish Store</h2>
                 <p className="text-text-secondary max-w-2xl mx-auto mt-4 text-lg">
                   The ultimate destination for unadulterated goodness. Only verified healthy items: from cold-pressed oils and ancient grain millet ladoos, to premium Kashmiri saffron and natural A2 Cow Kulfi. Zero chemicals, zero compromise.
                 </p>
@@ -605,36 +646,28 @@ export default function WelcomePage() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold mb-2">Strictly Curated Inventory</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">We strictly prohibit anything that harms the human system. If it's on Pure Pantry, it's 100% wholesome and lab-verified.</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">We strictly prohibit anything that harms the human system. If it's on Nourish Store, it's 100% wholesome and lab-verified.</p>
                     </div>
                   </div>
+                </div>
+                <div className="mt-12 text-center px-4">
+                  <Button asChild variant="cta" size="lg" className="w-full sm:w-auto h-14 px-12 font-bold text-lg shadow-xl touch-manipulation active:scale-95 transition-all">
+                    <Link href="/marketplace">Browse Store Catalog</Link>
+                  </Button>
                 </div>
               </section>
             )}
 
             {activeService === 'Elder help' && (
-              <section className="container mx-auto px-6 text-center py-10">
-                <Badge className="bg-primary/10 text-primary font-bold py-1 px-4 text-xs uppercase tracking-widest border-none mb-4">Coming Soon</Badge>
-                <h2 className="section-title">Compassionate Elder Care</h2>
-                <p className="text-text-secondary max-w-2xl mx-auto mt-4 text-lg">
-                  Dedicated support for your loved ones. Our elder care specialists provide companionship and assistance with daily living activities.
-                </p>
-                <div className="mt-12 space-y-6 max-w-3xl mx-auto">
-                  <div className="bg-surface border-2 border-primary/10 p-6 rounded-3xl flex items-center justify-between text-left group hover:border-primary/30 transition-all">
-                    <div>
-                      <h3 className="text-xl font-bold text-text-primary">Companion Care</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Mental stimulation and companionship through shared activities and conversation.</p>
-                    </div>
-                    <HeartPulse className="h-10 w-10 text-primary/20 group-hover:text-primary transition-colors" />
-                  </div>
-                  <div className="bg-surface border-2 border-primary/10 p-6 rounded-3xl flex items-center justify-between text-left group hover:border-primary/30 transition-all">
-                    <div>
-                      <h3 className="text-xl font-bold text-text-primary">Assistance with Chores</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Light housekeeping and assistance with errands to ensure comfort and safety.</p>
-                    </div>
-                    <HeartPulse className="h-10 w-10 text-primary/20 group-hover:text-primary transition-colors" />
-                  </div>
+              <section className="container mx-auto px-6 text-center py-24 min-h-[40vh] flex flex-col items-center justify-center">
+                <div className="bg-purple-500/10 text-purple-600 p-6 rounded-3xl h-fit shrink-0 mb-6 flex items-center justify-center">
+                    <HeartPulse className="h-12 w-12" />
                 </div>
+                <Badge className="bg-purple-500/10 text-purple-600 font-bold py-1.5 px-6 text-sm uppercase tracking-widest border-none mb-6">Coming Soon</Badge>
+                <h2 className="section-title text-4xl">Compassionate Elder Care</h2>
+                <p className="text-text-secondary max-w-2xl mx-auto mt-4 text-xl">
+                  We are finalizing our rigorous training protocols for specialized elder care professionals. Expert assistance for your loved ones is just around the corner.
+                </p>
               </section>
             )}
           </div>

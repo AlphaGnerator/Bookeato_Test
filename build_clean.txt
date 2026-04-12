@@ -1,0 +1,46 @@
+
+> nextn@0.1.0 build
+> cross-env NODE_ENV=production next build
+
+   ▲ Next.js 15.3.8
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./src/app/profile/page.tsx
+Module parse failed: Identifier 'ProfileForm' has already been declared (9:9)
+File was processed with these loaders:
+ * ./node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js
+ * ./node_modules/next/dist/build/webpack/loaders/next-swc-loader.js
+You may need an additional loader to handle the result of these loaders.
+| import { AppLayout } from '@/components/app-layout';
+| import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+> import { ProfileForm } from './profile-form';
+| import { Button } from '@/components/ui/button';
+| import { ArrowLeft } from "__barrel_optimize__?names=ArrowLeft!=!lucide-react";
+
+Import trace for requested module:
+./src/app/profile/page.tsx
+
+./src/app/recommendations/page.tsx
+Error:   [31mx[0m You're importing a component that needs `useRouter`. This React hook only works in a client component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m
+
+    ,-[[36;1;4mC:\Users\aniru\.gemini\antigravity\scratch\firebase_odc_app\src\app\recommendations\page.tsx[0m:7:1]
+ [2m 4[0m | import { Separator } from '@/components/ui/separator';
+ [2m 5[0m | import { Button } from '@/components/ui/button';
+ [2m 6[0m | import { ArrowLeft } from 'lucide-react';
+ [2m 7[0m | import { useRouter } from 'next/navigation';
+    : [35;1m         ^^^^^^^^^[0m
+ [2m 8[0m | 
+ [2m 9[0m | export default function RecommendationsPage() {
+ [2m10[0m |   const router = useRouter();
+    `----
+
+Import trace for requested module:
+./src/app/recommendations/page.tsx
+
+
+> Build failed because of webpack errors

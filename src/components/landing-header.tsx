@@ -5,10 +5,11 @@ import { Logo } from './logo';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
-import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
-import { Menu, LogOut, User as UserIcon, Activity } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from './ui/sheet';
+import { Menu, LogOut, User as UserIcon, Activity, ArrowRight } from 'lucide-react';
 import { useUser, useAuth } from '@/firebase';
 import { useCulinaryStore } from '@/hooks/use-culinary-store';
+import { Badge } from '@/components/ui/badge';
 import { signOut } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -23,9 +24,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const getNavLinks = (firebaseUser: any) => [
   { href: '/', label: 'Home' },
-  { href: '/pricing', label: 'Foods' },
-  { href: '/cooks', label: 'Cooks' },
-  { href: firebaseUser ? '/dashboard' : '/login', label: firebaseUser ? 'Dashboard' : 'My Bookings' },
+  { href: '/services', label: 'Services', isDropdown: true },
+  { href: '/partner-signup', label: 'Partners' },
+  { href: '/about', label: 'About Us' },
 ];
 
 export function LandingHeader() {
@@ -60,16 +61,30 @@ export function LandingHeader() {
         <Logo />
         <nav className="hidden md:flex items-center gap-8">
           {getNavLinks(firebaseUser).map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                'text-sm font-medium text-text-muted transition-colors hover:text-text-primary',
-                pathname === link.href && 'text-text-primary font-bold'
-              )}
-            >
-              {link.label}
-            </Link>
+            link.isDropdown ? (
+                 <DropdownMenu key={link.href}>
+                     <DropdownMenuTrigger className="text-sm font-medium text-text-muted transition-colors hover:text-text-primary focus:outline-none flex items-center gap-1">
+                         {link.label}
+                     </DropdownMenuTrigger>
+                     <DropdownMenuContent>
+                         <DropdownMenuItem onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Cook' })); router.push('/#services-grid'); }}>Cooks</DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Maid' })); router.push('/#services-grid'); }}>Maids</DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Elder help' })); router.push('/#services-grid'); }}>Elder Care</DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Nourish Store' })); router.push('/#services-grid'); }}>Nourish Store</DropdownMenuItem>
+                     </DropdownMenuContent>
+                 </DropdownMenu>
+            ) : (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    'text-sm font-medium text-text-muted transition-colors hover:text-text-primary',
+                    pathname === link.href && 'text-text-primary font-bold'
+                  )}
+                >
+                  {link.label}
+                </Link>
+            )
           ))}
         </nav>
         <div className="hidden md:flex items-center gap-4">
@@ -132,20 +147,46 @@ export function LandingHeader() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
+              <SheetTitle className="sr-only">Main Menu</SheetTitle>
               <div className="p-6 flex flex-col h-full">
                 <Logo />
                 <nav className="mt-8 flex flex-col gap-6">
+                   {/* MOBILE LIVE KITCHEN BANNER */}
+                   <Link href="/live" className="bg-orange-600 text-white px-4 py-3 rounded-xl flex items-center justify-between shadow-md">
+                       <div className="flex items-center gap-2">
+                          <span className="relative flex h-3 w-3">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                          </span>
+                          <span className="font-bold text-sm">Bookeato Live Kitchens</span>
+                       </div>
+                       <ArrowRight className="w-4 h-4" />
+                   </Link>
+
                   {getNavLinks(firebaseUser).map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={cn(
-                        'text-lg font-medium text-text-muted transition-colors hover:text-text-primary',
-                        pathname === link.href && 'text-text-primary font-bold'
-                      )}
-                    >
-                      {link.label}
-                    </Link>
+                     link.isDropdown ? (
+                         <div key={link.href} className="flex flex-col gap-3">
+                             <div className="text-lg font-bold text-text-primary">{link.label}</div>
+                             <div className="flex flex-col gap-2 pl-4 border-l-2 border-stone-100">
+                                 <SheetClose asChild><Button variant="link" className="justify-start p-0 h-auto text-base font-medium text-text-muted hover:text-text-primary" onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Cook' })); router.push('/#services-grid'); }}>Cooks</Button></SheetClose>
+                                 <SheetClose asChild><Button variant="link" className="justify-start p-0 h-auto text-base font-medium text-text-muted hover:text-text-primary" onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Maid' })); router.push('/#services-grid'); }}>Maids</Button></SheetClose>
+                                 <SheetClose asChild><Button variant="link" className="justify-start p-0 h-auto text-base font-medium text-text-muted hover:text-text-primary" onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Elder help' })); router.push('/#services-grid'); }}>Elder Care</Button></SheetClose>
+                                 <SheetClose asChild><Button variant="link" className="justify-start p-0 h-auto text-base font-medium text-text-muted hover:text-text-primary" onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Nourish Store' })); router.push('/#services-grid'); }}>Nourish Store</Button></SheetClose>
+                             </div>
+                         </div>
+                    ) : (
+                        <SheetClose asChild key={link.href}>
+                             <Link
+                               href={link.href}
+                               className={cn(
+                                 'text-lg font-medium text-text-muted transition-colors hover:text-text-primary',
+                                 pathname === link.href && 'text-text-primary font-bold'
+                               )}
+                             >
+                               {link.label}
+                             </Link>
+                        </SheetClose>
+                    )
                   ))}
                 </nav>
                 <div className="mt-auto border-t pt-6">
@@ -183,11 +224,13 @@ export function LandingHeader() {
                     ) : (
                         <div className="flex flex-col gap-4">
                             <Button asChild variant="secondaryCta" size="cta">
-                                <Link href="/login">Login</Link>
+                                <Link href="/login">Login / Register</Link>
                             </Button>
-                            <Button asChild variant="cta" size="cta">
-                                <Link href="/signup">Register</Link>
-                            </Button>
+                            <SheetClose asChild>
+                              <Button variant="cta" size="cta" onClick={() => router.push('/booking/cook')}>
+                                  Book Now
+                              </Button>
+                            </SheetClose>
                         </div>
                     )}
                 </div>
