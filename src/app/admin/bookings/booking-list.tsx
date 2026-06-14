@@ -59,6 +59,7 @@ function BookingRow({ booking, customer: providedCustomer }: { booking: Booking,
     const serviceTypeIcon: Record<string, React.ReactNode> = {
         'cook': <ChefHat className="h-4 w-4 text-orange-500" strokeWidth={2.5}/>,
         'maid': <Sparkles className="h-4 w-4 text-green-500" strokeWidth={2.5}/>,
+        'maid_monthly': <Sparkles className="h-4 w-4 text-green-500" strokeWidth={2.5}/>,
         'subscription': <Sparkles className="h-4 w-4 text-purple-500" strokeWidth={2.5}/>,
     }
 

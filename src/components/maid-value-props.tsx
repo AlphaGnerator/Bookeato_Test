@@ -14,15 +14,15 @@ export function MaidValueProps() {
             <div className="bg-green-primary/10 text-green-primary inline-block p-4 rounded-2xl mb-6">
               <Shield className="h-10 w-10" />
             </div>
-            <h3 className="text-xl font-bold text-text-primary mb-3">Vetted Professionals</h3>
-            <p className="text-text-secondary text-sm leading-relaxed">Every maid undergoes strict background checks and hygiene training before stepping into your home.</p>
+            <h3 className="text-xl font-bold text-text-primary mb-3">Instant Replacement</h3>
+            <p className="text-text-secondary text-sm leading-relaxed">Not happy with your assigned partner? Let us know, and we will find and deploy a replacement maid immediately, no questions asked.</p>
           </article>
           <article className="bg-white border-2 border-green-primary/20 rounded-[2rem] p-8 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
             <div className="bg-green-primary/10 text-green-primary inline-block p-4 rounded-2xl mb-6">
               <RefreshCw className="h-10 w-10" />
             </div>
-            <h3 className="text-xl font-bold text-[#0B1A2E] mb-3">Zero Disruption</h3>
-            <p className="text-sm leading-relaxed text-[#355067]">Our signature 30-day guarantee. If your regular maid takes a leave, we automatically deploy a verified backup. No follow-ups needed.</p>
+            <h3 className="text-xl font-bold text-[#0B1A2E] mb-3">No Chutti Guarantee</h3>
+            <p className="text-sm leading-relaxed text-[#355067]">Disruption-free service for all 30 days. No leaves or unplanned delays—if your primary maid is absent, we automatically deploy a verified backup.</p>
           </article>
           <article className="bg-white border-2 border-green-primary/20 rounded-[2rem] p-8 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
             <div className="bg-green-primary/10 text-green-primary inline-block p-4 rounded-2xl mb-6">

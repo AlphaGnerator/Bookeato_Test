@@ -43,10 +43,11 @@ const maidPricingPlans = [
     period: "/ month",
     tagline: "For households that never want to manage a maid again.",
     features: [
-      "30-Day Service Guarantee (excluding public holidays)",
+      "No Chutti: Maid comes all 30 days of the month",
       "Zero Disruption: Automatic backup replacement",
+      "No Questions Asked Replacements if unsatisfied",
       "Covers Deep Sweeping, Mopping & Utensils",
-      "Dedicated Support Manager",
+      "Dedicated Support Manager & Support",
     ],
     cta: "Go Monthly",
     plan: "monthly",
