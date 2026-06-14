@@ -4,10 +4,10 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { format, parseISO, addDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { useCulinaryStore, type DraftBookingItem } from '@/hooks/use-culinary-store';
+import { useCulinaryStore } from '@/hooks/use-culinary-store';
 import { useToast } from '@/hooks/use-toast';
 import { Flame, AlertTriangle, ChefHat, Beef, Clock, ArrowLeft, Minus, Plus, Search, Filter, X, Wrench } from 'lucide-react';
-import type { Dish } from '@/lib/types';
+import type { Dish, DraftBookingItem } from '@/lib/types';
 import Image from 'next/image';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -325,20 +325,23 @@ export function MenuSelector() {
     }
     
     const handleConfirm = () => {
-        const items: DraftBookingItem[] = Object.entries(itemPortions)
-            .map(([dishId, numberOfPortions]) => {
+        const items = Object.entries(itemPortions)
+            .map(([dishId, numberOfPortions]): DraftBookingItem | null => {
                 const dish = dishes.find(d => d.id === dishId);
                 if (!dish) return null;
                  const sides = sideSelections[dishId];
                 const notes: string[] = [];
                 if (sides?.rice && sides.rice !== 'none') notes.push(`Rice for ${sides.rice}`);
                 if (sides?.roti > 0) notes.push(`Roti x${sides.roti}`);
-                return {
+                const item: DraftBookingItem = {
                     dishId,
                     dishName: dish.displayName_en,
                     numberOfPortions,
-                    notes: notes.join(', ') || undefined,
+                };
+                if (notes.length > 0) {
+                    item.notes = notes.join(', ');
                 }
+                return item;
             })
             .filter((item): item is DraftBookingItem => item !== null);
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { MaidSmartEstimator } from '@/components/maid-smart-estimator';
 import { MaidCheckoutDetails } from '@/components/maid-checkout-details';
 import { MaidCheckoutSchedule } from '@/components/maid-checkout-schedule';
@@ -25,6 +25,10 @@ export default function MaidBookingWizard() {
   const { user, isInitialized } = useCulinaryStore();
   const [step, setStep] = useState(1);
 
+  const plugin = React.useRef(
+    Autoplay({ delay: 5000, stopOnInteraction: true })
+  );
+
   if (!isInitialized) {
     return <LoadingState fullPage message="Loading service details..." />;
   }
@@ -32,16 +36,12 @@ export default function MaidBookingWizard() {
   const handleEstimatorNext = () => {
     // If user is logged in and has all required details, skip to step 3 (Schedule)
     const hasProfileDetails = (user.contactNumber || user.email) && user.pincode && user.address;
-    if (isInitialized && user.id !== 'guest' && hasProfileDetails) {
+    if (isInitialized && user.id && user.id !== 'guest' && hasProfileDetails) {
       setStep(3); 
     } else {
       setStep(2); // Go to Details for guests or incomplete profiles
     }
   };
-
-  const plugin = React.useRef(
-    Autoplay({ delay: 5000, stopOnInteraction: true })
-  );
 
   const slides = [
     {
@@ -115,7 +115,9 @@ export default function MaidBookingWizard() {
 
       <div className="container mx-auto px-4 lg:px-6 max-w-4xl">
         {step === 1 && (
-          <MaidSmartEstimator onNext={handleEstimatorNext} onBack={() => router.back()} />
+          <Suspense fallback={<LoadingState message="Loading estimator..." />}>
+            <MaidSmartEstimator onNext={handleEstimatorNext} onBack={() => router.back()} />
+          </Suspense>
         )}
         {step === 2 && (
           <MaidCheckoutDetails onBack={() => setStep(1)} onNext={() => setStep(3)} />

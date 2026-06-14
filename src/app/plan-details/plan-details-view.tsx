@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Sparkles, BadgePercent, Calendar, XCircle, Users, Utensils, Check, IndianRupee, Hash, Leaf, Ban, RefreshCcw, Loader2, Hourglass, Edit, PlusCircle, ArrowLeft, BarChart3 } from 'lucide-react';
+import { Sparkles, BadgePercent, Calendar, XCircle, Users, Utensils, Check, IndianRupee, Hash, Leaf, Ban, RefreshCcw, Loader2, Hourglass, Edit, PlusCircle, ArrowLeft, BarChart3, BadgeCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { parseISO, format, isFuture } from 'date-fns';

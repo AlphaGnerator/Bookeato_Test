@@ -19,18 +19,6 @@ export default function LoginPage() {
             </CardHeader>
             <CardContent>
               <LoginForm />
-              <p className="text-center text-sm text-muted-foreground mt-6">
-                  Don&apos;t have an account?{' '}
-                  <Link href="/signup" className="text-primary hover:underline">
-                      Sign up
-                  </Link>
-              </p>
-               <p className="text-center text-sm text-muted-foreground mt-4">
-                  Are you a cook?{' '}
-                  <Link href="/cook/login" className="text-accent-foreground hover:underline">
-                      Go to Cook Portal
-                  </Link>
-              </p>
             </CardContent>
           </Card>
         </div>

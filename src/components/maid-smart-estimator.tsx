@@ -1,10 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Minus, Plus, Check, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useSearchParams } from 'next/navigation';
 
 export function MaidSmartEstimator({ onNext, onBack }: { onNext?: () => void, onBack?: () => void }) {
+  const searchParams = useSearchParams();
+  const hoursParam = searchParams.get('hours');
+  const planParam = searchParams.get('plan');
+
   const [homeSize, setHomeSize] = useState('2 BHK');
   const [occupants, setOccupants] = useState('1-2 People');
   
@@ -15,49 +20,99 @@ export function MaidSmartEstimator({ onNext, onBack }: { onNext?: () => void, on
     laundry: false,
     misc: false,
   });
+
+
+  useEffect(() => {
+    if (planParam === 'monthly') {
+      setChores({
+        sweeping: true,
+        utensils: true,
+        bathroom: false,
+        laundry: false,
+        misc: false,
+      });
+    } else if (hoursParam === '0.5') {
+      setChores({
+        sweeping: false,
+        utensils: true,
+        bathroom: false,
+        laundry: false,
+        misc: false,
+      });
+    } else if (hoursParam === '1.0') {
+      setChores({
+        sweeping: true,
+        utensils: true,
+        bathroom: false,
+        laundry: false,
+        misc: false,
+      });
+    }
+  }, [hoursParam, planParam]);
   
   const [miscTime, setMiscTime] = useState(30);
 
   const [bathrooms, setBathrooms] = useState(1);
 
-  // multipliers based on inputs
-  const homeSizeMultiplier = homeSize === '1 BHK' ? 0 : homeSize === '2 BHK' ? 1 : homeSize === '3 BHK' ? 2 : 3;
-  const occupantsMultiplier = occupants === '1-2 People' ? 0 : occupants === '3-4 People' ? 1 : 2;
 
   // dynamic chore times (in minutes)
-  const sweepingTime = 20 + (homeSizeMultiplier * 10);
-  const utensilsTime = 15 + (occupantsMultiplier * 15);
-  const bathroomTime = bathrooms * 15; // static 15m * bathroom count
-  const laundryTime = 15 + (occupantsMultiplier * 15);
+  const sweepingTime = chores.sweeping ? (homeSize === '1 BHK' ? 20 : homeSize === '2 BHK' ? 30 : homeSize === '3 BHK' ? 40 : 50) : 0;
+  const utensilsTime = chores.utensils ? (occupants === '1-2 People' ? 15 : occupants === '3-4 People' ? 30 : 45) : 0;
+  const bathroomTime = chores.bathroom ? bathrooms * 15 : 0;
+  const laundryTime = chores.laundry ? (occupants === '1-2 People' ? 15 : occupants === '3-4 People' ? 30 : 45) : 0;
+  const miscChoreTime = chores.misc ? (planParam === 'monthly' ? 15 : miscTime) : 0;
 
-  const totalTime = 
-    (chores.sweeping ? sweepingTime : 0) +
-    (chores.utensils ? utensilsTime : 0) +
-    (chores.bathroom ? bathroomTime : 0) +
-    (chores.laundry ? laundryTime : 0) +
-    (chores.misc ? miscTime : 0);
+  const totalRecommendedMinutes = sweepingTime + utensilsTime + bathroomTime + laundryTime + miscChoreTime;
+  const recommendedHours = totalRecommendedMinutes / 60;
+
+
+  const calculateMonthlyPrice = (hours: number) => {
+    const sweepingBase = chores.sweeping ? (homeSize === '1 BHK' ? 1200 : homeSize === '2 BHK' ? 1800 : homeSize === '3 BHK' ? 2400 : 3000) : 0;
+    const utensilsBase = chores.utensils ? (occupants === '1-2 People' ? 700 : occupants === '3-4 People' ? 1400 : 2100) : 0;
+    const bathroomBase = chores.bathroom ? bathrooms * 500 : 0;
+    const laundryBase = chores.laundry ? (occupants === '1-2 People' ? 800 : occupants === '3-4 People' ? 1500 : 2200) : 0;
+    const miscBase = chores.misc ? 500 : 0;
+
+    const totalBaseCost = sweepingBase + utensilsBase + bathroomBase + laundryBase + miscBase;
+
+    let adjustedBase = totalBaseCost;
+    if (recommendedHours > 0) {
+      adjustedBase = totalBaseCost * (hours / recommendedHours);
+    }
+
+    const backupCost = totalBaseCost > 0 ? 800 : 0;
+    const finalPrice = Math.round((adjustedBase + backupCost) * 1.2);
+
+    return { finalPrice };
+  };
+
+  const totalTime = planParam === 'monthly' ? recommendedHours * 60 : totalRecommendedMinutes;
 
   // tier mapping for sticky bottom cart
   let slotLabel = 'Select Chores';
   let slotPrice = '₹0';
   let slotReady = false;
 
-  if (totalTime > 0) {
+  if (totalRecommendedMinutes > 0) {
     slotReady = true;
-    if (totalTime <= 30) {
+    if (planParam === 'monthly') {
+      const { finalPrice } = calculateMonthlyPrice(recommendedHours);
+      const hrsDisplay = recommendedHours % 1 === 0 ? recommendedHours.toFixed(0) : recommendedHours.toFixed(2);
+      slotLabel = `Monthly Plan — ${hrsDisplay} Hrs/day`;
+      slotPrice = `₹${finalPrice.toLocaleString('en-IN')}/mo`;
+    } else if (totalRecommendedMinutes <= 30) {
       slotLabel = '30 Min Slot';
       slotPrice = '₹100';
-    } else if (totalTime <= 60) {
+    } else if (totalRecommendedMinutes <= 60) {
       slotLabel = '1 Hour Slot';
       slotPrice = '₹200';
-    } else if (totalTime <= 90) {
+    } else if (totalRecommendedMinutes <= 90) {
       slotLabel = '1.5 Hour Slot';
       slotPrice = '₹300';
     } else {
-      // Dynamic fallback for highly customized loads (e.g. 2+ Hour Slot)
-      const hours = Math.ceil(totalTime / 30) * 0.5;
+      const hours = Math.ceil(totalRecommendedMinutes / 30) * 0.5;
       slotLabel = `${hours} Hour Slot`;
-      slotPrice = `₹${hours * 200}`; // Scaled price logic
+      slotPrice = `₹${hours * 200}`;
     }
   }
 
@@ -99,11 +154,17 @@ export function MaidSmartEstimator({ onNext, onBack }: { onNext?: () => void, on
           return { choreName, estimatedTime };
         });
 
+      const isMonthly = planParam === 'monthly';
+      const { finalPrice } = calculateMonthlyPrice(recommendedHours);
+
       localStorage.setItem('bookeato_maid_estimate', JSON.stringify({
-        totalTime,
+        totalTime: isMonthly ? recommendedHours * 60 : totalRecommendedMinutes,
         slotLabel,
-        price: slotPrice,
-        chores: selectedChores
+        price: isMonthly ? `₹${finalPrice.toLocaleString('en-IN')}/mo` : slotPrice,
+        chores: selectedChores,
+        isMonthly,
+        bookedHours: isMonthly ? recommendedHours : null,
+        recommendedHours: isMonthly ? recommendedHours : null,
       }));
       if (onNext) onNext();
     }
@@ -303,6 +364,69 @@ export function MaidSmartEstimator({ onNext, onBack }: { onNext?: () => void, on
         </div>
       </div>
 
+      {/* 3. Monthly Service Plan Customization */}
+      {planParam === 'monthly' && (
+        <>
+          <hr className="border-stone-100 mx-6 sm:mx-8" />
+          <div className="px-6 sm:px-8 py-2 space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold text-stone-900">Subscription Duration</h3>
+              <span className="text-[10px] bg-emerald-100 text-emerald-800 font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                Fixed Allocation
+              </span>
+            </div>
+            
+            <div className="bg-stone-50 rounded-2xl p-5 border border-stone-100 space-y-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-bold text-stone-500 uppercase tracking-wide">Daily Time Required:</span>
+                <span className="font-black text-stone-900 text-lg">
+                  {recommendedHours % 1 === 0 ? recommendedHours.toFixed(0) : recommendedHours.toFixed(2)} Hrs / day
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {chores.sweeping && (
+                  <div className="bg-white border border-stone-100 rounded-xl px-3 py-2 flex justify-between items-center">
+                    <span className="text-stone-500 font-medium">Sweep & Mop</span>
+                    <span className="font-black text-stone-900">{sweepingTime}m</span>
+                  </div>
+                )}
+                {chores.utensils && (
+                  <div className="bg-white border border-stone-100 rounded-xl px-3 py-2 flex justify-between items-center">
+                    <span className="text-stone-500 font-medium">Utensils</span>
+                    <span className="font-black text-stone-900">{utensilsTime}m</span>
+                  </div>
+                )}
+                {chores.bathroom && (
+                  <div className="bg-white border border-stone-100 rounded-xl px-3 py-2 flex justify-between items-center">
+                    <span className="text-stone-500 font-medium">Bathroom</span>
+                    <span className="font-black text-stone-900">{bathroomTime}m</span>
+                  </div>
+                )}
+                {chores.laundry && (
+                  <div className="bg-white border border-stone-100 rounded-xl px-3 py-2 flex justify-between items-center">
+                    <span className="text-stone-500 font-medium">Laundry</span>
+                    <span className="font-black text-stone-900">{laundryTime}m</span>
+                  </div>
+                )}
+                {chores.misc && (
+                  <div className="bg-white border border-stone-100 rounded-xl px-3 py-2 flex justify-between items-center">
+                    <span className="text-stone-500 font-medium">Miscellaneous</span>
+                    <span className="font-black text-stone-900">{miscChoreTime}m</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="bg-emerald-50 border border-emerald-100 text-emerald-800 p-3 rounded-xl text-xs flex items-center gap-2 font-medium">
+                <span className="text-lg">✓</span>
+                <span><strong>Auto-optimized hours.</strong> Time is computed from your chores — no guesswork.</span>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      
       {/* 4. Bottom Section: The Dynamic Pricing Cart */}
       <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-stone-100 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] p-4 sm:px-6 py-5 flex items-center justify-end z-10 transition-transform">
         <div className="flex items-center gap-4 sm:gap-6">

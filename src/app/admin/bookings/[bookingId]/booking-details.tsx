@@ -51,7 +51,7 @@ function DishDetails({ dishId, dishName: providedName, portions, type }: { dishI
     }
     
     const dishName = dish?.displayName_en || providedName || 'Unknown Item';
-    const isMaid = type === 'maid';
+    const isMaid = type?.startsWith('maid');
 
     return (
         <div className="flex gap-4 border p-4 rounded-2xl bg-white shadow-sm border-stone-100">
@@ -178,14 +178,15 @@ export function BookingDetails({ bookingId }: { bookingId: string }) {
   
   const totalCookTime = booking.items.reduce((acc, item) => {
     const dish = allDishes?.find(d => d.id === item.dishId);
-    return acc + (dish?.totalCookTimeMinutes || 0) * item.numberOfPortions;
+    return acc + (dish?.totalCookTimeMinutes || 0) * (item.numberOfPortions || 0);
   }, 0);
-  const totalPortions = booking.items.reduce((acc, item) => acc + item.numberOfPortions, 0);
+  const totalPortions = booking.items.reduce((acc, item) => acc + (item.numberOfPortions || 0), 0);
 
     const statusVariant = {
         pending: 'accent',
         confirmed: 'default',
         completed: 'default',
+        delivered: 'default',
         in_progress: 'default',
         cancelled: 'destructive'
     } as const;
@@ -195,6 +196,7 @@ export function BookingDetails({ bookingId }: { bookingId: string }) {
       confirmed: <CheckCircle className="mr-2 h-4 w-4"/>,
       in_progress: <Timer className="mr-2 h-4 w-4 animate-pulse" />,
       completed: <CheckCircle className="mr-2 h-4 w-4" />,
+      delivered: <CheckCircle className="mr-2 h-4 w-4" />,
       cancelled: <AlertTriangle className="mr-2 h-4 w-4"/>
   }
 
@@ -223,19 +225,25 @@ export function BookingDetails({ bookingId }: { bookingId: string }) {
                 </CardHeader>
                 <CardContent className="pt-2">
                     <div className="flex items-center gap-3 mb-6 p-4 bg-stone-50 rounded-2xl border border-stone-100">
-                        {booking.type === 'maid' ? (
+                        {booking.type?.startsWith('maid') ? (
                             <div className="bg-green-100 p-2.5 rounded-full text-green-600"><Sparkles className="w-6 h-6" strokeWidth={2.5}/></div>
                         ) : (
                             <div className="bg-orange-100 p-2.5 rounded-full text-orange-600"><ChefHat className="w-6 h-6" /></div>
                         )}
                         <div>
                             <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 leading-none mb-1">Service Type</p>
-                            <p className="font-bold text-stone-900">{booking.type === 'maid' ? 'Maid & Cleaning' : 'Private Chef Session'}</p>
+                            <p className="font-bold text-stone-900">
+                                {booking.type === 'maid_monthly' 
+                                    ? 'Maid - Monthly Plan' 
+                                    : booking.type === 'maid' 
+                                    ? 'Maid & Cleaning' 
+                                    : 'Private Chef Session'}
+                            </p>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-sm">
                         <div className="space-y-1">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Total {booking.type === 'maid' ? 'Chores' : 'Dishes'}</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Total {booking.type?.startsWith('maid') ? 'Chores' : 'Dishes'}</p>
                             <p className="font-bold text-stone-900 flex items-center gap-2"><Utensils className="h-4 w-4 text-stone-300" /> {booking.items.length}</p>
                         </div>
                         <div className="space-y-1">
@@ -255,7 +263,7 @@ export function BookingDetails({ bookingId }: { bookingId: string }) {
             </Card>
 
             {booking.status === 'pending' && (
-                booking.type === 'maid' ? (
+                booking.type?.startsWith('maid') ? (
                     <AssignMaid bookingId={booking.id} customerId={booking.customerId} bookingDate={booking.bookingDate} bookingTime={booking.time} />
                 ) : (
                     <AssignCook bookingId={booking.id} customerId={booking.customerId} bookingDate={booking.bookingDate} bookingTime={booking.time} />
@@ -265,7 +273,7 @@ export function BookingDetails({ bookingId }: { bookingId: string }) {
             <Card className="rounded-[2rem] border-stone-100 shadow-sm overflow-hidden bg-stone-50/30">
                 <CardHeader className="px-8 pt-8">
                     <CardTitle className="text-xl font-black text-stone-900 tracking-tight">
-                        {booking.type === 'maid' ? 'Service Checklist' : 'Ordered Dishes'}
+                        {booking.type?.startsWith('maid') ? 'Service Checklist' : 'Ordered Dishes'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 px-8 pb-8">
@@ -274,8 +282,8 @@ export function BookingDetails({ bookingId }: { bookingId: string }) {
                          key={item.dishId || `item-${idx}`} 
                          dishId={item.dishId} 
                          dishName={item.dishName} 
-                         portions={item.numberOfPortions} 
-                         type={booking.type}
+                         portions={item.numberOfPortions || 1} 
+                         type={booking.type?.startsWith('maid') ? 'maid' : 'cook'}
                        />
                     ))}
                 </CardContent>

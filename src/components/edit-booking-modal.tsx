@@ -37,7 +37,7 @@ export function EditBookingModal({ isOpen, onClose, selectedBooking }: EditBooki
 
   useEffect(() => {
     // Delta Calculator Logic
-    if (selectedBooking.type === 'maid') {
+    if (selectedBooking.type?.startsWith('maid')) {
        let calculatedNew = 100; // Hardcoded base visit fee proxy
        editedItems.forEach(item => {
            calculatedNew += (CHORE_PRICES[item] || 0);
@@ -114,8 +114,8 @@ export function EditBookingModal({ isOpen, onClose, selectedBooking }: EditBooki
       <DialogContent className="sm:max-w-md rounded-[2.5rem] p-6 sm:p-8 bg-white overflow-hidden shadow-2xl border-none">
         <DialogHeader className="mb-2">
           <div className="flex items-start gap-4 mb-2">
-             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border ${selectedBooking.type === 'cook' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
-                {selectedBooking.type === 'cook' ? <ChefHat className="w-7 h-7" strokeWidth={2}/> : <Sparkles className="w-7 h-7" strokeWidth={2.5}/>}
+             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border ${selectedBooking.type?.startsWith('maid') ? 'bg-green-50 text-green-600 border-green-100' : 'bg-orange-50 text-orange-600 border-orange-100'}`}>
+                {selectedBooking.type?.startsWith('maid') ? <Sparkles className="w-7 h-7" strokeWidth={2.5}/> : <ChefHat className="w-7 h-7" strokeWidth={2}/>}
              </div>
              <div>
                  <DialogTitle className="text-2xl font-black text-stone-900 leading-tight tracking-tight">Edit Order</DialogTitle>
@@ -124,7 +124,7 @@ export function EditBookingModal({ isOpen, onClose, selectedBooking }: EditBooki
           </div>
         </DialogHeader>
 
-        {selectedBooking.type === 'cook' ? renderCookUI() : renderMaidUI()}
+        {selectedBooking.type?.startsWith('maid') ? renderMaidUI() : renderCookUI()}
 
         <DialogFooter className="bg-stone-50 -mx-6 sm:-mx-8 -mb-6 sm:-mb-8 p-6 sm:p-8 mt-4 border-t border-stone-200/60 flex-col gap-4">
           

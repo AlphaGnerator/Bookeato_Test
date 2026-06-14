@@ -28,7 +28,6 @@ const customerNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiresAuth: true },
   { href: '/pricing', label: 'New Booking', icon: CalendarDays, requiresAuth: true },
   { href: '/order-history', label: 'Order History', icon: List, requiresAuth: true },
-  { href: '/recommendations', label: 'AI Recommendations', icon: Sparkles, requiresAuth: true },
   { href: '/wallet', label: 'My Wallet', icon: Wallet, requiresAuth: true },
   { href: '/profile', label: 'My Profile', icon: User, requiresAuth: true },
 ];

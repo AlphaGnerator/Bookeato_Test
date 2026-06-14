@@ -138,7 +138,7 @@ export function LoginForm() {
             address: 'Demo Address, Culinary City',
             status: 'approved',
         };
-        setDocumentNonBlocking(cookDocRef, demoCookProfile);
+        setDocumentNonBlocking(cookDocRef, demoCookProfile, {});
       }
       
       toast({
@@ -163,7 +163,7 @@ export function LoginForm() {
                     status: 'approved',
                 };
                 const cookDocRef = doc(firestore, 'cooks', user.uid);
-                setDocumentNonBlocking(cookDocRef, demoCookProfile);
+                setDocumentNonBlocking(cookDocRef, demoCookProfile, {});
                 toast({
                     title: 'Demo Account Created!',
                     description: 'Logging you in as Demo Cook.',

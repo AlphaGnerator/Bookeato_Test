@@ -17,10 +17,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc } from 'firebase/firestore';
+import { doc, collection, addDoc } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Textarea } from '@/components/ui/textarea';
 import type { UserProfile } from '@/lib/types';
 import { useCulinaryStore } from '@/hooks/use-culinary-store';
@@ -38,6 +39,7 @@ export function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const { guestConfig } = useCulinaryStore();
   const [isLoading, setIsLoading] = useState(false);
@@ -57,17 +59,44 @@ export function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
   useEffect(() => {
     // 1. Try resolving from Maid Booking Handoff
     const pendingBookingRaw = typeof window !== 'undefined' ? localStorage.getItem('bookeato_pending_maid_booking') : null;
+    const step2Raw = typeof window !== 'undefined' ? localStorage.getItem('bookeato_maid_checkout_step2') : null;
+    
+    let resolvedAddress = '';
+    let resolvedPincode = '';
+
     if (pendingBookingRaw) {
       try {
         const bookingData = JSON.parse(pendingBookingRaw);
-        if (bookingData.address) form.setValue('address', bookingData.address);
-        if (bookingData.pincode) form.setValue('pincode', bookingData.pincode);
-        // We skip phone here as the base Auth schema uses email/pass, 
-        // but the address is fully mapped!
-        return; // Prioritize maid booking details if they exist
+        resolvedAddress = bookingData.address || bookingData.customerAddress || '';
+        resolvedPincode = bookingData.pincode || '';
       } catch (e) {
         console.error("Failed to parse maid booking data", e);
       }
+    }
+
+    if (step2Raw) {
+      try {
+        const step2Data = JSON.parse(step2Raw);
+        if (!resolvedAddress) {
+          if (step2Data.flat && step2Data.society) {
+            resolvedAddress = `${step2Data.flat}, ${step2Data.society}`;
+          } else if (step2Data.society) {
+            resolvedAddress = step2Data.society;
+          }
+        }
+        if (!resolvedPincode && step2Data.pincode) {
+          resolvedPincode = step2Data.pincode;
+        }
+      } catch (e) {
+        console.error("Failed to parse step 2 data", e);
+      }
+    }
+
+    if (resolvedAddress) form.setValue('address', resolvedAddress);
+    if (resolvedPincode) form.setValue('pincode', resolvedPincode);
+
+    if (resolvedAddress || resolvedPincode) {
+      return; // Prioritize maid booking details if they exist
     }
 
     // 2. Fallback to default Culinary Cook Guest Config
@@ -82,7 +111,25 @@ export function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
     }
   }, [guestConfig, form]);
 
-  const handleSuccess = () => {
+  const handleSuccess = async (newUserId: string) => {
+    // 1. Sync guest pending booking if exists
+    const pendingBookingRaw = localStorage.getItem('bookeato_pending_maid_booking');
+    if (pendingBookingRaw && firestore) {
+      try {
+        const payload = JSON.parse(pendingBookingRaw);
+        payload.customerId = newUserId;
+        const bookingsRef = collection(firestore, 'customers', newUserId, 'bookings');
+        await addDoc(bookingsRef, payload);
+        localStorage.removeItem('bookeato_pending_maid_booking');
+        toast({
+          title: "Booking Saved!",
+          description: "Your maid booking details have been successfully saved to your new account.",
+        });
+      } catch (e) {
+        console.error("Failed to sync pending booking on signup", e);
+      }
+    }
+
     if (onSuccess) {
       onSuccess();
     } else {
@@ -146,9 +193,9 @@ export function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
 
         toast({
           title: 'Account Created!',
-          description: 'Welcome! You can now log in.',
+          description: 'Welcome to Bookeato!',
         });
-        handleSuccess();
+        await handleSuccess(user.uid);
       }
     } catch (error: any) {
       console.error('Sign up failed', error);
@@ -234,6 +281,12 @@ export function SignUpForm({ onSuccess }: { onSuccess?: () => void }) {
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Create Account
         </Button>
+        <p className="text-center text-sm text-stone-500 mt-4">
+            Already have an account?{' '}
+            <Link href={`/login${searchParams.toString() ? `?${searchParams.toString()}` : ''}`} className="text-primary hover:underline font-bold">
+                Log in
+            </Link>
+        </p>
       </form>
     </Form>
   );

@@ -47,7 +47,7 @@ export function ImageLibraryManager() {
     return null;
   }, [firestore]);
 
-  const { data: images, isLoading, error, refetch: refetchImages } = useCollection<UploadedImage>(imagesCollectionRef);
+  const { data: images, isLoading, error } = useCollection<UploadedImage>(imagesCollectionRef);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -121,7 +121,6 @@ export function ImageLibraryManager() {
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
-        refetchImages();
 
     } catch (e: any) {
         console.error("Upload or Firestore write failed:", e);
@@ -141,7 +140,6 @@ export function ImageLibraryManager() {
     if (!firestore) return;
     deleteDocumentNonBlocking(doc(firestore, 'uploadedImages', id));
     toast({ title: 'Image Removed', description: 'The image has been removed from your library.', variant: 'destructive' });
-    refetchImages();
   };
   
   const handleCopyUrl = (url: string) => {
@@ -182,7 +180,6 @@ export function ImageLibraryManager() {
         });
 
         toast({ title: 'Test Upload Successful!', description: 'A test image was successfully uploaded and added to the library.' });
-        refetchImages();
 
     } catch (e: any) {
         console.error("Test upload failed:", e);

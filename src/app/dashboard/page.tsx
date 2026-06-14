@@ -35,7 +35,8 @@ import {
     CarouselContent, 
     CarouselItem, 
     CarouselNext, 
-    CarouselPrevious 
+    CarouselPrevious,
+    type CarouselApi
 } from "@/components/ui/carousel";
 import { format, isSameDay, addDays } from 'date-fns';
 import Link from 'next/link';
@@ -232,7 +233,7 @@ function ServiceIcon({ iconSrc, label, color, href, onClick, badge }: { iconSrc:
 }
 
 function LiveTaskCard({ booking }: { booking: any }) {
-    const isMaid = booking.type === 'maid';
+    const isMaid = booking.type?.startsWith('maid');
     const isConfirmed = booking.status === 'confirmed';
     const isInProgress = booking.status === 'in_progress';
 
@@ -376,7 +377,7 @@ export default function DashboardPage() {
 
                 {/* Hero Carousel */}
                 <div className="w-full">
-                    <HeroCarousel onNavigate={() => setIsNavigating(true)} />
+                    <HeroCarousel />
                 </div>
 
                 {/* Services Grid (Bookeato categories) */}

@@ -19,6 +19,7 @@ const demoCooks: CookProfile[] = [
         contactNumber: 'N/A',
         address: 'N/A',
         pincode: 'N/A',
+        status: 'approved',
     },
     {
         id: 'demo-2',
@@ -29,6 +30,7 @@ const demoCooks: CookProfile[] = [
         contactNumber: 'N/A',
         address: 'N/A',
         pincode: 'N/A',
+        status: 'approved',
     },
     {
         id: 'demo-3',
@@ -39,6 +41,7 @@ const demoCooks: CookProfile[] = [
         contactNumber: 'N/A',
         address: 'N/A',
         pincode: 'N/A',
+        status: 'approved',
     }
 ];
 

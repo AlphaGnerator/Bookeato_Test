@@ -85,7 +85,7 @@ export type Booking = {
     }[];
     status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'delivered' | 'in_progress';
     totalCost: number;
-    type?: 'cook' | 'maid' | 'subscription';
+    type?: 'cook' | 'maid' | 'maid_monthly' | 'subscription';
     service?: string;
     notes?: string; // For special requests like expert curation
     otp?: string; // 4-digit OTP for task verification

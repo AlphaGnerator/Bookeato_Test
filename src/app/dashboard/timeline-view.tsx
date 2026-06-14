@@ -100,9 +100,9 @@ export function TimelineView() {
                 case 'booked':
                   return (
                     <div className="text-xs font-semibold text-green-700 truncate">
-                      {bookingForDay.items.length > 1
+                      {bookingForDay && bookingForDay.items.length > 1
                         ? `${bookingForDay.items.length} dishes`
-                        : bookingForDay.items[0]?.dishName || 'Booked'}
+                        : bookingForDay?.items?.[0]?.dishName || 'Booked'}
                     </div>
                   );
                 case 'open_slot':

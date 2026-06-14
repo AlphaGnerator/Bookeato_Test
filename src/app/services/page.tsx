@@ -90,7 +90,6 @@ export default function ServicesPage() {
                             description="Pure Homemade Food" 
                             href="/booking/menu"
                             color="bg-orange-100 text-orange-600"
-                            imageSrc="/images/chef_service.png"
                         />
                         <ServiceBlock 
                             icon={Sparkles} 
@@ -98,7 +97,6 @@ export default function ServicesPage() {
                             description="Deep clean or Daily" 
                             href="/booking/maid"
                             color="bg-green-100 text-green-600"
-                            imageSrc="/images/maid_service.png"
                         />
                     </div>
                 </div>

@@ -116,7 +116,7 @@ export function BookingDetailsModal({ booking, open, onOpenChange }: BookingDeta
                         <div className="flex justify-between items-start">
                            <div className="space-y-1">
                                 <h2 className="text-2xl font-black text-stone-900 tracking-tight">
-                                    {booking.service || (booking.type === 'maid' ? 'Maid' : 'Cook') + ' Service'}
+                                    {booking.service || (booking.type?.startsWith('maid') ? 'Maid' : 'Cook') + ' Service'}
                                 </h2>
                                 <p className="text-orange-500 font-black uppercase tracking-widest text-[10px] flex items-center gap-1.5">
                                     <BadgeCheck className="w-3.5 h-3.5" />

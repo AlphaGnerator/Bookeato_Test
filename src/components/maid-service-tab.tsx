@@ -1,8 +1,11 @@
-import React from 'react';
-import { X, Clock, CheckCircle2, Calendar } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Clock, CheckCircle2, Calendar, Check } from 'lucide-react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 export function MaidServiceTab() {
+  const [selectedPlan, setSelectedPlan] = useState<'half_hour' | 'one_hour' | 'monthly'>('one_hour');
+
   return (
     <div className="w-full max-w-5xl mx-auto flex flex-col gap-12 py-8 px-4 sm:px-6 lg:px-8 bg-white text-stone-800">
       {/* 1. Section Header */}
@@ -24,7 +27,7 @@ export function MaidServiceTab() {
           },
           {
             title: 'Utensils & Kitchen',
-            img: 'https://images.unsplash.com/photo-1621255551351-4d4007ee2335?q=80&w=400&h=300&auto=format&fit=crop', // dishes
+            img: '/images/utensils_kitchen.png', // dishes
           },
           {
             title: 'Bathroom Sanitization',
@@ -32,7 +35,7 @@ export function MaidServiceTab() {
           },
           {
             title: 'Laundry & Ironing',
-            img: 'https://images.unsplash.com/photo-1545173168-9f1947eebb7f?q=80&w=400&h=300&auto=format&fit=crop', // laundry
+            img: '/images/maid_laundry.png', // laundry
           },
         ].map((service, idx) => (
           <div key={idx} className="flex flex-col group overflow-hidden rounded-2xl bg-stone-50 border border-stone-100 transition-all hover:shadow-md">
@@ -58,9 +61,21 @@ export function MaidServiceTab() {
           <h3 className="text-2xl font-bold text-stone-900">How much time should I book?</h3>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-stone-100 flex items-start gap-4 transition-all hover:border-green-200">
-            <div className="bg-green-100 text-green-600 p-2.5 rounded-full shrink-0">
-              <Clock className="w-5 h-5" />
+          {/* Card 1: 0.5 Hrs */}
+          <button
+            onClick={() => setSelectedPlan('half_hour')}
+            className={cn(
+              "text-left bg-white rounded-2xl p-5 shadow-sm border flex items-start gap-4 transition-all hover:border-orange-300 w-full active:scale-[0.98] outline-none",
+              selectedPlan === 'half_hour' 
+                ? "border-orange-500 ring-2 ring-orange-500/20 shadow-md bg-orange-50/10" 
+                : "border-stone-100"
+            )}
+          >
+            <div className={cn(
+              "p-2.5 rounded-full shrink-0 transition-colors",
+              selectedPlan === 'half_hour' ? "bg-orange-500 text-white shadow-lg shadow-orange-500/30" : "bg-green-100 text-green-600"
+            )}>
+              {selectedPlan === 'half_hour' ? <Check className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
             </div>
             <div>
               <h4 className="font-bold text-stone-900 text-lg flex items-center gap-2">
@@ -71,11 +86,23 @@ export function MaidServiceTab() {
                 Perfect for a quick sink of utensils <strong className="font-semibold text-stone-800">OR</strong> a basic floor sweep & mop.
               </p>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-stone-100 flex items-start gap-4 transition-all hover:border-green-200">
-            <div className="bg-green-100 text-green-600 p-2.5 rounded-full shrink-0">
-              <Clock className="w-5 h-5" />
+          {/* Card 2: 1.0 Hrs */}
+          <button
+            onClick={() => setSelectedPlan('one_hour')}
+            className={cn(
+              "text-left bg-white rounded-2xl p-5 shadow-sm border flex items-start gap-4 transition-all hover:border-orange-300 w-full active:scale-[0.98] outline-none",
+              selectedPlan === 'one_hour' 
+                ? "border-orange-500 ring-2 ring-orange-500/20 shadow-md bg-orange-50/10" 
+                : "border-stone-100"
+            )}
+          >
+            <div className={cn(
+              "p-2.5 rounded-full shrink-0 transition-colors",
+              selectedPlan === 'one_hour' ? "bg-orange-500 text-white shadow-lg shadow-orange-500/30" : "bg-green-100 text-green-600"
+            )}>
+              {selectedPlan === 'one_hour' ? <Check className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
             </div>
             <div>
               <h4 className="font-bold text-stone-900 text-lg flex items-center gap-2">
@@ -86,22 +113,34 @@ export function MaidServiceTab() {
                 The standard daily reset (Floors + Utensils + Surface wipe).
               </p>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-stone-100 flex items-start gap-4 ring-1 ring-orange-500 ring-offset-2 ring-offset-orange-50">
-            <div className="bg-orange-500 text-white p-2.5 rounded-full shrink-0 shadow-lg shadow-orange-500/30">
-              <Calendar className="w-5 h-5" />
+          {/* Card 3: Monthly */}
+          <button
+            onClick={() => setSelectedPlan('monthly')}
+            className={cn(
+              "text-left bg-white rounded-2xl p-5 shadow-sm border flex items-start gap-4 transition-all hover:border-orange-300 w-full active:scale-[0.98] outline-none",
+              selectedPlan === 'monthly' 
+                ? "border-orange-500 ring-2 ring-orange-500/20 shadow-md bg-orange-50/10" 
+                : "border-stone-100"
+            )}
+          >
+            <div className={cn(
+              "p-2.5 rounded-full shrink-0 transition-colors shadow-lg",
+              selectedPlan === 'monthly' ? "bg-orange-500 text-white shadow-orange-500/30" : "bg-orange-500 text-white shadow-lg shadow-orange-500/30"
+            )}>
+              {selectedPlan === 'monthly' ? <Check className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
             </div>
             <div>
               <h4 className="font-bold text-stone-900 text-lg flex items-center gap-2">
                 Monthly
-                <span className="text-sm font-bold text-orange-900 bg-orange-100 px-2 py-0.5 rounded-full">₹5,500</span>
+                <span className="text-sm font-bold text-orange-950 bg-orange-100 px-2 py-0.5 rounded-full">₹5,500</span>
               </h4>
               <p className="text-stone-600 mt-1 text-sm leading-relaxed">
                 Total autopilot. <strong className="font-semibold text-stone-800">Zero Disruption</strong> guarantee with automatic backups.
               </p>
             </div>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -131,10 +170,20 @@ export function MaidServiceTab() {
       {/* 5. The Call to Action */}
       <div className="flex justify-center pt-4 pb-8">
         <Link 
-          href="/booking/maid" 
+          href={
+            selectedPlan === 'monthly' 
+              ? '/booking/maid?plan=monthly' 
+              : selectedPlan === 'half_hour' 
+              ? '/booking/maid?hours=0.5' 
+              : '/booking/maid?hours=1.0'
+          } 
           className="bg-orange-500 hover:bg-orange-600 text-white text-lg font-bold py-4 px-10 rounded-full shadow-lg shadow-orange-500/30 transition-all hover:scale-105 hover:shadow-orange-500/40 active:scale-95 flex items-center gap-2"
         >
-          Select Chores & Book
+          {selectedPlan === 'monthly' 
+            ? 'Subscribe to Monthly Plan' 
+            : selectedPlan === 'half_hour' 
+            ? 'Select Chores & Book (0.5 Hrs)' 
+            : 'Select Chores & Book (1.0 Hrs)'}
           <CheckCircle2 className="w-5 h-5 opacity-90" />
         </Link>
       </div>

@@ -22,7 +22,15 @@ export function MaidCheckoutSchedule({ onBack }: { onBack?: () => void }) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [summaryData, setSummaryData] = useState<any>(null);
-  const [estimate, setEstimate] = useState<{ totalTime: number, slotLabel: string, price: string, chores?: any[] } | null>(null);
+  const [estimate, setEstimate] = useState<{ 
+    totalTime: number; 
+    slotLabel: string; 
+    price: string; 
+    chores?: any[];
+    isMonthly?: boolean;
+    bookedHours?: number | null;
+    recommendedHours?: number | null;
+  } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -75,10 +83,17 @@ export function MaidCheckoutSchedule({ onBack }: { onBack?: () => void }) {
   const walletBalance = user.walletBalance || 0;
   const canAfford = walletBalance >= costNum;
 
+  const getEndDate = (startDate: Date | null) => {
+    if (!startDate) return null;
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 30);
+    return endDate;
+  };
+
   const handleConfirmBooking = async () => {
     if (!selectedDate || !selectedTime || !firestore) return;
 
-    if (!canAfford && user.id !== 'guest') {
+    if (!canAfford && user.id && user.id !== 'guest') {
         toast({
             title: "Insufficient Balance",
             description: `You need ₹${costNum - walletBalance} more to book this service.`,
@@ -91,8 +106,8 @@ export function MaidCheckoutSchedule({ onBack }: { onBack?: () => void }) {
     setIsSubmitting(true);
     try {
         const payload: any = {
-            service: 'Maid - A-La-Carte',
-            type: 'maid',
+            service: estimate?.isMonthly ? 'Maid - Monthly Plan' : 'Maid - A-La-Carte',
+            type: estimate?.isMonthly ? 'maid_monthly' : 'maid',
             items: estimate?.chores || [],
             totalCost: costNum,
             totalTime: estimate?.totalTime || 0,
@@ -105,11 +120,16 @@ export function MaidCheckoutSchedule({ onBack }: { onBack?: () => void }) {
             customerName: user.name || 'Anonymous',
             customerContact: summaryData?.phone || user.contactNumber || '',
             customerAddress: `${summaryData?.flat || ''}, ${summaryData?.society || ''}`.trim() || user.address || '',
-            customerId: user.id
+            pincode: summaryData?.pincode || user.pincode || '',
+            customerId: user.id || 'guest',
+            ...(estimate?.isMonthly && {
+              startDate: selectedDate.toISOString(),
+              endDate: getEndDate(selectedDate)!.toISOString()
+            })
         };
 
         // If user is logged in, save to Firestore
-        if (user.id !== 'guest') {
+        if (user.id && user.id !== 'guest') {
             const bookingsRef = collection(firestore, 'customers', user.id as string, 'bookings');
             await addDoc(bookingsRef, payload);
             
@@ -140,9 +160,11 @@ export function MaidCheckoutSchedule({ onBack }: { onBack?: () => void }) {
   };
 
   const timeGroups = {
+      'Early Morning': ['06:00 AM', '07:00 AM'],
       'Morning': ['08:00 AM', '09:00 AM', '10:00 AM'],
-      'Afternoon': ['12:00 PM', '02:00 PM', '04:00 PM'],
-      'Evening': ['05:00 PM', '06:00 PM'],
+      'Late Morning / Noon': ['11:00 AM', '12:00 PM', '01:00 PM'],
+      'Afternoon': ['02:00 PM', '03:00 PM', '04:00 PM'],
+      'Evening / Late Daily': ['05:00 PM', '06:00 PM', '07:00 PM'],
   };
 
   return (
@@ -260,11 +282,27 @@ export function MaidCheckoutSchedule({ onBack }: { onBack?: () => void }) {
             <div className="space-y-2 text-sm font-medium pt-1">
                 <div className="flex justify-between items-center py-0.5">
                     <span className="text-stone-500">Service:</span>
-                    <span className="text-stone-800 font-bold">Maid - A-La-Carte</span>
+                    <span className="text-stone-800 font-bold">{estimate?.isMonthly ? 'Maid - Monthly Plan' : 'Maid - A-La-Carte'}</span>
                 </div>
+                {estimate?.isMonthly && selectedDate && (
+                  <>
+                    <div className="flex justify-between items-center py-0.5 text-xs text-orange-600 font-bold bg-orange-50/50 px-2 py-1 rounded-lg">
+                        <span>Plan Starts:</span>
+                        <span>{format(selectedDate, "MMM d, yyyy")}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-0.5 text-xs text-orange-600 font-bold bg-orange-50/50 px-2 py-1 rounded-lg">
+                        <span>Plan Expires:</span>
+                        <span>{format(getEndDate(selectedDate)!, "MMM d, yyyy")}</span>
+                    </div>
+                  </>
+                )}
                 <div className="flex justify-between items-center py-0.5">
                     <span className="text-stone-500">Estimate:</span>
-                    <span className="text-stone-800">{summaryData?.time || '1.0 Hrs'} <span className="text-stone-300 px-1">•</span> <span className="text-green-600 font-bold text-base">{summaryData?.price || '₹149'}</span></span>
+                    <span className="text-stone-800">
+                        {estimate?.isMonthly ? (() => { const h = Number(estimate.bookedHours); return `Daily ${h % 1 === 0 ? h.toFixed(0) : h.toFixed(2)} Hrs`; })() : (summaryData?.time || '1.0 Hrs')} 
+                        <span className="text-stone-300 px-1">•</span> 
+                        <span className="text-green-600 font-bold text-base">{summaryData?.price || '₹149'}</span>
+                    </span>
                 </div>
                 <div className="flex justify-between items-center py-0.5">
                     <span className="text-stone-500">Location:</span>
@@ -289,7 +327,9 @@ export function MaidCheckoutSchedule({ onBack }: { onBack?: () => void }) {
 
             <div className="bg-green-50 border border-green-100 rounded-xl p-3 mt-4 text-xs font-bold text-green-700 flex items-center gap-2">
                 <Check className="w-4 h-4 text-green-500 shrink-0" />
-                30-Day No Disruption Guarantee Available Post-Trial
+                {estimate?.isMonthly 
+                    ? "30-Day No Disruption Guarantee (Includes Backup Replacements)" 
+                    : "30-Day No Disruption Guarantee Available Post-Trial"}
             </div>
         </div>
 

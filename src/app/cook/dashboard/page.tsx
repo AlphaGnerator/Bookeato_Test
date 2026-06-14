@@ -24,7 +24,8 @@ import {
     CreditCard,
     ChefHat,
     Timer,
-    Play
+    Play,
+    ArrowRight
 } from 'lucide-react';
 import { format, differenceInSeconds } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -32,6 +33,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Booking, CookProfile } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
+import Link from 'next/link';
 
 export default function CookDashboard() {
     const auth = useAuth();

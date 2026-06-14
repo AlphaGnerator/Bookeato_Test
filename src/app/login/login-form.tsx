@@ -18,9 +18,10 @@ import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { Loader2, TestTube } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { LoadingState } from "@/components/loading-state";
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { signInWithEmailAndPassword, signInAnonymously } from 'firebase/auth';
-import { doc } from 'firebase/firestore';
+import { doc, collection, addDoc } from 'firebase/firestore';
 import type { UserProfile } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import { defaultUser } from '@/lib/mock-data';
@@ -35,6 +36,7 @@ export function LoginForm({ onSuccess, className, ...props }: { onSuccess?: () =
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isDemoLoading, setIsDemoLoading] = useState(false);
@@ -44,7 +46,25 @@ export function LoginForm({ onSuccess, className, ...props }: { onSuccess?: () =
     defaultValues: { email: '', password: '' },
   });
 
-  const handleSuccess = () => {
+  const handleSuccess = async (userId: string) => {
+    // 1. Sync guest pending booking if exists
+    const pendingBookingRaw = localStorage.getItem('bookeato_pending_maid_booking');
+    if (pendingBookingRaw && firestore) {
+      try {
+        const payload = JSON.parse(pendingBookingRaw);
+        payload.customerId = userId;
+        const bookingsRef = collection(firestore, 'customers', userId, 'bookings');
+        await addDoc(bookingsRef, payload);
+        localStorage.removeItem('bookeato_pending_maid_booking');
+        toast({
+          title: "Booking Confirmed!",
+          description: "Your pending maid booking has been successfully placed.",
+        });
+      } catch (e) {
+        console.error("Failed to sync pending booking on login", e);
+      }
+    }
+
     if (onSuccess) {
       onSuccess();
     } else {
@@ -66,12 +86,12 @@ export function LoginForm({ onSuccess, className, ...props }: { onSuccess?: () =
         return;
     }
     try {
-        await signInWithEmailAndPassword(auth, values.email, values.password);
+        const credential = await signInWithEmailAndPassword(auth, values.email, values.password);
         toast({
             title: 'Login Successful',
             description: "Welcome back!",
         });
-        handleSuccess();
+        await handleSuccess(credential.user.uid);
     } catch (error: any) {
       
       let description = 'An unknown error occurred. Please try again.';
@@ -134,7 +154,7 @@ export function LoginForm({ onSuccess, className, ...props }: { onSuccess?: () =
                 title: "Demo Login Successful",
                 description: "You are now logged in as a demo customer.",
             });
-            handleSuccess();
+            await handleSuccess(user.uid);
         }
     } catch (error: any) {
         console.error("Demo login failed", error);
@@ -192,7 +212,7 @@ export function LoginForm({ onSuccess, className, ...props }: { onSuccess?: () =
                 OR
             </span>
         </div>
-        <Button variant="secondary" className="w-full" onClick={handleDemoLogin} disabled={isDemoLoading}>
+         <Button variant="secondary" className="w-full" onClick={handleDemoLogin} disabled={isDemoLoading}>
             {isDemoLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -200,6 +220,18 @@ export function LoginForm({ onSuccess, className, ...props }: { onSuccess?: () =
             )}
             Continue as Demo Customer
         </Button>
+        <p className="text-center text-sm text-stone-500 mt-4">
+            Don&apos;t have an account?{' '}
+            <Link href={`/signup${searchParams.toString() ? `?${searchParams.toString()}` : ''}`} className="text-primary hover:underline font-bold">
+                Sign up
+            </Link>
+        </p>
+        <p className="text-center text-sm text-stone-500 mt-2">
+            Are you a cook?{' '}
+            <Link href="/cook/login" className="text-stone-700 hover:underline font-bold">
+                Go to Cook Portal
+            </Link>
+        </p>
       </div>
     </>
   );

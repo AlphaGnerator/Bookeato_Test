@@ -56,7 +56,7 @@ function FilterToggle({ label, active, onClick }: { label: string, active: boole
 
 function BookingCard({ booking, onClick }: { booking: any, onClick: () => void }) {
     const bookingDate = parseISO(booking.bookingDate);
-    const isMaid = booking.type === 'maid';
+    const isMaid = booking.type?.startsWith('maid');
     
     const statusConfig: Record<string, { label: string, color: string, icon: any }> = {
         pending: { label: 'Pending', color: 'bg-amber-100 text-amber-700', icon: Clock },

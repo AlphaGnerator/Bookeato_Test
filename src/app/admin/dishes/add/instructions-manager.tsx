@@ -36,7 +36,7 @@ const processInstructionsTsv = (tsv: string): Omit<RecipeInstruction, 'id'>[] =>
         'stepNumber', 'instruction_en', 'instruction_hi', 'imageUrl', 'timeMinutes', 'specialInstruction'
     ];
 
-    return lines.map((line, lineIndex) => {
+    return lines.map((line, lineIndex): Omit<RecipeInstruction, 'id'> | null => {
         const values = line.split('\t');
         const instructionData: { [key: string]: any } = {};
 

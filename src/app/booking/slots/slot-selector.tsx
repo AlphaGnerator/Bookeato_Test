@@ -166,7 +166,7 @@ export function SlotSelector() {
                     }
                     modifiers={{ 
                         booked: bookedDays,
-                        inRange: planRange
+                        ...(planRange ? { inRange: planRange } : {})
                     }}
                     modifiersClassNames={{
                         booked: 'bg-blue-500/20 text-blue-800 rounded-full',

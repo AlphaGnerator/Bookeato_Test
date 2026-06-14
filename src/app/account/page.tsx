@@ -95,12 +95,12 @@ export default function AccountPage() {
                 {/* Profile Header */}
                 <div className="flex flex-col items-center text-center gap-3 pt-4">
                     <Avatar className="w-24 h-24 border-4 border-white shadow-xl">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.name}`} />
-                        <AvatarFallback className="bg-stone-100 font-black text-2xl text-stone-500">{profile.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.name || 'User'}`} />
+                        <AvatarFallback className="bg-stone-100 font-black text-2xl text-stone-500">{(profile?.name || 'User').charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div>
-                        <h2 className="text-3xl font-black text-stone-950 tracking-tight">{profile.name}</h2>
-                        <p className="text-sm font-bold text-stone-400 tracking-wider uppercase">{profile.email}</p>
+                        <h2 className="text-3xl font-black text-stone-950 tracking-tight">{profile?.name || 'User'}</h2>
+                        <p className="text-sm font-bold text-stone-400 tracking-wider uppercase">{profile?.email || ''}</p>
                     </div>
                     {profile.subscription?.status === 'active' && (
                         <Badge className="mt-2 bg-gradient-to-r from-stone-900 to-stone-700 text-white font-black px-4 py-1.5 rounded-full border-none shadow-lg items-center gap-2">

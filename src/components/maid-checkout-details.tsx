@@ -13,7 +13,7 @@ export function MaidCheckoutDetails({ onBack, onNext }: { onBack?: () => void, o
   const [flat, setFlat] = useState('');
 
   useEffect(() => {
-    if (isInitialized && user && user.id !== 'guest') {
+    if (isInitialized && user && user.id && user.id !== 'guest') {
       if (user.contactNumber) {
           const rawPhone = user.contactNumber.replace('+91', '');
           if (rawPhone) setPhoneNumber(rawPhone);

@@ -25,7 +25,7 @@ const processIngredientsTsv = (tsv: string): Omit<Ingredient, 'id'>[] => {
         'name', 'quantity', 'unit', 'prepNote', 'prepTimeMinutes', 'providedBy', 'isKeyIngredient'
     ];
 
-    return lines.map((line, lineIndex) => {
+    return lines.map((line, lineIndex): Omit<Ingredient, 'id'> | null => {
         const values = line.split('\t');
         const ingredientData: { [key: string]: any } = {};
 

@@ -161,7 +161,7 @@ function CancellationContent() {
                     <div className="flex justify-between items-start">
                         <div className="space-y-1">
                             <CardTitle className="text-xl font-black text-stone-900">
-                                {booking.service || (booking.type === 'maid' ? 'Maid' : 'Cook') + ' Service'}
+                                {booking.service || (booking.type?.startsWith('maid') ? 'Maid' : 'Cook') + ' Service'}
                             </CardTitle>
                             <p className="text-stone-400 font-black uppercase tracking-widest text-[10px]">
                                 Booking #{bookingId?.slice(-6).toUpperCase()}

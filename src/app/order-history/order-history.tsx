@@ -84,6 +84,8 @@ function HistoryItemCard({ item }: { item: MergedHistoryItem }) {
             pending: 'accent',
             confirmed: 'default',
             completed: 'default',
+            delivered: 'default',
+            in_progress: 'default',
             cancelled: 'destructive'
         } as const;
 
@@ -91,6 +93,8 @@ function HistoryItemCard({ item }: { item: MergedHistoryItem }) {
             pending: <Hourglass className="mr-2 h-4 w-4"/>,
             confirmed: <BadgeCheck className="mr-2 h-4 w-4"/>,
             completed: <BadgeCheck className="mr-2 h-4 w-4" />,
+            delivered: <BadgeCheck className="mr-2 h-4 w-4" />,
+            in_progress: <Hourglass className="mr-2 h-4 w-4"/>,
             cancelled: <XCircle className="mr-2 h-4 w-4"/>
         };
 

@@ -66,7 +66,7 @@ const PRICING_CONSTANTS = {
 const getGeneratedPrice = (planType: 'day' | 'weekly' | 'monthly', peopleCount: number, mealConfig: string) => {
     // 1. Normalize Inputs
     const pCount = Math.min(Math.max(peopleCount, 1), 8).toString() as keyof typeof PRICING_CONSTANTS.TIME_SLOTS;
-    const type = planType.toLowerCase() as 'day' | 'weekly' | 'monthly';
+    const type = (planType === 'day' ? 'daily' : planType.toLowerCase()) as 'daily' | 'weekly' | 'monthly';
     
     // 2. Determine Meal Category (Single, Dual, Triple)
     let mealCategory: 'single' | 'dual' | 'triple' = 'single';

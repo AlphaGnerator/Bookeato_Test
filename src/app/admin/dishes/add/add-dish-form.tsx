@@ -210,7 +210,7 @@ export function AddDishForm({ dish }: AddDishFormProps) {
             ...dish,
             ...data,
         };
-        setDocumentNonBlocking(dishRef, updatedDish);
+        setDocumentNonBlocking(dishRef, updatedDish, {});
         toast({
             title: 'Dish Updated',
             description: `${data.displayName_en} has been updated.`,
@@ -223,7 +223,7 @@ export function AddDishForm({ dish }: AddDishFormProps) {
             id: newDishRef.id,
             heroImageUrl: data.heroImageUrl || `https://picsum.photos/seed/${newDishRef.id}/600/400`,
         };
-        addDocumentNonBlocking(newDishRef, newDish);
+        setDocumentNonBlocking(newDishRef, newDish, {});
         toast({
             title: 'Dish Added',
             description: `${data.displayName_en} has been added to the playbook.`,
