@@ -35,7 +35,7 @@ import { Label } from '@/components/ui/label';
 import { useCulinaryStore } from '@/hooks/use-culinary-store';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const heroCarouselDishes = [
     {
@@ -277,7 +277,8 @@ const heroSlides = [
         badge: 'Disruption-Free Monthly Plans',
         cta: 'Learn More',
         link: '#services',
-        imageUrl: '/carousel/carousel_cook_v4.png'
+        imageUrl: '/carousel/carousel_cook_16_9.png',
+        hasBurnedText: true
     },
     { 
         id: 'maid',
@@ -286,7 +287,8 @@ const heroSlides = [
         badge: '100% Disruption-Free Guarantee',
         cta: 'Learn More',
         link: '#services',
-        imageUrl: '/carousel/carousel_maid_v4.png'
+        imageUrl: '/carousel/carousel_maid_16_9.png',
+        hasBurnedText: true
     },
     { 
         id: 'elder',
@@ -295,7 +297,8 @@ const heroSlides = [
         badge: 'Trained & Vetted',
         cta: 'Learn More',
         link: '#services',
-        imageUrl: '/carousel/carousel_elderly_v4.png'
+        imageUrl: '/carousel/carousel_elderly_16_9.png',
+        hasBurnedText: true
     },
     { 
         id: 'pantry',
@@ -304,9 +307,270 @@ const heroSlides = [
         badge: 'Zero Chemicals',
         cta: 'Learn More',
         link: '#services',
-        imageUrl: '/carousel/carousel_pantry_v4.png'
+        imageUrl: '/carousel/carousel_pantry_16_9.png',
+        hasBurnedText: false
     }
 ];
+
+function ElderCareRequestForm() {
+  const firestore = useFirestore();
+  const [submitted, setSubmitted] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [formData, setFormData] = React.useState({
+    contactName: '',
+    contactPhone: '',
+    contactEmail: '',
+    patientName: '',
+    patientAge: '',
+    patientGender: 'male',
+    careDuration: '12_hours',
+    existingAilments: '',
+    preferredStartDate: '',
+  });
+
+  const [specialNeeds, setSpecialNeeds] = React.useState({
+    mobility: false,
+    feeding: false,
+    medication: false,
+    companionship: false,
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCheckboxChange = (name: keyof typeof specialNeeds) => {
+    setSpecialNeeds(prev => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const payload = {
+        ...formData,
+        patientAge: parseInt(formData.patientAge, 10) || 0,
+        specialNeeds: Object.keys(specialNeeds).filter(key => specialNeeds[key as keyof typeof specialNeeds]),
+        status: 'pending',
+        createdAt: serverTimestamp ? serverTimestamp() : new Date(),
+      };
+      if (firestore) {
+        await addDoc(collection(firestore, 'elderCareRequests'), payload);
+      } else {
+        const existing = JSON.parse(localStorage.getItem('bookeato_elder_requests') || '[]');
+        existing.push({ ...payload, createdAt: new Date().toISOString() });
+        localStorage.setItem('bookeato_elder_requests', JSON.stringify(existing));
+      }
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Error submitting elder care request:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="max-w-xl mx-auto bg-white border border-purple-100 rounded-[2.5rem] p-8 sm:p-12 shadow-xl shadow-purple-100/30 text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
+        <div className="bg-purple-100 text-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto shadow-inner">
+          <Check className="w-8 h-8" strokeWidth={3} />
+        </div>
+        <h3 className="text-2xl font-black text-stone-900 tracking-tight">Request Received Successfully!</h3>
+        <p className="text-stone-600 text-sm leading-relaxed max-w-sm mx-auto">
+          Thank you for reaching out. Our Elder Care Coordinator will review your details and get back to you within 2 hours.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto bg-white border border-stone-100 rounded-[2.5rem] p-6 sm:p-10 shadow-xl shadow-stone-200/50">
+      <div className="text-center mb-8">
+        <h3 className="text-2xl font-black text-stone-900 tracking-tight">Request Specialized Elder Care</h3>
+        <p className="text-stone-500 text-sm mt-2 font-medium">Provide details to help us match the right care professional for your loved one.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6 text-left">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="contactName" className="font-bold text-stone-700">Your Name (Contact Person)</Label>
+            <Input
+              id="contactName"
+              name="contactName"
+              value={formData.contactName}
+              onChange={handleInputChange}
+              placeholder="e.g. Rahul Sharma"
+              required
+              className="rounded-xl border-stone-200 focus-visible:ring-purple-500"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="contactPhone" className="font-bold text-stone-700">Phone Number</Label>
+            <Input
+              id="contactPhone"
+              name="contactPhone"
+              type="tel"
+              value={formData.contactPhone}
+              onChange={handleInputChange}
+              placeholder="e.g. +91 9876543210"
+              required
+              className="rounded-xl border-stone-200 focus-visible:ring-purple-500"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="contactEmail" className="font-bold text-stone-700">Email Address</Label>
+          <Input
+            id="contactEmail"
+            name="contactEmail"
+            type="email"
+            value={formData.contactEmail}
+            onChange={handleInputChange}
+            placeholder="e.g. rahul@example.com"
+            required
+            className="rounded-xl border-stone-200 focus-visible:ring-purple-500"
+          />
+        </div>
+
+        <hr className="border-stone-100 my-6" />
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="col-span-1 md:col-span-2 space-y-2">
+            <Label htmlFor="patientName" className="font-bold text-stone-700">Recipient's Name (Elderly Person)</Label>
+            <Input
+              id="patientName"
+              name="patientName"
+              value={formData.patientName}
+              onChange={handleInputChange}
+              placeholder="e.g. Devendra Sharma"
+              required
+              className="rounded-xl border-stone-200 focus-visible:ring-purple-500"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="patientAge" className="font-bold text-stone-700">Age</Label>
+            <Input
+              id="patientAge"
+              name="patientAge"
+              type="number"
+              min="50"
+              max="120"
+              value={formData.patientAge}
+              onChange={handleInputChange}
+              placeholder="e.g. 75"
+              required
+              className="rounded-xl border-stone-200 focus-visible:ring-purple-500"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="patientGender" className="font-bold text-stone-700">Gender</Label>
+            <select
+              id="patientGender"
+              name="patientGender"
+              value={formData.patientGender}
+              onChange={handleInputChange}
+              className="w-full h-10 px-3 rounded-xl border border-stone-200 bg-white text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
+            >
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="careDuration" className="font-bold text-stone-700">Care Duration Needed</Label>
+            <select
+              id="careDuration"
+              name="careDuration"
+              value={formData.careDuration}
+              onChange={handleInputChange}
+              className="w-full h-10 px-3 rounded-xl border border-stone-200 bg-white text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
+            >
+              <option value="12_hours">12 Hours (Day/Night)</option>
+              <option value="24_hours">24 Hours</option>
+              <option value="live_in">Live-in Caregiver</option>
+              <option value="few_hours">Few Hours / Part-time</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <Label className="font-bold text-stone-700 block">Required Special Assistance</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              { id: 'mobility', label: 'Mobility Assistance (Walking/Transferring)' },
+              { id: 'feeding', label: 'Feeding & Meal Assistance' },
+              { id: 'medication', label: 'Medication Management' },
+              { id: 'companionship', label: 'Companionship & Emotional Care' }
+            ].map(item => (
+              <label 
+                key={item.id} 
+                className={cn(
+                  "flex items-start gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer select-none",
+                  specialNeeds[item.id as keyof typeof specialNeeds]
+                    ? "border-purple-500 bg-purple-50/20"
+                    : "border-stone-100 hover:border-stone-200 bg-stone-50/30"
+                )}
+              >
+                <input 
+                  type="checkbox"
+                  checked={specialNeeds[item.id as keyof typeof specialNeeds]}
+                  onChange={() => handleCheckboxChange(item.id as keyof typeof specialNeeds)}
+                  className="mt-1 rounded border-stone-300 text-purple-600 focus:ring-purple-500"
+                />
+                <span className="text-xs font-semibold text-stone-700 leading-tight">{item.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="existingAilments" className="font-bold text-stone-700">Existing Ailments / Medical Conditions</Label>
+          <textarea
+            id="existingAilments"
+            name="existingAilments"
+            value={formData.existingAilments}
+            onChange={handleInputChange}
+            placeholder="e.g. Diabetes, Hypertension, early-stage Dementia, Parkinson's, recovering from surgery, etc."
+            rows={3}
+            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 placeholder:text-stone-400"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="preferredStartDate" className="font-bold text-stone-700">Preferred Start Date</Label>
+          <Input
+            id="preferredStartDate"
+            name="preferredStartDate"
+            type="date"
+            min={new Date().toISOString().split('T')[0]}
+            value={formData.preferredStartDate}
+            onChange={handleInputChange}
+            required
+            className="rounded-xl border-stone-200 focus-visible:ring-purple-500"
+          />
+        </div>
+
+        <Button 
+          type="submit" 
+          disabled={loading}
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold h-12 rounded-xl text-md active:scale-95 transition-all mt-4 flex items-center justify-center gap-2"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Submitting...
+            </>
+          ) : 'Submit Care Request'}
+        </Button>
+      </form>
+    </div>
+  );
+}
 
 export default function WelcomePage() {
   const firestore = useFirestore();
@@ -380,7 +644,7 @@ export default function WelcomePage() {
           </div>
 
           {/* Coast-to-Coast Hero Section */}
-          <section className="relative w-full h-[75vh] md:h-[85vh] overflow-hidden flex items-center justify-center bg-stone-950 group">
+          <section className="relative w-full aspect-video overflow-hidden bg-stone-950 group">
              <Carousel
                  key={carouselImages.length}
                  opts={{ align: "start", loop: true }}
@@ -389,7 +653,22 @@ export default function WelcomePage() {
              >
                  <CarouselContent className="h-full ml-0">
                      {carouselImages.map((slide, idx) => (
-                         <CarouselItem key={slide.id + idx} className="h-full pl-0 relative">
+                         <CarouselItem 
+                              key={slide.id + idx} 
+                              className="h-full pl-0 relative cursor-pointer"
+                              onClick={() => {
+                                  const serviceMapping: Record<string, string> = {
+                                      cook: 'Cook',
+                                      maid: 'Maid',
+                                      elder: 'Elder help',
+                                      pantry: 'Nourish Store'
+                                  };
+                                  if (serviceMapping[slide.id]) {
+                                      setActiveService(serviceMapping[slide.id]);
+                                  }
+                                  document.getElementById('services-grid')?.scrollIntoView({ behavior: 'smooth' });
+                              }}
+                         >
                              <div className="relative w-full h-full flex flex-col justify-end bg-stone-950">
                                  <div className="absolute inset-0 w-full h-full">
                                    <Image 
@@ -397,27 +676,31 @@ export default function WelcomePage() {
                                        src={slide.imageUrl}
                                        alt={slide.title}
                                        fill
-                                       className="object-contain md:object-contain transition-transform duration-[30s] ease-linear scale-100 group-hover:scale-105"
+                                       className="object-contain transition-transform duration-[30s] ease-linear scale-100 group-hover:scale-105"
                                        priority={idx === 0}
                                    />
                                  </div>
-                                 <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-transparent pointer-events-none" />
-                                 
-                                 {/* Slide Specific Content */}
-                                 <div className="relative z-20 container mx-auto px-6 pt-24 md:pt-0 pb-20 md:pb-32 text-left flex flex-col items-start gap-4">
-                                     <Badge className="bg-orange-500/90 text-white border-none shadow-lg px-4 py-1.5 text-[10px] md:text-sm uppercase tracking-widest font-black">{slide.badge}</Badge>
-                                     <div className="max-w-2xl">
-                                       <h3 className="text-3xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight drop-shadow-2xl leading-tight">{slide.title}</h3>
-                                       <p className="text-lg md:text-2xl text-stone-200 font-bold max-w-[90%] drop-shadow-md">{slide.subtitle}</p>
-                                     </div>
-                                     <div className="flex gap-4 mt-6 items-center flex-wrap">
-                                       <Button asChild variant="cta" size="lg" className="rounded-2xl shadow-2xl touch-manipulation active:scale-95 group/btn border border-white/20 relative z-30 font-bold text-lg h-14 px-8">
-                                           <a href="#services" onClick={(e) => { e.preventDefault(); setActiveService(slide.id === 'cook' ? 'Cook' : slide.id === 'maid' ? 'Maid' : slide.id === 'elder' ? 'Elder help' : 'Nourish Store'); document.getElementById('services-grid')?.scrollIntoView({behavior: 'smooth'}); }}>
-                                               {slide.cta} <ArrowRight className="ml-3 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
-                                           </a>
-                                       </Button>
-                                     </div>
-                                 </div>
+                                 {!slide.hasBurnedText && (
+                                    <>
+                                      <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-transparent pointer-events-none" />
+                                      
+                                      {/* Slide Specific Content */}
+                                      <div className="relative z-20 container mx-auto px-6 pt-24 md:pt-0 pb-20 md:pb-32 text-left flex flex-col items-start gap-4">
+                                          <Badge className="bg-orange-500/90 text-white border-none shadow-lg px-4 py-1.5 text-[10px] md:text-sm uppercase tracking-widest font-black">{slide.badge}</Badge>
+                                          <div className="max-w-2xl">
+                                            <h3 className="text-3xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight drop-shadow-2xl leading-tight">{slide.title}</h3>
+                                            <p className="text-lg md:text-2xl text-stone-200 font-bold max-w-[90%] drop-shadow-md">{slide.subtitle}</p>
+                                          </div>
+                                          <div className="flex gap-4 mt-6 items-center flex-wrap">
+                                            <Button asChild variant="cta" size="lg" className="rounded-2xl shadow-2xl touch-manipulation active:scale-95 group/btn border border-white/20 relative z-30 font-bold text-lg h-14 px-8">
+                                                <span className="flex items-center gap-1">
+                                                    {slide.cta} <ArrowRight className="ml-3 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
+                                                </span>
+                                            </Button>
+                                          </div>
+                                      </div>
+                                    </>
+                                 )}
                              </div>
                          </CarouselItem>
                      ))}
@@ -431,16 +714,6 @@ export default function WelcomePage() {
                      <CarouselNext className="pointer-events-auto relative right-0 top-0 translate-y-0 translate-x-0 h-10 w-10 md:h-12 md:w-12 bg-black/20 hover:bg-black/40 text-white border-white/20 backdrop-blur-md transition-all hover:scale-110" />
                  </div>
              </Carousel>
-
-             {/* Global Floating Header OVER the carousel */}
-             <div className="absolute top-8 md:top-12 left-0 right-0 z-30 pointer-events-none">
-                <div className="container mx-auto px-6">
-                    <h1 className="text-3xl md:text-5xl font-black text-white drop-shadow-2xl">
-                        <span className="text-stone-100">Urban</span> <span className="text-orange-400">Problems,</span> <span className="text-green-400">Sorted.</span>
-                    </h1>
-                    <p className="text-stone-200 font-semibold mt-2 drop-shadow-lg max-w-md hidden md:block">Premium home care and pure dining, automated.</p>
-                </div>
-             </div>
              
              {/* Simple Glassmorphic Booking Widget */}
              <div className="absolute bottom-20 md:bottom-28 right-6 md:right-10 z-30 hidden lg:block">
@@ -659,15 +932,8 @@ export default function WelcomePage() {
             )}
 
             {activeService === 'Elder help' && (
-              <section className="container mx-auto px-6 text-center py-24 min-h-[40vh] flex flex-col items-center justify-center">
-                <div className="bg-purple-500/10 text-purple-600 p-6 rounded-3xl h-fit shrink-0 mb-6 flex items-center justify-center">
-                    <HeartPulse className="h-12 w-12" />
-                </div>
-                <Badge className="bg-purple-500/10 text-purple-600 font-bold py-1.5 px-6 text-sm uppercase tracking-widest border-none mb-6">Coming Soon</Badge>
-                <h2 className="section-title text-4xl">Compassionate Elder Care</h2>
-                <p className="text-text-secondary max-w-2xl mx-auto mt-4 text-xl">
-                  We are finalizing our rigorous training protocols for specialized elder care professionals. Expert assistance for your loved ones is just around the corner.
-                </p>
+              <section className="container mx-auto px-6 py-12 min-h-[40vh]">
+                <ElderCareRequestForm />
               </section>
             )}
           </div>

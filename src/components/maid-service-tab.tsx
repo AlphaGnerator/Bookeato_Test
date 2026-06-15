@@ -134,7 +134,7 @@ export function MaidServiceTab() {
             <div>
               <h4 className="font-bold text-stone-900 text-lg flex items-center gap-2">
                 Monthly
-                <span className="text-sm font-bold text-orange-950 bg-orange-100 px-2 py-0.5 rounded-full">₹5,500</span>
+                <span className="text-sm font-bold text-orange-950 bg-orange-100 px-2 py-0.5 rounded-full">Starts at ₹3,960/mo</span>
               </h4>
               <p className="text-stone-600 mt-1 text-sm leading-relaxed">
                 Total autopilot. <strong className="font-semibold text-stone-800">Zero Disruption</strong> guarantee with automatic backups.

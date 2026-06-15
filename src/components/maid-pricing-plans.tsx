@@ -39,8 +39,8 @@ const maidPricingPlans = [
   },
   {
     name: "Monthly Peace Plan",
-    price: "₹5,500",
-    period: "/ month",
+    price: "₹3,960",
+    period: "/ month (starts at)",
     tagline: "For households that never want to manage a maid again.",
     features: [
       "No Chutti: Maid comes all 30 days of the month",
