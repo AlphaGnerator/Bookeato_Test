@@ -277,7 +277,7 @@ const heroSlides = [
         badge: 'Disruption-Free Monthly Plans',
         cta: 'Book Cook Now',
         link: '/booking',
-        imageUrl: '/carousel/carousel_cook_bg.png',
+        imageUrl: '/carousel/carousel_cook_bg.png?v=2',
         hasBurnedText: false,
         features: [
           "Trained Culinary Experts: Professional cooks skilled in hygiene.",
@@ -293,7 +293,7 @@ const heroSlides = [
         badge: '100% Disruption-Free Guarantee',
         cta: 'Book Maid Now',
         link: '/booking/maid',
-        imageUrl: '/carousel/carousel_maid_bg.png',
+        imageUrl: '/carousel/carousel_maid_bg.png?v=2',
         hasBurnedText: false,
         features: [
           "30-Day Service Guarantee: Backup maid arranged if yours is on leave.",
@@ -308,7 +308,7 @@ const heroSlides = [
         badge: 'Trained & Vetted Caregivers',
         cta: 'Request Care',
         link: '#services-grid',
-        imageUrl: '/carousel/carousel_elderly_bg.png',
+        imageUrl: '/carousel/carousel_elderly_bg.png?v=2',
         hasBurnedText: false,
         features: [
           "Certified Specialists: Warm, professional caregivers trained in elder care.",
@@ -323,7 +323,7 @@ const heroSlides = [
         badge: 'Zero Chemicals',
         cta: 'Visit Nourish Store',
         link: '#services-grid',
-        imageUrl: '/carousel/carousel_pantry_bg.png',
+        imageUrl: '/carousel/carousel_pantry_bg.png?v=2',
         hasBurnedText: false,
         features: [
           "Zero Chemicals: Pure ingredients sourced directly from organic farms.",
