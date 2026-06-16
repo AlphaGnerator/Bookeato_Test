@@ -100,7 +100,7 @@ export function MaidPricingPlans() {
                     </CardContent>
                     <CardFooter className="p-8 pt-0">
                          <Button asChild variant={plan.solidBg ? "cta" : "outline"} size="lg" className={cn("w-full h-14 text-base font-bold rounded-2xl touch-manipulation active:scale-95", plan.solidBg ? "shadow-lg bg-orange-500 hover:bg-orange-600 text-white" : "border-2 border-orange-500 text-orange-600 hover:bg-orange-50")}>
-                            <Link href={`/booking?plan=${plan.plan}`}>{plan.cta}</Link>
+                            <Link href={`/booking/maid?plan=${plan.plan}`}>{plan.cta}</Link>
                         </Button>
                     </CardFooter>
                 </Card>

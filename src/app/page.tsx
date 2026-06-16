@@ -272,43 +272,64 @@ function HeroBookingDialog() {
 const heroSlides = [
     { 
         id: 'cook',
-        title: 'Authentic Indian Meals', 
-        subtitle: 'Chef-designed, home-cooked daily. Starting at just ₹200/visit.',
+        title: 'Eat Healthy, Exactly Your Way', 
+        subtitle: 'Prepared by Trained Experts. Real taste, pure hygiene.',
         badge: 'Disruption-Free Monthly Plans',
-        cta: 'Learn More',
-        link: '#services',
-        imageUrl: '/carousel/carousel_cook_16_9.png',
-        hasBurnedText: true
+        cta: 'Book Cook Now',
+        link: '/booking',
+        imageUrl: '/carousel/carousel_cook_bg.png',
+        hasBurnedText: false,
+        features: [
+          "Trained Culinary Experts: Professional cooks skilled in hygiene.",
+          "Expert-Curated Healthy Menus: Nutritious and customized meal plans.",
+          "30-Day Guaranteed Service: Automatic backup if your cook is on leave.",
+          "No Questions Asked Replacement: Instant replacement if you are unsatisfied."
+        ]
     },
     { 
         id: 'maid',
-        title: 'Trusted Home Keepers', 
-        subtitle: 'Vetted, reliable maids that respect your space. Zero absenteeism.',
+        title: 'Finally, House Help That Shows Up', 
+        subtitle: 'Every Single Day. Spotless home infrastructure on autopilot.',
         badge: '100% Disruption-Free Guarantee',
-        cta: 'Learn More',
-        link: '#services',
-        imageUrl: '/carousel/carousel_maid_16_9.png',
-        hasBurnedText: true
+        cta: 'Book Maid Now',
+        link: '/booking/maid',
+        imageUrl: '/carousel/carousel_maid_bg.png',
+        hasBurnedText: false,
+        features: [
+          "30-Day Service Guarantee: Backup maid arranged if yours is on leave.",
+          "No Questions Asked Replacement: Instant maid replacement if unsatisfied.",
+          "Exact Time Booking: Maid stays and cleans for the full booked duration."
+        ]
     },
     { 
         id: 'elder',
         title: 'Compassionate Elder Care', 
         subtitle: 'Warm, trained specialists for your loved ones at home.',
-        badge: 'Trained & Vetted',
-        cta: 'Learn More',
-        link: '#services',
-        imageUrl: '/carousel/carousel_elderly_16_9.png',
-        hasBurnedText: true
+        badge: 'Trained & Vetted Caregivers',
+        cta: 'Request Care',
+        link: '#services-grid',
+        imageUrl: '/carousel/carousel_elderly_bg.png',
+        hasBurnedText: false,
+        features: [
+          "Certified Specialists: Warm, professional caregivers trained in elder care.",
+          "Direct Callbacks: Customized support matching your needs.",
+          "Safety & Trust: Background verified and continuously monitored."
+        ]
     },
     { 
         id: 'pantry',
         title: 'Just Nourish Store', 
-        subtitle: 'A2 Kulfis, ancient grains, and cold-pressed oils. Zero adulteration.',
+        subtitle: 'A2 Kulfis, ancient grains, and cold-pressed oils. Zero chemical adulteration.',
         badge: 'Zero Chemicals',
-        cta: 'Learn More',
-        link: '#services',
-        imageUrl: '/carousel/carousel_pantry_16_9.png',
-        hasBurnedText: false
+        cta: 'Visit Nourish Store',
+        link: '#services-grid',
+        imageUrl: '/carousel/carousel_pantry_bg.png',
+        hasBurnedText: false,
+        features: [
+          "Zero Chemicals: Pure ingredients sourced directly from organic farms.",
+          "Ancient Grains: Handpicked millets and traditional nutrient-dense varieties.",
+          "Cold-Pressed Oils: Retaining natural aroma, nutrients, and purity."
+        ]
     }
 ];
 
@@ -615,6 +636,58 @@ export default function WelcomePage() {
     localStorage.setItem('bookeato_active_service', activeService);
   }, [activeService]);
 
+  const [showFloatingCTA, setShowFloatingCTA] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 450) {
+        setShowFloatingCTA(true);
+      } else {
+        setShowFloatingCTA(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const getFloatingCTAConfig = (service: string) => {
+    switch (service) {
+      case 'Cook':
+        return {
+          text: 'Book Cook Now',
+          href: '/booking',
+          color: 'bg-orange-600 hover:bg-orange-700 text-white shadow-orange-500/20',
+          icon: ChefHat,
+        };
+      case 'Maid':
+        return {
+          text: 'Book Maid Now',
+          href: '/booking/maid',
+          color: 'bg-teal-600 hover:bg-teal-700 text-white shadow-teal-500/20',
+          icon: Shield,
+        };
+      case 'Elder help':
+        return {
+          text: 'Request Elder Care',
+          href: '#services-grid',
+          color: 'bg-purple-600 hover:bg-purple-700 text-white shadow-purple-500/20',
+          icon: HeartPulse,
+        };
+      case 'Nourish Store':
+        return {
+          text: 'Browse Nourish Store',
+          href: '/marketplace',
+          color: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20',
+          icon: Sparkles,
+        };
+      default:
+        return null;
+    }
+  };
+
+  const ctaConfig = getFloatingCTAConfig(activeService);
+  const CTAIcon = ctaConfig?.icon;
+
   const carouselImages = React.useMemo(() => {
       return heroSlides;
   }, []);
@@ -644,7 +717,7 @@ export default function WelcomePage() {
           </div>
 
           {/* Coast-to-Coast Hero Section */}
-          <section className="relative w-full aspect-video overflow-hidden bg-stone-950 group">
+          <section className="relative w-full h-[60vh] sm:h-[70vh] md:h-[600px] lg:h-[700px] overflow-hidden bg-stone-950 group">
              <Carousel
                  key={carouselImages.length}
                  opts={{ align: "start", loop: true }}
@@ -653,57 +726,67 @@ export default function WelcomePage() {
              >
                  <CarouselContent className="h-full ml-0">
                      {carouselImages.map((slide, idx) => (
-                         <CarouselItem 
-                              key={slide.id + idx} 
-                              className="h-full pl-0 relative cursor-pointer"
-                              onClick={() => {
-                                  const serviceMapping: Record<string, string> = {
-                                      cook: 'Cook',
-                                      maid: 'Maid',
-                                      elder: 'Elder help',
-                                      pantry: 'Nourish Store'
-                                  };
-                                  if (serviceMapping[slide.id]) {
-                                      setActiveService(serviceMapping[slide.id]);
-                                  }
-                                  document.getElementById('services-grid')?.scrollIntoView({ behavior: 'smooth' });
-                              }}
-                         >
-                             <div className="relative w-full h-full flex flex-col justify-end bg-stone-950">
-                                 <div className="absolute inset-0 w-full h-full">
-                                   <Image 
-                                       data-ai-hint="hero authentic image"
-                                       src={slide.imageUrl}
-                                       alt={slide.title}
-                                       fill
-                                       className="object-contain transition-transform duration-[30s] ease-linear scale-100 group-hover:scale-105"
-                                       priority={idx === 0}
-                                   />
-                                 </div>
-                                 {!slide.hasBurnedText && (
-                                    <>
-                                      <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-transparent pointer-events-none" />
-                                      
-                                      {/* Slide Specific Content */}
-                                      <div className="relative z-20 container mx-auto px-6 pt-24 md:pt-0 pb-20 md:pb-32 text-left flex flex-col items-start gap-4">
-                                          <Badge className="bg-orange-500/90 text-white border-none shadow-lg px-4 py-1.5 text-[10px] md:text-sm uppercase tracking-widest font-black">{slide.badge}</Badge>
-                                          <div className="max-w-2xl">
-                                            <h3 className="text-3xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight drop-shadow-2xl leading-tight">{slide.title}</h3>
-                                            <p className="text-lg md:text-2xl text-stone-200 font-bold max-w-[90%] drop-shadow-md">{slide.subtitle}</p>
-                                          </div>
-                                          <div className="flex gap-4 mt-6 items-center flex-wrap">
-                                            <Button asChild variant="cta" size="lg" className="rounded-2xl shadow-2xl touch-manipulation active:scale-95 group/btn border border-white/20 relative z-30 font-bold text-lg h-14 px-8">
-                                                <span className="flex items-center gap-1">
-                                                    {slide.cta} <ArrowRight className="ml-3 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
-                                                </span>
-                                            </Button>
-                                          </div>
-                                      </div>
-                                    </>
-                                 )}
-                             </div>
-                         </CarouselItem>
-                     ))}
+                          <CarouselItem 
+                               key={slide.id + idx} 
+                               className="h-full pl-0 relative cursor-pointer"
+                               onClick={() => {
+                                   const serviceMapping: Record<string, string> = {
+                                       cook: 'Cook',
+                                       maid: 'Maid',
+                                       elder: 'Elder help',
+                                       pantry: 'Nourish Store'
+                                   };
+                                   if (serviceMapping[slide.id]) {
+                                       setActiveService(serviceMapping[slide.id]);
+                                   }
+                                   document.getElementById('services-grid')?.scrollIntoView({ behavior: 'smooth' });
+                               }}
+                          >
+                              <div className="relative w-full h-full flex flex-col justify-end bg-stone-950">
+                                  <div className="absolute inset-0 w-full h-full">
+                                    <Image 
+                                        data-ai-hint="hero authentic image"
+                                        src={slide.imageUrl}
+                                        alt={slide.title}
+                                        fill
+                                        className="object-cover transition-transform duration-[30s] ease-linear scale-100 group-hover:scale-105"
+                                        priority={idx === 0}
+                                    />
+                                  </div>
+                                  {!slide.hasBurnedText && (
+                                     <>
+                                       <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/45 to-stone-950/10 md:from-stone-950/95 md:via-stone-950/40 md:to-transparent pointer-events-none" />
+                                       
+                                       {/* Slide Specific Content */}
+                                       <div className="relative z-20 container mx-auto px-4 sm:px-6 pt-16 md:pt-0 pb-16 md:pb-28 text-left flex flex-col items-start gap-3 md:gap-4 h-full justify-end">
+                                           <Badge className="bg-orange-500/90 text-white border-none shadow-lg px-4 py-1.5 text-[10px] md:text-sm uppercase tracking-widest font-black">{slide.badge}</Badge>
+                                           <div className="max-w-2xl">
+                                             <h3 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-2 tracking-tight drop-shadow-2xl leading-tight">{slide.title}</h3>
+                                             <p className="text-sm sm:text-lg md:text-xl lg:text-2xl text-stone-200 font-bold max-w-[95%] drop-shadow-md">{slide.subtitle}</p>
+                                           </div>
+                                           {slide.features && (
+                                              <ul className="hidden md:flex flex-col gap-2 mt-2 mb-4 max-w-xl text-stone-100">
+                                                 {slide.features.map((feature, fIdx) => (
+                                                    <li key={fIdx} className="flex items-start gap-2 text-sm font-semibold">
+                                                       <Check className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
+                                                       <span className="drop-shadow-md text-stone-200">{feature}</span>
+                                                    </li>
+                                                 ))}
+                                              </ul>
+                                           )}
+                                           <div className="flex gap-4 mt-2 items-center flex-wrap">
+                                             <Button asChild variant="cta" size="lg" className="rounded-2xl shadow-2xl touch-manipulation active:scale-95 group/btn border border-white/20 relative z-30 font-bold text-lg h-14 px-8" onClick={(e) => e.stopPropagation()}>
+                                                 <Link href={slide.link} className="flex items-center gap-1">
+                                                     {slide.cta} <ArrowRight className="ml-3 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
+                                                 </Link>
+                                             </Button>
+                                           </div>
+                                       </div>
+                                     </>
+                                  )}
+                              </div>
+                          </CarouselItem>
+                      ))}
                  </CarouselContent>
                  
                  {/* Carousel Controls */}
@@ -725,85 +808,90 @@ export default function WelcomePage() {
           </section>
 
           {/* Service Hub Section - Swiggy Style Pills */}
-          {/* Service Hub Section - Swiggy Style Pills */}
-          {/* Service Hub Section - Swiggy Style Pills */}
-          <section id="services-grid" className="bg-stone-950 pt-8 relative z-20">
-             <div className="container mx-auto px-6 text-center md:pb-4 text-white">
-                 <h2 className="text-xl md:text-3xl font-black tracking-tight leading-tight drop-shadow-md">What do you need help with today?</h2>
+          <section 
+              id="services-grid" 
+              className={cn(
+                  "relative pt-12 pb-2 transition-colors duration-500 overflow-visible z-20",
+                  activeService === 'Cook' ? 'bg-orange-50' : 
+                  activeService === 'Maid' ? 'bg-teal-50' : 
+                  activeService === 'Elder help' ? 'bg-purple-50' : 'bg-emerald-50'
+              )}
+          >
+             {/* Top Blend Gradient fading from the dark carousel into the light section */}
+             <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-stone-950 to-transparent pointer-events-none" />
+
+             <div className="container mx-auto px-6 text-center md:pb-4 relative z-10">
+                 <h2 className="text-xl md:text-3xl font-black tracking-tight leading-tight text-stone-900 drop-shadow-sm">What do you need help with today?</h2>
              </div>
 
-             <div className="container mx-auto px-1 md:px-6 relative z-30 mt-6">
-                <div className="flex justify-between w-full overflow-visible items-end relative -mb-[2px] md:-mb-[3px] px-1 md:px-4 gap-1 md:gap-4">
-                    {services.map((service) => {
-                        const isActive = activeService === service.id;
-                        
-                        // Swiggy Dynamic Background logic - active tab perfectly merges with the container below
-                        const getActiveThemeBg = (id: string) => {
-                            switch(id) {
-                                case 'Cook': return 'bg-orange-50';
-                                case 'Maid': return 'bg-teal-50';
-                                case 'Elder help': return 'bg-purple-50';
-                                case 'Nourish Store': return 'bg-emerald-50';
-                                default: return 'bg-stone-50';
-                            }
-                        };
-                        const activeThemeBg = getActiveThemeBg(activeService);
+             <div className={cn(
+                "sticky top-16 md:top-20 z-45 w-full transition-all duration-300 py-3 md:py-4 border-b border-stone-200/20 backdrop-blur-xl shadow-sm mt-6",
+                activeService === 'Cook' ? 'bg-orange-50/90' : 
+                activeService === 'Maid' ? 'bg-teal-50/90' : 
+                activeService === 'Elder help' ? 'bg-purple-50/90' : 'bg-emerald-50/90'
+             )}>
+                <div className="container mx-auto px-1 md:px-6 relative z-30">
+                    <div className="flex justify-between w-full overflow-visible items-end px-1 md:px-4 gap-1 md:gap-4">
+                        {services.map((service) => {
+                            const isActive = activeService === service.id;
+                            const activeThemeBg = activeService === 'Cook' ? 'bg-orange-50' : activeService === 'Maid' ? 'bg-teal-50' : activeService === 'Elder help' ? 'bg-purple-50' : 'bg-emerald-50';
 
-                        return (
-                            <button
-                                key={service.id}
-                                onClick={() => setActiveService(service.id)}
-                                className={cn(
-                                    "relative flex flex-col items-center transition-all duration-300 ease-in-out cursor-pointer flex-1 min-w-0 border-b-0",
-                                    isActive 
-                                       ? `${activeThemeBg} rounded-t-[1.2rem] md:rounded-t-[2.5rem] pt-4 pb-6 md:pt-6 md:pb-12 shadow-[0_-15px_30px_-5px_rgba(0,0,0,0.4)] z-40 border-0`
-                                       : "bg-white/5 hover:bg-white/10 rounded-[1rem] md:rounded-[2rem] pt-3 pb-4 mx-0.5 md:mx-1 z-10 border border-white/10 text-white backdrop-blur-md transform scale-95 opacity-80 hover:opacity-100 mb-2 md:mb-4"
-                                )}
-                            >
-                                {/* Flared Corner Visual Illusions for Active Tab to blend perfectly */}
-                                {isActive && (
-                                   <>
-                                      {/* Fill the bottom gap */}
-                                      <div className={`absolute inset-x-0 bottom-0 h-4 md:h-6 ${activeThemeBg} z-40 translate-y-[2px] md:translate-y-[3px]`}></div>
-                                      
-                                      {/* Left Flare Curve */}
-                                      <svg 
-                                        className="absolute bottom-0 -left-3 md:-left-4 w-3 h-3 md:w-4 md:h-4 z-50 text-current translate-y-[2px] md:translate-y-[3px]" 
-                                        style={{ color: activeService === 'Cook' ? '#fff7ed' : activeService === 'Maid' ? '#f0fdfa' : activeService === 'Elder help' ? '#faf5ff' : activeService === 'Nourish Store' ? '#ecfdf5' : '#fafaf9' }}
-                                        viewBox="0 0 24 24" 
-                                        fill="currentColor"
-                                      >
-                                          <path d="M0,24 L24,24 L24,0 C24,13.25 13.25,24 0,24 Z" />
-                                      </svg>
+                            return (
+                                <button
+                                    key={service.id}
+                                    onClick={() => setActiveService(service.id)}
+                                    className={cn(
+                                        "relative flex flex-col items-center transition-all duration-300 ease-in-out cursor-pointer flex-1 min-w-0 border-b-0",
+                                        isActive 
+                                           ? `${activeThemeBg} rounded-t-[1.2rem] md:rounded-t-[2.5rem] pt-3 pb-4 md:pt-4 md:pb-6 shadow-[0_-10px_20px_-3px_rgba(0,0,0,0.1)] z-40 border-0`
+                                           : "bg-white/40 hover:bg-white/60 rounded-[1rem] md:rounded-[2rem] pt-2 pb-3 mx-0.5 md:mx-1 z-10 border border-stone-200/40 text-stone-700 backdrop-blur-md transform scale-95 opacity-80 hover:opacity-100 mb-1"
+                                    )}
+                                >
+                                    {/* Flared Corner Visual Illusions for Active Tab to blend perfectly */}
+                                    {isActive && (
+                                       <>
+                                          {/* Fill the bottom gap */}
+                                          <div className={`absolute inset-x-0 bottom-0 h-4 md:h-6 ${activeThemeBg} z-40 translate-y-[2px] md:translate-y-[3px]`}></div>
+                                          
+                                          {/* Left Flare Curve */}
+                                          <svg 
+                                            className="absolute bottom-0 -left-3 md:-left-4 w-3 h-3 md:w-4 md:h-4 z-50 text-current translate-y-[2px] md:translate-y-[3px]" 
+                                            style={{ color: activeService === 'Cook' ? '#fff7ed' : activeService === 'Maid' ? '#f0fdfa' : activeService === 'Elder help' ? '#faf5ff' : '#ecfdf5' }}
+                                            viewBox="0 0 24 24" 
+                                            fill="currentColor"
+                                          >
+                                              <path d="M0,24 L24,24 L24,0 C24,13.25 13.25,24 0,24 Z" />
+                                          </svg>
 
-                                      {/* Right Flare Curve */}
-                                      <svg 
-                                        className="absolute bottom-0 -right-3 md:-right-4 w-3 h-3 md:w-4 md:h-4 z-50 text-current scale-x-[-1] translate-y-[2px] md:translate-y-[3px]" 
-                                        style={{ color: activeService === 'Cook' ? '#fff7ed' : activeService === 'Maid' ? '#f0fdfa' : activeService === 'Elder help' ? '#faf5ff' : activeService === 'Nourish Store' ? '#ecfdf5' : '#fafaf9' }}
-                                        viewBox="0 0 24 24" 
-                                        fill="currentColor"
-                                      >
-                                          <path d="M0,24 L24,24 L24,0 C24,13.25 13.25,24 0,24 Z" />
-                                      </svg>
-                                   </>
-                                )}
-                                
-                                <div className={cn(
-                                    "relative transition-transform duration-300", 
-                                    isActive ? "w-10 h-10 md:w-16 md:h-16 drop-shadow-lg scale-110 mb-2" : "w-8 h-8 md:w-12 md:h-12 mb-1"
-                                )}>
-                                    <Image src={service.icon} alt={service.name} fill className="object-contain" />
-                                </div>
-                                <span className={cn(
-                                    "font-black tracking-tight mt-1 transition-all text-center leading-[1.1] mb-1 md:mb-0",
-                                    isActive ? "text-stone-900 text-[10px] md:text-xl scale-100 px-1" : "text-[8px] md:text-sm font-semibold scale-90 px-0.5"
-                                )}>
-                                    {service.name}
-                                </span>
-                            </button>
-                        );
-                    })}
-                </div>
+                                          {/* Right Flare Curve */}
+                                          <svg 
+                                            className="absolute bottom-0 -right-3 md:-right-4 w-3 h-3 md:w-4 md:h-4 z-50 text-current scale-x-[-1] translate-y-[2px] md:translate-y-[3px]" 
+                                            style={{ color: activeService === 'Cook' ? '#fff7ed' : activeService === 'Maid' ? '#f0fdfa' : activeService === 'Elder help' ? '#faf5ff' : '#ecfdf5' }}
+                                            viewBox="0 0 24 24" 
+                                            fill="currentColor"
+                                          >
+                                              <path d="M0,24 L24,24 L24,0 C24,13.25 13.25,24 0,24 Z" />
+                                          </svg>
+                                       </>
+                                    )}
+                                    
+                                    <div className={cn(
+                                        "relative transition-transform duration-300", 
+                                        isActive ? "w-8 h-8 md:w-12 md:h-12 drop-shadow-sm scale-110 mb-1" : "w-7 h-7 md:w-9 md:h-9 mb-1"
+                                    )}>
+                                        <Image src={service.icon} alt={service.name} fill className="object-contain" />
+                                    </div>
+                                    <span className={cn(
+                                        "font-black tracking-tight mt-1 transition-all text-center leading-[1.1] mb-0.5",
+                                        isActive ? "text-stone-900 text-[10px] md:text-lg scale-100 px-1" : "text-stone-600 text-[8px] md:text-sm font-semibold scale-90 px-0.5"
+                                    )}>
+                                        {service.name}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                 </div>
              </div>
           </section>
 
@@ -886,7 +974,7 @@ export default function WelcomePage() {
                 </Carousel>
                  <div className="text-center mt-12 px-4">
                   <Button asChild variant="cta" size="lg" className="w-full sm:w-auto h-14 px-12 font-bold text-lg shadow-xl touch-manipulation active:scale-95 transition-all">
-                    <Link href="/booking/cook">Book a Cook</Link>
+                    <Link href="/booking">Book a Cook</Link>
                   </Button>
                 </div>
               </section>
@@ -1053,6 +1141,32 @@ export default function WelcomePage() {
         </main>
         
         <div className="md:hidden pb-16"></div>
+
+        {/* Sticky Floating bottom CTA */}
+        {ctaConfig && CTAIcon && (
+          <div className={cn(
+            "fixed z-45 transition-all duration-500 transform",
+            showFloatingCTA 
+              ? "opacity-100 translate-y-0 scale-100" 
+              : "opacity-0 translate-y-10 scale-90 pointer-events-none",
+            "bottom-24 left-1/2 -translate-x-1/2 md:bottom-8 md:right-8 md:left-auto md:translate-x-0"
+          )}>
+            <Button
+              asChild
+              className={cn(
+                "rounded-full px-6 py-4 md:px-8 md:py-6 h-12 md:h-16 text-sm md:text-lg font-black tracking-tight uppercase shadow-2xl flex items-center gap-2 md:gap-3 transition-transform active:scale-95 group border border-white/10",
+                ctaConfig.color
+              )}
+            >
+              <Link href={ctaConfig.href}>
+                <CTAIcon className="w-5 h-5 md:w-6 md:h-6 animate-pulse" />
+                <span>{ctaConfig.text}</span>
+                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1 ml-1" />
+              </Link>
+            </Button>
+          </div>
+        )}
+
         <BottomNav isGuest={true} />
 
         {/* Footer */}

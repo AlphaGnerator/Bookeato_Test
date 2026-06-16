@@ -227,7 +227,7 @@ export function LandingHeader() {
                                 <Link href="/login">Login / Register</Link>
                             </Button>
                             <SheetClose asChild>
-                              <Button variant="cta" size="cta" onClick={() => router.push('/booking/cook')}>
+                              <Button variant="cta" size="cta" onClick={() => router.push('/booking')}>
                                   Book Now
                               </Button>
                             </SheetClose>
