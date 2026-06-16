@@ -594,6 +594,7 @@ function ElderCareRequestForm() {
 }
 
 export default function WelcomePage() {
+  const router = useRouter();
   const firestore = useFirestore();
   const carouselRef = useMemoFirebase(() => firestore ? collection(firestore, 'carouselImages') : null, [firestore]);
   const { data: dbImages } = useCollection<{ title: string; imageUrl: string }>(carouselRef);
@@ -749,7 +750,7 @@ export default function WelcomePage() {
                                         src={slide.imageUrl}
                                         alt={slide.title}
                                         fill
-                                        className="object-cover transition-transform duration-[30s] ease-linear scale-100 group-hover:scale-105"
+                                        className="object-cover object-[78%_center] md:object-center transition-transform duration-[30s] ease-linear scale-100 group-hover:scale-105"
                                         priority={idx === 0}
                                     />
                                   </div>
@@ -775,10 +776,30 @@ export default function WelcomePage() {
                                               </ul>
                                            )}
                                            <div className="flex gap-4 mt-2 items-center flex-wrap">
-                                             <Button asChild variant="cta" size="lg" className="rounded-2xl shadow-2xl touch-manipulation active:scale-95 group/btn border border-white/20 relative z-30 font-bold text-lg h-14 px-8" onClick={(e) => e.stopPropagation()}>
-                                                 <Link href={slide.link} className="flex items-center gap-1">
+                                             <Button 
+                                                 variant="cta" 
+                                                 size="lg" 
+                                                 className="rounded-2xl shadow-2xl touch-manipulation active:scale-95 group/btn border border-white/20 relative z-40 font-bold text-lg h-14 px-8" 
+                                                 onClick={(e) => {
+                                                     e.preventDefault();
+                                                     e.stopPropagation();
+                                                     if (slide.link.startsWith('#')) {
+                                                         const serviceMapping: Record<string, string> = {
+                                                             elder: 'Elder help',
+                                                             pantry: 'Nourish Store'
+                                                         };
+                                                         if (serviceMapping[slide.id]) {
+                                                             setActiveService(serviceMapping[slide.id]);
+                                                         }
+                                                         document.getElementById(slide.link.substring(1))?.scrollIntoView({ behavior: 'smooth' });
+                                                     } else {
+                                                         router.push(slide.link);
+                                                     }
+                                                 }}
+                                             >
+                                                 <span className="flex items-center gap-1">
                                                      {slide.cta} <ArrowRight className="ml-3 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
-                                                 </Link>
+                                                 </span>
                                              </Button>
                                            </div>
                                        </div>
