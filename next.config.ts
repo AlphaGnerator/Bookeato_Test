@@ -3,6 +3,7 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
+  serverExternalPackages: ['genkit', '@genkit-ai/google-genai', '@genkit-ai/next', '@genkit-ai/core', '@genkit-ai/dotprompt', '@genkit-ai/flow'],
   typescript: {
     ignoreBuildErrors: true,
   },
