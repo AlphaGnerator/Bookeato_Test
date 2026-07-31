@@ -1,0 +1,238 @@
+'use client';
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
+import { Loader2, TestTube } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { LoadingState } from "@/components/loading-state";
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { signInWithEmailAndPassword, signInAnonymously } from 'firebase/auth';
+import { doc, collection, addDoc } from 'firebase/firestore';
+import type { UserProfile } from '@/lib/types';
+import { Separator } from '@/components/ui/separator';
+import { defaultUser } from '@/lib/mock-data';
+import { cn } from '@/lib/utils'; // Added for cn utility
+
+const formSchema = z.object({
+  email: z.string().email('Please enter a valid email address.'),
+  password: z.string().min(6, 'Password must be at least 6 characters.'),
+});
+
+export function LoginForm({ onSuccess, className, ...props }: { onSuccess?: () => void; className?: string; [key: string]: any }) { // Modified signature
+  const auth = useAuth();
+  const firestore = useFirestore();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
+  
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { email: '', password: '' },
+  });
+
+  const handleSuccess = async (userId: string) => {
+    // 1. Sync guest pending booking if exists
+    const pendingBookingRaw = localStorage.getItem('bookeato_pending_maid_booking');
+    if (pendingBookingRaw && firestore) {
+      try {
+        const payload = JSON.parse(pendingBookingRaw);
+        payload.customerId = userId;
+        const bookingsRef = collection(firestore, 'customers', userId, 'bookings');
+        await addDoc(bookingsRef, payload);
+        localStorage.removeItem('bookeato_pending_maid_booking');
+        toast({
+          title: "Booking Confirmed!",
+          description: "Your pending maid booking has been successfully placed.",
+        });
+      } catch (e) {
+        console.error("Failed to sync pending booking on login", e);
+      }
+    }
+
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      // Smart fallback for standalone auth pages
+      const hasDraft = localStorage.getItem('culinary-canvas-guest-config');
+      if (hasDraft) {
+        router.push('/booking/checkout');
+      } else {
+        router.push('/dashboard');
+      }
+    }
+  };
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
+    if (!auth) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Auth not initialized.'})
+        setIsLoading(false);
+        return;
+    }
+    try {
+        const credential = await signInWithEmailAndPassword(auth, values.email, values.password);
+        toast({
+            title: 'Login Successful',
+            description: "Welcome back!",
+        });
+        await handleSuccess(credential.user.uid);
+    } catch (error: any) {
+      
+      let description = 'An unknown error occurred. Please try again.';
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        description = 'Invalid email or password. Please check your credentials and try again.';
+      }
+
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: description,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setIsDemoLoading(true);
+    if (!auth || !firestore) {
+        toast({ variant: "destructive", title: "Initialization error", description: "Firebase not ready."});
+        setIsDemoLoading(false);
+        return;
+    }
+    try {
+        const userCredential = await signInAnonymously(auth);
+        const user = userCredential.user;
+        if (user) {
+            const demoCustomerProfile: UserProfile = {
+                id: user.uid,
+                name: "Demo Customer",
+                email: `demo-${user.uid.slice(0,5)}@example.com`,
+                address: '123 Demo Lane, Anytown, 110011',
+                pincode: '110011',
+                calorieTarget: 2200,
+                dietaryNeeds: ['Vegetarian'],
+                foodPreferences: ['North Indian', 'Spicy'],
+                familySize: 2,
+                walletBalance: 5000,
+                subscription: {
+                    status: 'none',
+                    planId: 'daily',
+                    tier: 1,
+                    cost: 0,
+                    startDate: new Date().toISOString(),
+                    expiryDate: new Date().toISOString(),
+                    config: {
+                        people: '2 people',
+                        meals: 'Lunch',
+                        diet: 'Veg',
+                        timeSlot: '12:00',
+                    },
+                },
+            };
+            const customerDocRef = doc(firestore, 'customers', user.uid);
+            // Use non-blocking write. UI will optimistically update via culinary store.
+            setDocumentNonBlocking(customerDocRef, demoCustomerProfile, { merge: true });
+
+            toast({
+                title: "Demo Login Successful",
+                description: "You are now logged in as a demo customer.",
+            });
+            await handleSuccess(user.uid);
+        }
+    } catch (error: any) {
+        console.error("Demo login failed", error);
+        toast({
+            variant: "destructive",
+            title: "Demo Login Failed",
+            description: error.message || "Could not sign in for the demo.",
+        });
+    } finally {
+        setIsDemoLoading(false);
+    }
+  }
+
+  return (
+    <>
+      {isLoading && <LoadingState fullPage type="processing" message="Verifying your digital identity..." />}
+      <div className={cn("grid gap-6", className)} {...props}>
+        <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                    <Input type="email" placeholder="you@example.com" {...field} />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                    <Input type="password" placeholder="••••••••" {...field} />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Login
+            </Button>
+        </form>
+        </Form>
+        <div className="relative my-6">
+            <Separator />
+            <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-card px-2 text-sm text-muted-foreground">
+                OR
+            </span>
+        </div>
+         <Button variant="secondary" className="w-full" onClick={handleDemoLogin} disabled={isDemoLoading}>
+            {isDemoLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+                <TestTube className="mr-2 h-4 w-4" />
+            )}
+            Continue as Demo Customer
+        </Button>
+        <p className="text-center text-sm text-stone-500 mt-4">
+            Don&apos;t have an account?{' '}
+            <Link href={`/signup${searchParams.toString() ? `?${searchParams.toString()}` : ''}`} className="text-primary hover:underline font-bold">
+                Sign up
+            </Link>
+        </p>
+        <p className="text-center text-sm text-stone-500 mt-2">
+            Are you a cook?{' '}
+            <Link href="/cook/login" className="text-stone-700 hover:underline font-bold">
+                Go to Cook Portal
+            </Link>
+        </p>
+      </div>
+    </>
+  );
+}

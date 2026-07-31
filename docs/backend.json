@@ -1,0 +1,344 @@
+{
+  "entities": {
+    "CustomerProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CustomerProfile",
+      "type": "object",
+      "description": "Represents a customer's profile, including their personal details and dietary preferences for meal recommendations and slot bookings.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the CustomerProfile entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The customer's full name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The customer's email address.",
+          "format": "email"
+        },
+        "calorieTarget": {
+          "type": "number",
+          "description": "The customer's daily calorie target."
+        },
+        "dietaryRestrictions": {
+          "type": "array",
+          "description": "A list of dietary restrictions the customer adheres to (e.g., 'vegan', 'gluten-free').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "foodAllergies": {
+          "type": "array",
+          "description": "A list of food items the customer is allergic to (e.g., 'peanuts', 'dairy').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preferredCuisines": {
+          "type": "array",
+          "description": "A list of cuisines the customer prefers (e.g., 'Italian', 'Mexican').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dislikedIngredients": {
+          "type": "array",
+          "description": "A list of ingredients the customer dislikes or wishes to avoid.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preferredMealIds": {
+          "type": "array",
+          "description": "References to Meals that the customer has marked as preferred. (Relationship: CustomerProfile N:N Meal)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the customer profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the customer profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "calorieTarget",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CookingSlot": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CookingSlot",
+      "type": "object",
+      "description": "Represents an available or booked cooking session slot that customers can reserve.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the CookingSlot entity."
+        },
+        "startTime": {
+          "type": "string",
+          "description": "The starting date and time of the cooking slot.",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "description": "The ending date and time of the cooking slot.",
+          "format": "date-time"
+        },
+        "maxCapacity": {
+          "type": "number",
+          "description": "The maximum number of customers that can book this slot."
+        },
+        "location": {
+          "type": "string",
+          "description": "The physical location or kitchen area where the cooking slot takes place (e.g., 'Main Kitchen A')."
+        },
+        "isAvailable": {
+          "type": "boolean",
+          "description": "Indicates if the cooking slot is currently open for new bookings."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the cooking slot was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the cooking slot was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "startTime",
+        "endTime",
+        "maxCapacity",
+        "location",
+        "isAvailable",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Meal": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Meal",
+      "type": "object",
+      "description": "Represents a specific meal, including its recipe details, nutritional information, and dietary compatibility.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Meal entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the meal."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the meal."
+        },
+        "recipeInstructions": {
+          "type": "string",
+          "description": "Detailed instructions on how to prepare the meal."
+        },
+        "prepTimeMinutes": {
+          "type": "number",
+          "description": "The estimated preparation time for the meal in minutes."
+        },
+        "cookTimeMinutes": {
+          "type": "number",
+          "description": "The estimated cooking time for the meal in minutes."
+        },
+        "totalCalories": {
+          "type": "number",
+          "description": "The estimated total calorie count for one serving of the meal."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "A URL to an image representing the meal.",
+          "format": "uri"
+        },
+        "cuisineType": {
+          "type": "string",
+          "description": "The type of cuisine the meal belongs to (e.g., 'Italian', 'Asian', 'Mediterranean')."
+        },
+        "dietaryTags": {
+          "type": "array",
+          "description": "A list of tags indicating dietary compatibility (e.g., 'vegetarian', 'low-carb', 'gluten-free').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mainIngredients": {
+          "type": "array",
+          "description": "A list of key ingredients required for the meal.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the meal information was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the meal information was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "recipeInstructions",
+        "totalCalories",
+        "cuisineType",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Booking": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Booking",
+      "type": "object",
+      "description": "Represents a customer's reservation for a specific cooking slot, potentially associated with a chosen meal.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Booking entity."
+        },
+        "customerId": {
+          "type": "string",
+          "description": "Reference to the CustomerProfile who made the booking. (Relationship: CustomerProfile 1:N Booking)"
+        },
+        "cookingSlotId": {
+          "type": "string",
+          "description": "Reference to the CookingSlot being booked. (Relationship: CookingSlot 1:N Booking)"
+        },
+        "mealId": {
+          "type": "string",
+          "description": "Optional reference to a specific Meal chosen for this booking. (Relationship: Meal 1:N Booking)"
+        },
+        "bookingDateTime": {
+          "type": "string",
+          "description": "The date and time when the booking was placed.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the booking (e.g., 'Pending', 'Confirmed', 'Cancelled', 'Completed')."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Any special requests or notes provided by the customer for this booking."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the booking was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the booking was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "customerId",
+        "cookingSlotId",
+        "bookingDateTime",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}/customerProfile",
+        "definition": {
+          "entityName": "CustomerProfile",
+          "schema": {
+            "$ref": "#/backend/entities/CustomerProfile"
+          },
+          "description": "Stores a customer's personal profile, preferences, and dietary information. This document is private and unique to each authenticated user. Its ID matches the `userId` in the path. Authorization is based on `request.auth.uid` matching `{userId}`."
+        }
+      },
+      {
+        "path": "/meals/{mealId}",
+        "definition": {
+          "entityName": "Meal",
+          "schema": {
+            "$ref": "#/backend/entities/Meal"
+          },
+          "description": "Contains details for all available meals, including recipes, nutritional facts, and dietary tags. This collection is publicly readable for all customers for browsing and recommendations. Assumed to be managed by system administrators.",
+          "params": [
+            {
+              "name": "mealId",
+              "description": "The unique identifier for a specific meal."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/cookingSlots/{cookingSlotId}",
+        "definition": {
+          "entityName": "CookingSlot",
+          "schema": {
+            "$ref": "#/backend/entities/CookingSlot"
+          },
+          "description": "Holds information about available cooking session slots, including time, capacity, and location. This collection is publicly readable for all customers to view and select. Assumed to be managed by system administrators.",
+          "params": [
+            {
+              "name": "cookingSlotId",
+              "description": "The unique identifier for a specific cooking slot."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/bookings/{bookingId}",
+        "definition": {
+          "entityName": "Booking",
+          "schema": {
+            "$ref": "#/backend/entities/Booking"
+          },
+          "description": "Stores individual booking records made by a customer for a cooking slot. The document includes a denormalized 'customerId' field that must match the `{userId}` in the path and `request.auth.uid` for authorization independence. This ensures a user can only read/write their own bookings.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the customer who made the booking."
+            },
+            {
+              "name": "bookingId",
+              "description": "The unique identifier for a specific booking."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore structure prioritizes Authorization Independence, Structural Segregation, and clear Access Modeling to ensure security, scalability, and debuggability. \n\n**Authorization Independence:**\n*   **CustomerProfile:** Each customer profile is stored directly under their user ID (`/users/{userId}/customerProfile`). Authorization relies purely on path-based ownership, where `request.auth.uid` must match `{userId}`. This eliminates any need for `get()` calls to check parent document permissions, making rules atomic and easier to debug.\n*   **Booking:** Bookings are also nested under the user's path (`/users/{userId}/bookings/{bookingId}`). Crucially, the `Booking` document itself will include a `customerId` field, which must match the `{userId}` from the path and `request.auth.uid`. This denormalization ensures that a user's access to their bookings is self-contained within the `Booking` document, further preventing recursive authorization checks with `get()`.\n*   **Meals & CookingSlots:** These collections (`/meals/{mealId}` and `/cookingSlots/{cookingSlotId}`) are designed to be globally readable. Since there's no user-specific authorization tied to individual Meal or CookingSlot documents for customers, no denormalization is required for customer read access. Admin write access would be handled by separate rules, likely leveraging DBAC via a dedicated admin roles collection if needed.\n\n**QAP (Queries as a Policy) Support:**\n*   **Public Data (`/meals`, `/cookingSlots`):** These collections hold data intended for all customers to browse. Since all documents within these collections have the same security posture (publicly readable), `list` operations are inherently secure. A customer can query `/meals` or `/cookingSlots` without concern for filtering out unauthorized documents, as all are authorized for read.\n*   **User-Owned Data (`/users/{userId}/customerProfile`, `/users/{userId}/bookings`):** By nesting `customerProfile` and `bookings` under a specific user's path, `list` operations are implicitly secured. When a user queries `/users/{request.auth.uid}/bookings`, the query naturally limits results to only their own bookings, satisfying the QAP principle by ensuring the database's response set aligns perfectly with the user's authorization.\n\n**Structural Segregation:**\n*   **Private User Data:** `CustomerProfile` and `Booking` are strictly segregated under `/users/{userId}/` to ensure only the owning user can access them.\n*   **Public Catalog Data:** `Meal` and `CookingSlot` data are in top-level collections, `/meals` and `/cookingSlots`, respectively, reflecting their public and read-only nature for customers.\n\nThis design leverages hierarchical paths for user-owned data, explicit denormalization for authorization independence in shared contexts (bookings), and clear segregation for different security postures, resulting in a robust and easily auditable security model."
+  }
+}
