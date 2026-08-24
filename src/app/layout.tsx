@@ -8,6 +8,9 @@ import { CulinaryStoreProvider } from '@/hooks/use-culinary-store';
 export const metadata: Metadata = {
   title: 'Bookeato',
   description: 'Book your slot for cooking and get personalized meal recommendations.',
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
