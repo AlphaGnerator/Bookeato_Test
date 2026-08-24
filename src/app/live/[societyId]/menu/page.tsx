@@ -78,7 +78,7 @@ export default function LiveMenu() {
                   brandStory: data.brandStory 
                }).catch(() => {});
             }
-            fetched.push({ id: docSnap.id, ...data });
+            fetched.push({ ...data, id: docSnap.id });
          });
          setItems(fetched.filter(item => item.inStock));
       } catch (e) {

@@ -101,6 +101,90 @@ export default function ServicesPage() {
                     </div>
                 </div>
 
+                {/* Featured Service Cards */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between px-2">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Featured Service Cards</h3>
+                        <Badge variant="outline" className="bg-amber-50 text-amber-800 font-extrabold text-[9px] border-amber-200">
+                            Top Rated 4.9★
+                        </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {/* Service Card 1: Cook */}
+                        <Card className="rounded-2xl border-amber-200/80 shadow-xs bg-gradient-to-br from-amber-50/70 via-white to-orange-50/30 p-4 space-y-3 hover:shadow-md transition-all">
+                            <div className="flex items-center justify-between">
+                                <div className="p-2.5 rounded-xl bg-amber-500 text-stone-950 font-black text-xs shadow-xs">
+                                    <ChefHat className="w-5 h-5 text-white" />
+                                </div>
+                                <Badge className="bg-amber-100 text-amber-900 font-extrabold text-[9px] border-none">
+                                    Starting ₹349
+                                </Badge>
+                            </div>
+                            <div>
+                                <h4 className="font-extrabold text-stone-900 text-sm">Private Cook Service</h4>
+                                <p className="text-[10px] text-stone-500 font-medium leading-relaxed mt-0.5">
+                                    Hygiene-certified home chefs for North & South Indian, regional & continental meals.
+                                </p>
+                            </div>
+                            <Button 
+                                onClick={() => router.push('/booking/menu')}
+                                className="w-full bg-stone-950 hover:bg-amber-600 text-white font-bold text-xs h-8 rounded-xl active:scale-95 transition-all"
+                            >
+                                Book Cook Service
+                            </Button>
+                        </Card>
+
+                        {/* Service Card 2: Maid */}
+                        <Card className="rounded-2xl border-emerald-200/80 shadow-xs bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/30 p-4 space-y-3 hover:shadow-md transition-all">
+                            <div className="flex items-center justify-between">
+                                <div className="p-2.5 rounded-xl bg-emerald-600 text-white font-black text-xs shadow-xs">
+                                    <Sparkles className="w-5 h-5" />
+                                </div>
+                                <Badge className="bg-emerald-100 text-emerald-900 font-extrabold text-[9px] border-none">
+                                    Starting ₹299
+                                </Badge>
+                            </div>
+                            <div>
+                                <h4 className="font-extrabold text-stone-900 text-sm">Maid & Cleaning Help</h4>
+                                <p className="text-[10px] text-stone-500 font-medium leading-relaxed mt-0.5">
+                                    Daily dusting, utensil cleaning, mopping & reliable household chore assistance.
+                                </p>
+                            </div>
+                            <Button 
+                                onClick={() => router.push('/booking/maid')}
+                                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs h-8 rounded-xl active:scale-95 transition-all"
+                            >
+                                Book Maid Help
+                            </Button>
+                        </Card>
+
+                        {/* Service Card 3: Elder Care */}
+                        <Card className="rounded-2xl border-rose-200/80 shadow-xs bg-gradient-to-br from-rose-50/70 via-white to-pink-50/30 p-4 space-y-3 hover:shadow-md transition-all">
+                            <div className="flex items-center justify-between">
+                                <div className="p-2.5 rounded-xl bg-rose-600 text-white font-black text-xs shadow-xs">
+                                    <Heart className="w-5 h-5" />
+                                </div>
+                                <Badge className="bg-rose-100 text-rose-900 font-extrabold text-[9px] border-none">
+                                    Free 2-hr Trial
+                                </Badge>
+                            </div>
+                            <div>
+                                <h4 className="font-extrabold text-stone-900 text-sm">Elder Care Companion</h4>
+                                <p className="text-[9px] text-stone-500 font-medium leading-relaxed mt-0.5">
+                                    Empathetic companion care, medication tracking & walking assistance for elders.
+                                </p>
+                            </div>
+                            <Button 
+                                onClick={() => router.push('/booking/elder-care')}
+                                className="w-full bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs h-8 rounded-xl active:scale-95 transition-all"
+                            >
+                                Book Free Trial
+                            </Button>
+                        </Card>
+                    </div>
+                </div>
+
                 {/* Marketplace */}
                 <div className="space-y-6">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 pl-4">Bookeato Marketplace</h3>
@@ -124,33 +208,8 @@ export default function ServicesPage() {
                                         Shop Healthy <ChevronRight className="ml-2 w-4 h-4" />
                                     </Button>
                                 </div>
-                            </Card>
+                             </Card>
                         </Link>
-                    </div>
-                </div>
-
-                {/* Specialized Care */}
-                <div className="space-y-6">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 pl-4">Dedicated Assistance</h3>
-                    <div className="grid grid-cols-1 gap-4 opacity-75 grayscale-[0.5]">
-                        <div className="relative group/geriatric cursor-not-allowed">
-                            <Card className="rounded-[2.5rem] border-stone-100 bg-white shadow-sm overflow-hidden p-8 flex flex-col md:flex-row items-center gap-6">
-                                <div className="p-4 rounded-3xl bg-red-50 text-red-600">
-                                    <Heart className="w-10 h-10" />
-                                </div>
-                                <div className="flex-grow text-center md:text-left">
-                                    <div className="flex items-center justify-center md:justify-start gap-3 mb-1">
-                                        <h4 className="text-2xl font-black text-stone-900 leading-tight">Geriatric Care</h4>
-                                        <Badge className="bg-stone-100 text-stone-500 font-black border-none px-3 py-1 rounded-full text-[9px] uppercase tracking-widest">
-                                            Coming Soon
-                                        </Badge>
-                                    </div>
-                                    <p className="text-sm font-bold text-stone-400 uppercase tracking-widest leading-relaxed">
-                                        Professional, empathetic care for the elderly. Bringing peace of mind to your family.
-                                    </p>
-                                </div>
-                            </Card>
-                        </div>
                     </div>
                 </div>
             </div>

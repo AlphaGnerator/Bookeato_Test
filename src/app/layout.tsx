@@ -30,6 +30,35 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              window.addEventListener('error', function(e) {
+                if (e && (e.message && e.message.indexOf('ChunkLoadError') !== -1 || e.target && e.target.tagName === 'SCRIPT')) {
+                  var lastReload = sessionStorage.getItem('chunk_reload_ts');
+                  var now = Date.now();
+                  if (!lastReload || (now - parseInt(lastReload)) > 5000) {
+                    sessionStorage.setItem('chunk_reload_ts', now.toString());
+                    window.location.reload();
+                  }
+                }
+              }, true);
+              window.addEventListener('unhandledrejection', function(e) {
+                if (e && e.reason && (e.reason.name === 'ChunkLoadError' || (e.reason.message && e.reason.message.indexOf('Loading chunk') !== -1))) {
+                  var lastReload = sessionStorage.getItem('chunk_reload_ts');
+                  var now = Date.now();
+                  if (!lastReload || (now - parseInt(lastReload)) > 5000) {
+                    sessionStorage.setItem('chunk_reload_ts', now.toString());
+                    window.location.reload();
+                  }
+                }
+                if (e && e.reason && e.reason.message && e.reason.message.indexOf('ca9') !== -1) {
+                  e.preventDefault();
+                }
+              });
+            })();
+          `
+        }} />
       </head>
       <body className="font-body antialiased" suppressHydrationWarning>
         <div className="gradient-bg"></div>

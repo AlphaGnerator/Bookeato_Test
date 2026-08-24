@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
-import { Loader2, TestTube } from 'lucide-react';
+import { Loader2, TestTube, Sparkles } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { LoadingState } from "@/components/loading-state";
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -212,13 +212,17 @@ export function LoginForm({ onSuccess, className, ...props }: { onSuccess?: () =
                 OR
             </span>
         </div>
-         <Button variant="secondary" className="w-full" onClick={handleDemoLogin} disabled={isDemoLoading}>
+        <Button 
+            className="w-full h-12 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-sm shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2" 
+            onClick={handleDemoLogin} 
+            disabled={isDemoLoading}
+        >
             {isDemoLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-                <TestTube className="mr-2 h-4 w-4" />
+                <Sparkles className="w-5 h-5 text-amber-300" />
             )}
-            Continue as Demo Customer
+            Instant Demo Customer Login → Dashboard
         </Button>
         <p className="text-center text-sm text-stone-500 mt-4">
             Don&apos;t have an account?{' '}

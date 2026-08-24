@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from './ui/sheet';
-import { Menu, LogOut, User as UserIcon, Activity, ArrowRight } from 'lucide-react';
+import { Menu, LogOut, User as UserIcon, Activity, ArrowRight, ChevronDown, LogIn, UserPlus, ChefHat, Store, User } from 'lucide-react';
 import { useUser, useAuth } from '@/firebase';
 import { useCulinaryStore } from '@/hooks/use-culinary-store';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,8 @@ import { useState, useEffect, useRef } from 'react';
 
 const getNavLinks = () => [
   { href: '/', label: 'Home' },
+  { href: '/live', label: '🔴 Live Kitchen' },
+  { href: '/marketplace', label: '🛒 Marketplace' },
   { href: '/services', label: 'Services', isDropdown: true },
   { href: '/partner-signup', label: 'Partners' },
   { href: '/about', label: 'About Us' },
@@ -95,10 +97,11 @@ export function LandingHeader() {
                          {link.label}
                      </DropdownMenuTrigger>
                      <DropdownMenuContent>
+                         <DropdownMenuItem onClick={() => router.push('/live')} className="font-bold text-orange-600">🔴 Bookeato Live Kitchen</DropdownMenuItem>
                          <DropdownMenuItem onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Cook' })); router.push('/#services-grid'); }}>Cooks</DropdownMenuItem>
                          <DropdownMenuItem onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Maid' })); router.push('/#services-grid'); }}>Maids</DropdownMenuItem>
                          <DropdownMenuItem onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Elder help' })); router.push('/#services-grid'); }}>Elder Care</DropdownMenuItem>
-                         <DropdownMenuItem onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Marketplace' })); router.push('/#services-grid'); }}>Marketplace</DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => router.push('/marketplace')}>Marketplace</DropdownMenuItem>
                      </DropdownMenuContent>
                  </DropdownMenu>
             ) : (
@@ -115,7 +118,8 @@ export function LandingHeader() {
             )
           ))}
         </nav>
-        <div className="hidden md:flex items-center gap-4">
+        {/* Desktop Top-Right Actions */}
+        <div className="hidden md:flex items-center gap-3">
           {isLoading ? (
             <Skeleton className="h-10 w-10 rounded-full" />
           ) : firebaseUser ? (
@@ -156,20 +160,82 @@ export function LandingHeader() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <>
+            <div className="flex items-center gap-2">
               <Button asChild variant="secondaryCta" size="secondaryCta">
-                <Link href="/login">Login</Link>
+                <Link href="/login">
+                  <LogIn className="w-4 h-4 mr-1.5 inline" />
+                  Login
+                </Link>
               </Button>
               <Button asChild variant="cta" size="secondaryCta">
-                <Link href="/signup">Register</Link>
+                <Link href="/signup">
+                  <UserPlus className="w-4 h-4 mr-1.5 inline" />
+                  Register
+                </Link>
               </Button>
-            </>
+            </div>
           )}
         </div>
-        <div className="md:hidden">
+
+        {/* Mobile Top-Right Actions */}
+        <div className="flex md:hidden items-center gap-2">
+          {isLoading ? (
+            <Skeleton className="h-8 w-8 rounded-full" />
+          ) : firebaseUser ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={`https://picsum.photos/seed/${firebaseUser.uid}/40/40`} alt={getDisplayName()} />
+                    <AvatarFallback>{getAvatarName()}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <p className="text-sm font-semibold">{getDisplayName()}</p>
+                  <p className="text-xs text-muted-foreground">{firebaseUser.email || 'Welcome'}</p>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard"><Activity className="mr-2 h-4 w-4" />Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile"><UserIcon className="mr-2 h-4 w-4" />Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}><LogOut className="mr-2 h-4 w-4" />Logout</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="cta" size="sm" className="h-8 px-3 text-xs font-bold rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-1">
+                  <User className="w-3.5 h-3.5" />
+                  <span>Login / Register</span>
+                  <ChevronDown className="w-3 h-3 opacity-70" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/login" className="flex items-center gap-2 font-bold">
+                    <LogIn className="w-4 h-4 text-emerald-600" />
+                    <span>Login</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/signup" className="flex items-center gap-2 font-bold">
+                    <UserPlus className="w-4 h-4 text-amber-600" />
+                    <span>Register</span>
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-slate-300 hover:text-white hover:bg-slate-800">
+              <Button variant="ghost" size="icon" className="text-slate-300 hover:text-white hover:bg-slate-800 h-9 w-9">
                 <Menu />
                 <span className="sr-only">Open menu</span>
               </Button>
@@ -199,7 +265,7 @@ export function LandingHeader() {
                                  <SheetClose asChild><Button variant="link" className="justify-start p-0 h-auto text-base font-medium text-text-muted hover:text-text-primary" onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Cook' })); router.push('/#services-grid'); }}>Cooks</Button></SheetClose>
                                  <SheetClose asChild><Button variant="link" className="justify-start p-0 h-auto text-base font-medium text-text-muted hover:text-text-primary" onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Maid' })); router.push('/#services-grid'); }}>Maids</Button></SheetClose>
                                  <SheetClose asChild><Button variant="link" className="justify-start p-0 h-auto text-base font-medium text-text-muted hover:text-text-primary" onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Elder help' })); router.push('/#services-grid'); }}>Elder Care</Button></SheetClose>
-                                 <SheetClose asChild><Button variant="link" className="justify-start p-0 h-auto text-base font-medium text-text-muted hover:text-text-primary" onClick={() => { window.dispatchEvent(new CustomEvent('bookeato_service_change', { detail: 'Marketplace' })); router.push('/#services-grid'); }}>Marketplace</Button></SheetClose>
+                                 <SheetClose asChild><Button variant="link" className="justify-start p-0 h-auto text-base font-medium text-text-muted hover:text-text-primary" onClick={() => router.push('/marketplace')}>Marketplace</Button></SheetClose>
                              </div>
                          </div>
                     ) : (
@@ -250,15 +316,19 @@ export function LandingHeader() {
                             </Button>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-4">
-                            <Button asChild variant="secondaryCta" size="cta">
-                                <Link href="/login">Login / Register</Link>
+                        <div className="flex flex-col gap-3">
+                            <Button asChild variant="cta" size="cta">
+                                <Link href="/login" className="flex items-center justify-center gap-2">
+                                  <LogIn className="w-4 h-4" />
+                                  Login
+                                </Link>
                             </Button>
-                            <SheetClose asChild>
-                              <Button variant="cta" size="cta" onClick={() => router.push('/booking')}>
-                                  Book Now
-                              </Button>
-                            </SheetClose>
+                            <Button asChild variant="secondaryCta" size="cta">
+                                <Link href="/signup" className="flex items-center justify-center gap-2">
+                                  <UserPlus className="w-4 h-4" />
+                                  Register
+                                </Link>
+                            </Button>
                         </div>
                     )}
                 </div>

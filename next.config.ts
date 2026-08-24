@@ -3,6 +3,7 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
+  allowedDevOrigins: ['localhost:3000', '127.0.0.1:3000', '192.168.1.41:3000'],
   serverExternalPackages: ['genkit', '@genkit-ai/google-genai', '@genkit-ai/next', '@genkit-ai/core', '@genkit-ai/dotprompt', '@genkit-ai/flow'],
   typescript: {
     ignoreBuildErrors: true,

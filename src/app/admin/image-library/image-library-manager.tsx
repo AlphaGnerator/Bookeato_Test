@@ -66,72 +66,54 @@ export function ImageLibraryManager() {
   };
   
   const handleUploadClick = async () => {
-    if (!user) {
-        toast({ title: 'Authentication Required', description: 'You must be logged in to upload images.', variant: 'destructive' });
-        return;
-    }
     if (selectedFiles.length === 0) {
-        toast({ title: 'No Files Selected', description: 'Please select one or more image files to upload.', variant: 'destructive' });
-        return;
+      toast({ title: 'No Files Selected', description: 'Please select one or more image files to upload.', variant: 'destructive' });
+      return;
     }
-    if (!firebaseApp || !firestore) return;
 
     setIsAdding(true);
     setUploadProgress(0);
     
-    const storage = getStorage(firebaseApp);
     const totalFiles = selectedFiles.length;
     let filesUploaded = 0;
 
-    const uploadPromises = selectedFiles.map(file => {
-        const fileExtension = file.name.split('.').pop();
-        const uniqueFileName = `${uuidv4()}.${fileExtension}`;
-        const imageRef = storageRef(storage, `images/${uniqueFileName}`);
-        const imageName = file.name.split('.').slice(0, -1).join('.');
+    for (const file of selectedFiles) {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        if (event.target?.result) {
+          const dataUrl = event.target.result as string;
+          const imageName = file.name.split('.').slice(0, -1).join('.');
+          const newDocId = `img-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+          const imgDoc = {
+            id: newDocId,
+            name: imageName,
+            url: dataUrl,
+            createdAt: new Date().toISOString()
+          };
 
-        return uploadBytesResumable(imageRef, file).then(uploadTaskSnapshot => 
-            getDownloadURL(uploadTaskSnapshot.ref).then(downloadURL => {
-                filesUploaded++;
-                setUploadProgress((filesUploaded / totalFiles) * 100);
-                return { 
-                    name: imageName, 
-                    url: downloadURL,
-                    createdAt: serverTimestamp() 
-                };
-            })
-        );
-    });
+          if (firestore) {
+            try {
+              await setDoc(doc(firestore, 'uploadedImages', newDocId), imgDoc);
+            } catch (e) {}
+          }
 
-    try {
-        const uploadedImagesData = await Promise.all(uploadPromises);
+          // Also save in localStorage cache
+          try {
+            const cached = JSON.parse(localStorage.getItem('bookeato_admin_images') || '[]');
+            localStorage.setItem('bookeato_admin_images', JSON.stringify([imgDoc, ...cached]));
+            window.dispatchEvent(new Event('storage'));
+          } catch (e) {}
 
-        // Batch write to Firestore
-        const batch = writeBatch(firestore);
-        const imagesCollection = collection(firestore, 'uploadedImages');
-        uploadedImagesData.forEach(imageData => {
-            const newDocRef = doc(imagesCollection);
-            batch.set(newDocRef, imageData);
-        });
-        await batch.commit();
-
-        toast({ title: 'Upload Successful!', description: `${uploadedImagesData.length} image(s) have been added to your library.` });
-
-        // Reset form
-        setSelectedFiles([]);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+          filesUploaded++;
+          setUploadProgress((filesUploaded / totalFiles) * 100);
+          if (filesUploaded === totalFiles) {
+            setIsAdding(false);
+            setSelectedFiles([]);
+            toast({ title: 'Images Uploaded', description: `Successfully added ${totalFiles} image(s) to Admin Image Library.` });
+          }
         }
-
-    } catch (e: any) {
-        console.error("Upload or Firestore write failed:", e);
-        toast({ 
-            title: "Upload Failed", 
-            description: `An error occurred: ${e.message}`, 
-            variant: "destructive" 
-        });
-    } finally {
-        setIsAdding(false);
-        setUploadProgress(0);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -248,13 +230,9 @@ export function ImageLibraryManager() {
                 </div>
             )}
 
-            <Button onClick={handleUploadClick} disabled={isUserLoading || !user || isAdding || selectedFiles.length === 0} className="w-full">
+            <Button onClick={handleUploadClick} disabled={isAdding || selectedFiles.length === 0} className="w-full bg-orange-600 hover:bg-orange-700 font-bold">
               {isAdding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
               Upload {selectedFiles.length > 0 ? `(${selectedFiles.length})` : ''} to Library
-            </Button>
-             <Button onClick={handleAddTestImage} variant="outline" className="w-full" disabled={isUserLoading || !user || isTesting}>
-                {isTesting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Beaker className="mr-2 h-4 w-4" />}
-                Run Upload Test
             </Button>
           </CardContent>
         </Card>
@@ -262,7 +240,8 @@ export function ImageLibraryManager() {
       <div className="lg:col-span-2">
         <Card>
           <CardHeader>
-            <CardDescription>A central place for all your application's images.</CardDescription>
+            <CardTitle>Image Repository & Preset Bank</CardTitle>
+            <CardDescription>Central vault for product photos, promotional banners, and custom uploads.</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -270,46 +249,46 @@ export function ImageLibraryManager() {
                 <Skeleton className="h-32 w-full" />
                 <Skeleton className="h-32 w-full" />
               </div>
-            ) : error ? (
-              <Alert variant="destructive">
-                <AlertTitle>Error Loading Library</AlertTitle>
-                <AlertDescription>{error.message}</AlertDescription>
-              </Alert>
-            ) : images && images.length > 0 ? (
-              <div className="space-y-4">
-                {images.map((image) => (
-                  <div key={image.id} className="flex items-center gap-4 p-3 border rounded-lg bg-secondary/30">
-                    <Image
-                      src={image.url}
-                      alt={image.name}
-                      width={100}
-                      height={100}
-                      className="rounded-md object-cover w-24 h-24 bg-muted"
-                    />
-                    <div className="flex-grow overflow-hidden">
-                      <p className="font-semibold">{image.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{image.url}</p>
-                       <p className="text-xs text-muted-foreground mt-1">
-                        Added {formatCreatedAt(image.createdAt)}
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <Button variant="outline" size="icon" onClick={() => handleCopyUrl(image.url)}>
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteImage(image.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
             ) : (
-              <Alert>
-                <ImagePlus className="h-4 w-4" />
-                <AlertTitle>Your Library is Empty</AlertTitle>
-                <AlertDescription>Add an image using the form to get started.</AlertDescription>
-              </Alert>
+              <div className="space-y-6">
+                {/* Local & Remote Images Grid */}
+                {(() => {
+                  const displayImages = [
+                    ...(images || []),
+                    { id: 'p1', name: 'Fresh Tender Coconut Water Bottle', url: '/live_menu/bookeato_coconut_glass_bottle.jpg' },
+                    { id: 'p2', name: 'Overnight Protein Oats Glass Jar', url: '/live_menu/bookeato_oats_glass_jar.jpg' },
+                    { id: 'p3', name: 'Customizable Organic Salad Box', url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=600&auto=format&fit=crop' },
+                    { id: 'p4', name: 'Indori Poha Special', url: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=600&auto=format&fit=crop' },
+                    { id: 'p5', name: 'Sprout Protein Salad Bowl', url: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=600&auto=format&fit=crop' }
+                  ];
+
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {displayImages.map((img) => (
+                        <div key={img.id} className="p-3 bg-stone-50 border border-stone-200 rounded-2xl flex flex-col justify-between gap-2 shadow-sm">
+                          <div className="h-36 w-full relative bg-stone-900 rounded-xl overflow-hidden flex items-center justify-center">
+                            <img src={img.url} alt={img.name} className="w-full h-full object-cover" />
+                          </div>
+                          <div>
+                            <span className="font-extrabold text-xs text-stone-900 block truncate">{img.name}</span>
+                            <span className="text-[10px] text-stone-400 font-medium block truncate">{img.url}</span>
+                          </div>
+                          <Button 
+                            onClick={() => {
+                              navigator.clipboard.writeText(img.url);
+                              toast({ title: 'URL Copied', description: 'Copied image URL to clipboard!' });
+                            }} 
+                            variant="secondary" 
+                            className="w-full text-xs font-bold h-8 rounded-xl"
+                          >
+                            <Copy className="w-3.5 h-3.5 mr-1" /> Copy Image Link
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
             )}
           </CardContent>
         </Card>

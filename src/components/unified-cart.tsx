@@ -80,7 +80,7 @@ export function UnifiedCart() {
                         <div className="space-y-6">
                             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Marketplace Products</h3>
                             {marketplaceCart.map((item, idx) => (
-                                <div key={item.product.id} className="group flex flex-col gap-3">
+                                <div key={`${item.product.id}_${idx}`} className="group flex flex-col gap-3">
                                     <div className="flex justify-between items-start">
                                         <div className="flex gap-4">
                                             <div className="w-14 h-14 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-600 relative overflow-hidden">
@@ -88,9 +88,21 @@ export function UnifiedCart() {
                                             </div>
                                             <div>
                                                 <h4 className="font-black text-stone-900 text-lg leading-tight">{item.product.name}</h4>
+                                                {item.product.shortDescription && (
+                                                    <p className="text-xs text-stone-500 font-medium line-clamp-1 mt-0.5">{item.product.shortDescription}</p>
+                                                )}
                                                 <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-0.5">
                                                     ₹{item.product.price} • {item.product.unit}
                                                 </p>
+                                                {item.selectedCustomizations && item.selectedCustomizations.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1 mt-1.5">
+                                                        {item.selectedCustomizations.map((cust, cIdx) => (
+                                                            <Badge key={cIdx} variant="secondary" className="bg-emerald-50 text-emerald-800 text-[9px] font-bold border-emerald-100">
+                                                                {cust.optionLabel}
+                                                            </Badge>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         <Button 
@@ -123,7 +135,11 @@ export function UnifiedCart() {
                                                 <Plus className="w-3 h-3" />
                                             </Button>
                                         </div>
-                                        <span className="font-black text-stone-900">₹{item.product.price * item.quantity}</span>
+                                        {(() => {
+                                            const customModifiers = item.selectedCustomizations?.reduce((sum, c) => sum + (c.priceModifier || 0), 0) || 0;
+                                            const itemPrice = (item.product.price + customModifiers) * item.quantity;
+                                            return <span className="font-black text-stone-900">₹{itemPrice}</span>;
+                                        })()}
                                     </div>
                                     {idx < marketplaceCart.length - 1 && <Separator className="mt-4 opacity-50" />}
                                 </div>
@@ -188,12 +204,7 @@ export function UnifiedCart() {
                             className="w-full h-16 rounded-[2rem] bg-stone-950 text-white font-black text-xl shadow-2xl shadow-stone-300 active:scale-95 transition-all flex items-center justify-center gap-3 hover:bg-orange-600 transition-colors"
                             onClick={() => {
                                 setIsOpen(false);
-                                if (serviceCount > 0) {
-                                    const latestDate = draftBookings[draftBookings.length - 1].bookingDate;
-                                    router.push(`/booking/summary/${format(new Date(latestDate), 'yyyy-MM-dd')}`);
-                                } else {
-                                    router.push('/marketplace/checkout');
-                                }
+                                router.push('/checkout');
                             }}
                         >
                             Proceed to Checkout <ArrowRight className="w-6 h-6" />

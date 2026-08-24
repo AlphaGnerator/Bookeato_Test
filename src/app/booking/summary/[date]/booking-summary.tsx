@@ -307,47 +307,10 @@ export function BookingSummary({ date }: { date: string }) {
   const isAddressMissing = !currentAddress || currentAddress.trim().length < 5;
 
   const handleConfirmAndProceed = async () => {
-    if (!originalDraft || !priceScenario) return;
-
-    if (!firebaseUser) {
-        setIsAuthDialogOpen(true);
-        return;
-    }
-
-    if (!hasSufficientBalance) {
-        router.push(`/wallet?redirect=${window.location.pathname}&requiredAmount=${priceScenario.current_bill.amount - (user.walletBalance || 0)}`);
-        return;
-    }
-    
-    setIsSubmitting(true);
-    try {
-        const isSubscriber = !!(user.subscription && (user.subscription.status === 'active' || user.subscription.status === 'upcoming'));
-        const planTypeToUse = isSubscriber ? (user.subscription!.planId as 'day' | 'weekly' | 'monthly') : selectedPlan;
-        
-        const checkoutData = {
-            type: planTypeToUse,
-            cost: priceScenario.current_bill.amount,
-            configuration: {
-                ...(isSubscriber ? user.subscription!.config : {
-                    people: `${familySizeForCalc} people`,
-                    meals: originalDraft.mealType,
-                    diet: 'Veg',
-                }),
-                timeSlot: format(new Date(originalDraft.bookingDate), 'HH:mm'),
-            },
-            startDate: new Date(originalDraft.bookingDate)
-        };
-
-        await executeUnifiedCheckout(checkoutData, 0);
-        toast({ title: "Booking Confirmed!", description: "Your cook has been requested." });
-        router.push('/dashboard');
-    } catch (error: any) {
-        console.error("Checkout error:", error);
-    } finally {
-        setIsSubmitting(false);
-    }
+    if (!originalDraft) return;
+    router.push('/checkout');
   }
-  
+
   const handleBackToMenu = () => {
     const params = new URLSearchParams(window.location.search);
     router.push(`/booking/menu?date=${date}&${params.toString()}`);

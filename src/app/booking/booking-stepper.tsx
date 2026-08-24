@@ -302,7 +302,48 @@ export function BookingStepper() {
           </div>
         </div>
 
-        {/* 2. Meals Section */}
+        {/* 2. People Section */}
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <h3 className="text-xl font-bold flex items-center gap-2 text-stone-800">
+              <Users className="h-5 w-5 text-[#3bc166]"/> 
+              {plan === 'day' ? 'How many people?' : 'How many people are there at home?'}
+            </h3>
+            {plan !== 'day' && <p className="text-stone-400 text-xs font-semibold">This will be locked for the duration of the plan.</p>}
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            {peopleOptions.map((option) => (
+              <ChoiceButton key={option} label={option} isSelected={people === option} onClick={() => setPeople(option)} />
+            ))}
+          </div>
+        </div>
+
+        {/* 3. Diet Section */}
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <h3 className="text-xl font-bold flex items-center gap-2 text-stone-800">
+              <Leaf className="h-5 w-5 text-[#3bc166]"/> Veg/Non Veg?
+            </h3>
+            {plan !== 'day' && <p className="text-stone-400 text-xs font-semibold">Your preference for this subscription period.</p>}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {dietOptions.map((option) => (
+              <ChoiceButton key={option} label={option} isSelected={diet === option} onClick={() => setDiet(option)} />
+            ))}
+          </div>
+        </div>
+
+        {diet === 'Veg + Non-Veg' && plan !== 'day' && (
+          <Alert variant="destructive" className="bg-amber-500/5 border-amber-500/20 text-amber-700 rounded-2xl p-4">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertTitle className="text-amber-800 font-bold">Non-Veg Selection</AlertTitle>
+            <AlertDescription className="text-amber-700">
+              Note: Complex meat dishes may require additional time overage. Final cost will be confirmed after dish selection.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* 4. Meals Section */}
         <div className="space-y-4">
           <div className="space-y-1">
             <h3 className="text-xl font-bold flex items-center gap-2 text-stone-800">
@@ -347,47 +388,6 @@ export function BookingStepper() {
             ))}
           </div>
         </div>
-
-        {/* 3. People Section */}
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <h3 className="text-xl font-bold flex items-center gap-2 text-stone-800">
-              <Users className="h-5 w-5 text-[#3bc166]"/> 
-              {plan === 'day' ? 'How many people?' : 'How many people are there at home?'}
-            </h3>
-            {plan !== 'day' && <p className="text-stone-400 text-xs font-semibold">This will be locked for the duration of the plan.</p>}
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {peopleOptions.map((option) => (
-              <ChoiceButton key={option} label={option} isSelected={people === option} onClick={() => setPeople(option)} />
-            ))}
-          </div>
-        </div>
-
-        {/* 4. Diet Section */}
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <h3 className="text-xl font-bold flex items-center gap-2 text-stone-800">
-              <Leaf className="h-5 w-5 text-[#3bc166]"/> Veg/Non Veg?
-            </h3>
-            {plan !== 'day' && <p className="text-stone-400 text-xs font-semibold">Your preference for this subscription period.</p>}
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {dietOptions.map((option) => (
-              <ChoiceButton key={option} label={option} isSelected={diet === option} onClick={() => setDiet(option)} />
-            ))}
-          </div>
-        </div>
-
-        {diet === 'Veg + Non-Veg' && plan !== 'day' && (
-          <Alert variant="destructive" className="bg-amber-500/5 border-amber-500/20 text-amber-700 rounded-2xl p-4">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-800 font-bold">Non-Veg Selection</AlertTitle>
-            <AlertDescription className="text-amber-700">
-              Note: Complex meat dishes may require additional time overage. Final cost will be confirmed after dish selection.
-            </AlertDescription>
-          </Alert>
-        )}
 
         {/* 5. Date & Time Slots */}
         <>

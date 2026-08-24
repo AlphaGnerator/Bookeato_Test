@@ -258,18 +258,4 @@ export type Transaction = {
     };
 }
 
-export type MarketplaceProduct = {
-    id: string;
-    name: string;
-    price: number;
-    image: string;
-    description: string;
-    ingredients: string[];
-    isHealthy: boolean;
-    unit?: string;
-}
-
-export type MarketplaceCartItem = {
-    product: MarketplaceProduct;
-    quantity: number;
-}
+export * from '@/types/marketplace';

@@ -115,10 +115,84 @@ export function ItemEditorDialog({ isOpen, onClose, onSave, editingItem }: ItemE
                 <option value="Healthy Signatures">Healthy Signatures</option>
               </select>
             </div>
-            <div className="space-y-2">
-              <Label>Image URL (or path)</Label>
-              <Input required name="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="/live_menu/item.png" className="bg-white" />
+          {/* Image Upload & Preview Section */}
+          <div className="space-y-3 bg-white p-4 rounded-2xl border border-stone-200">
+            <Label className="font-extrabold text-stone-900 flex items-center justify-between">
+              <span>Product Image</span>
+              <span className="text-[10px] text-stone-400 font-normal">Upload file, paste URL, or pick from gallery</span>
+            </Label>
+
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              {/* Image Preview Box */}
+              <div className="w-24 h-24 rounded-2xl bg-stone-100 border border-stone-300 overflow-hidden shrink-0 relative flex items-center justify-center shadow-inner">
+                {formData.imageUrl ? (
+                  <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-[10px] text-stone-400 font-bold text-center px-1">No Image Selected</span>
+                )}
+              </div>
+
+              {/* Upload & Inputs */}
+              <div className="flex-1 space-y-2.5 w-full">
+                <div className="flex items-center gap-2">
+                  <Input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          if (event.target?.result) {
+                            setFormData(prev => ({ ...prev, imageUrl: event.target!.result as string }));
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="bg-stone-50 border-stone-200 text-xs font-semibold cursor-pointer file:bg-orange-500 file:text-white file:border-none file:rounded-lg file:px-2 file:py-1 file:font-bold file:text-xs hover:file:bg-orange-600"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-stone-400 uppercase">Or Image URL / Path</span>
+                  <Input 
+                    required 
+                    name="imageUrl" 
+                    value={formData.imageUrl} 
+                    onChange={handleChange} 
+                    placeholder="https://images.unsplash.com/... or /live_menu/item.jpg" 
+                    className="bg-stone-50 border-stone-200 text-xs font-mono" 
+                  />
+                </div>
+              </div>
             </div>
+
+            {/* Quick Gallery Presets */}
+            <div className="space-y-1.5 border-t border-stone-100 pt-3">
+              <span className="text-[10px] font-bold text-stone-500 uppercase block">Quick Select High-Res Presets</span>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { name: '🥥 Coconut Bottle', url: '/live_menu/bookeato_coconut_glass_bottle.jpg' },
+                  { name: '🥗 Salad Bowl', url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=600&auto=format&fit=crop' },
+                  { name: '🫙 Oats Jar', url: '/live_menu/bookeato_oats_glass_jar.jpg' },
+                  { name: '🍛 Indori Poha', url: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=600&auto=format&fit=crop' },
+                  { name: '🌱 Sprout Bowl', url: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=600&auto=format&fit=crop' }
+                ].map(preset => (
+                  <button
+                    type="button"
+                    key={preset.url}
+                    onClick={() => setFormData(prev => ({ ...prev, imageUrl: preset.url }))}
+                    className={`px-2.5 py-1 rounded-xl text-[11px] font-bold border transition-all ${
+                      formData.imageUrl === preset.url ? 'bg-orange-500 text-white border-orange-500 shadow-sm' : 'bg-stone-100 text-stone-700 border-stone-200 hover:bg-stone-200'
+                    }`}
+                  >
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
           </div>
 
           <div className="space-y-2">

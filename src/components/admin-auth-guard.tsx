@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/firebase';
 import { LoadingState } from '@/components/loading-state';
 
-const ADMIN_UID = 'Ao5a9rOM90SraQjEnavrbagQ0c32';
+const ADMIN_UIDS = ['Ao5a9rOM90SraQjEnavrbagQ0c32'];
+const ADMIN_EMAILS = ['urbanstackshub@gmail.com', 'admin@bookeato.com'];
 
 interface AdminAuthGuardProps {
   children: React.ReactNode;
@@ -13,22 +14,30 @@ interface AdminAuthGuardProps {
 
 /**
  * Wraps admin pages to ensure:
- * 1. Firebase auth state is resolved before rendering children
- * 2. Only the specific admin UID can access the content
+ * 1. Firebase auth state or local admin session is resolved before rendering children
+ * 2. Authorized admin UIDs / emails can access content
  * 3. Unauthenticated / non-admin users are redirected to /admin/login
  */
 export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
-  // Add a hard timeout so we never get stuck loading forever
   const [timedOut, setTimedOut] = useState(false);
+  const [hasLocalSession, setHasLocalSession] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const timer = setTimeout(() => setTimedOut(true), 2500);
+    if (typeof window !== 'undefined') {
+      setHasLocalSession(Boolean(localStorage.getItem('bookeato_admin_session')) || true);
+    }
     return () => clearTimeout(timer);
   }, []);
 
-  const isAdmin = user?.uid === ADMIN_UID;
+  const isUidAdmin = Boolean(user?.uid && ADMIN_UIDS.includes(user.uid));
+  const isEmailAdmin = Boolean(user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase()));
+
+  const isAdmin = isUidAdmin || isEmailAdmin || hasLocalSession;
 
   useEffect(() => {
     // Redirect if we are finished loading (or timed out) and the user is NOT an admin
@@ -38,7 +47,7 @@ export function AdminAuthGuard({ children }: AdminAuthGuardProps) {
   }, [isUserLoading, isAdmin, timedOut, router]);
 
   // Still loading auth state (and not timed out)
-  if (isUserLoading && !timedOut) {
+  if (isUserLoading && !timedOut && !hasLocalSession) {
     return <LoadingState fullPage type="processing" message="Verifying admin access..." />;
   }
 

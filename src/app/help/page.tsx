@@ -128,6 +128,31 @@ export default function HelpPage() {
                     </Card>
                 </div>
 
+                {/* Safety & Guarantee Policy Card */}
+                <Card className="rounded-[2rem] border-emerald-200/80 shadow-md bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/30 p-6 space-y-3">
+                    <div className="flex items-center justify-between">
+                        <div className="p-3 bg-emerald-600 text-white rounded-2xl shadow-sm">
+                            <Headset className="w-6 h-6" />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                            Bookeato Promise
+                        </span>
+                    </div>
+                    <div>
+                        <h3 className="font-black text-stone-900 text-xl">Safety & 100% Satisfaction Guarantee</h3>
+                        <p className="text-xs text-stone-600 font-medium leading-relaxed mt-1">
+                            All home cooks, maids, and elder companions undergo mandatory 7-step identity and police background verification.
+                        </p>
+                    </div>
+                    <Button 
+                        variant="outline"
+                        className="w-full border-emerald-300 text-emerald-800 hover:bg-emerald-100 font-bold text-xs h-10 rounded-xl active:scale-95 transition-all"
+                        onClick={() => alert("Bookeato Assurance: 100% refund guarantee if service is unsatisfactory or cancelled before session start.")}
+                    >
+                        View Verification & Insurance Policy
+                    </Button>
+                </Card>
+
                 {/* Direct Admin Access Notice */}
                 <div className="bg-stone-100 rounded-2xl p-4 border border-stone-200 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">

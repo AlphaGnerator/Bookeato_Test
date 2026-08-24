@@ -16,16 +16,42 @@ import { ItemEditorDialog } from './item-editor-dialog';
 
 const MOCK_ITEMS: Omit<LiveItem, 'id'>[] = [
   {
-    name: "(V) Quinoa Golgappas",
-    price: 585,
-    imageUrl: "/live_menu/quinoa_golgappas.png",
-    category: "The Guilt-Free Chaats",
+    name: "Fresh Tender Coconut Water (Glass Bottle)",
+    price: 79,
+    imageUrl: "/live_menu/bookeato_coconut_glass_bottle.jpg",
+    category: "Organic Refreshment",
     inStock: true,
-    isSpicy: true,
+    isSpicy: false,
     isVeg: true,
-    ingredients: ["Quinoa Flour", "Cranberry Juice", "Jaljeera Water", "Sprouted Moong", "Mint"],
-    nutritionalProfile: { calories: 120, protein: 4, carbs: 22, fat: 1 },
-    brandStory: "A revolutionary twist on the classic pani puri. Our shells are crafted from superfood quinoa rather than refined maida, resulting in a lighter crunch. We replaced the sugar-heavy sweet water with antioxidant-rich deep cranberry juice and kept the spicy kick with pure jaljeera.",
+    ingredients: ["100% Pure Tender Coconut Water", "Natural Electrolytes", "Glass Bottle Packaging"],
+    nutritionalProfile: { calories: 45, protein: 1, carbs: 9, fat: 0 },
+    brandStory: "Pure raw tender coconut water served chilled in glass bottle with Bookeato sticker label. Natural hydration delivered fresh daily.",
+    societyId: "global"
+  },
+  {
+    name: "Customized Organic Salad Box",
+    price: 99,
+    imageUrl: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=600&auto=format&fit=crop",
+    category: "Daily Health Subscription",
+    inStock: true,
+    isSpicy: false,
+    isVeg: true,
+    ingredients: ["Chickpeas", "Lobiya", "Organic Paneer / Tofu", "Red Onions", "Tomatoes", "Lemon Mint Vinaigrette"],
+    nutritionalProfile: { calories: 280, protein: 18, carbs: 32, fat: 6 },
+    brandStory: "Handpicked organic greens, high-protein legumes, and artisan house dressings in a crisp subscription box.",
+    societyId: "global"
+  },
+  {
+    name: "Overnight Protein Oats Jar (24g Protein)",
+    price: 129,
+    imageUrl: "/live_menu/bookeato_oats_glass_jar.jpg",
+    category: "Daily Health Subscription",
+    inStock: true,
+    isSpicy: false,
+    isVeg: true,
+    ingredients: ["Rolled Oats", "Belgian Chocolate / French Vanilla Whey (24g)", "Almond Milk", "Fresh Berries", "Almonds"],
+    nutritionalProfile: { calories: 340, protein: 24, carbs: 42, fat: 5 },
+    brandStory: "Slow-soaked overnight oats loaded with 24g pure whey protein powder, fruit compote, and superfood nut toppings in glass jar.",
     societyId: "global"
   },
   {
@@ -43,29 +69,16 @@ const MOCK_ITEMS: Omit<LiveItem, 'id'>[] = [
     societyId: "global"
   },
   {
-    name: "(V) Lotus Root Bhel",
+    name: "(V) Quinoa Golgappas",
     price: 585,
-    imageUrl: "/live_menu/lotus_root_bhel.png",
+    imageUrl: "/live_menu/quinoa_golgappas.png",
     category: "The Guilt-Free Chaats",
     inStock: true,
     isSpicy: true,
     isVeg: true,
-    ingredients: ["Crispy Lotus Root", "Lemon", "Chilli Dressing", "Puffed Rice"],
-    nutritionalProfile: { calories: 180, protein: 2, carbs: 30, fat: 6 },
-    brandStory: "Delicate slices of lotus root crisp to perfection, coated with a zesty lemon and chili dressing that brightens up every bite. A completely unique texture compared to standard bhel.",
-    societyId: "global"
-  },
-  {
-    name: "(V) Palak Potta Chaat",
-    price: 585,
-    imageUrl: "/live_menu/palak_patta_chaat.png",
-    category: "The Guilt-Free Chaats",
-    inStock: true,
-    isSpicy: false,
-    isVeg: true,
-    ingredients: ["Crispy Spinach Leaves", "Chutneys", "Chaat Ka Dahi", "Pomegranate"],
-    nutritionalProfile: { calories: 250, protein: 5, carbs: 25, fat: 14 },
-    brandStory: "Leaves of organic baby spinach are flash-crisped in cold-pressed oil, then immediately dressed with thick, slightly sweetened yogurt and a medley of our house-made chutneys.",
+    ingredients: ["Quinoa Flour", "Cranberry Juice", "Jaljeera Water", "Sprouted Moong", "Mint"],
+    nutritionalProfile: { calories: 120, protein: 4, carbs: 22, fat: 1 },
+    brandStory: "A revolutionary twist on the classic pani puri. Our shells are crafted from superfood quinoa rather than refined maida, resulting in a lighter crunch. We replaced the sugar-heavy sweet water with antioxidant-rich deep cranberry juice and kept the spicy kick with pure jaljeera.",
     societyId: "global"
   }
 ];
@@ -88,22 +101,31 @@ function LiveMenuManager() {
       const fetchedItems: LiveItem[] = [];
       querySnapshot.forEach((docSnap) => {
         const data = docSnap.data() as LiveItem;
-        if (data.name.toLowerCase().includes('poha')) {
-          data.price = 100;
-          if (!data.brandStory?.includes('cold press oil')) {
-             data.brandStory = "The beloved breakfast jewel of Indore, elevated. Made by cold press oil with organic hand-pounded rice and authentic Jeeravan masala. Sweet ruby pomegranate seeds burst with freshness to counter the crunchy sev, leaving you satiated yet incredibly light.";
-          }
-          updateDoc(doc(firestore, 'liveItems', docSnap.id), { 
-             price: 100, 
-             brandStory: data.brandStory 
-          }).catch(() => {});
-        }
-        fetchedItems.push({ id: docSnap.id, ...data });
+        fetchedItems.push({ ...data, id: docSnap.id });
       });
-      setItems(fetchedItems);
+
+      if (fetchedItems.length > 0) {
+        setItems(fetchedItems);
+        try {
+          localStorage.setItem('bookeato_live_items_override', JSON.stringify(fetchedItems));
+          window.dispatchEvent(new Event('storage'));
+        } catch (e) {}
+      } else {
+        // Fallback to MOCK_ITEMS if empty
+        setItems(MOCK_ITEMS as LiveItem[]);
+        try {
+          localStorage.setItem('bookeato_live_items_override', JSON.stringify(MOCK_ITEMS));
+          window.dispatchEvent(new Event('storage'));
+        } catch (e) {}
+      }
     } catch (e) {
       console.error(e);
-      toast({ title: 'Error', description: 'Failed to fetch items', variant: 'destructive' });
+      const cached = localStorage.getItem('bookeato_live_items_override');
+      if (cached) {
+        try { setItems(JSON.parse(cached)); } catch (err) { setItems(MOCK_ITEMS as LiveItem[]); }
+      } else {
+        setItems(MOCK_ITEMS as LiveItem[]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -163,19 +185,25 @@ function LiveMenuManager() {
   const saveItem = async (itemData: Omit<LiveItem, 'id'>) => {
     if (!firestore) return;
     try {
+      let updated: LiveItem[];
       if (editingItem) {
          const docRef = doc(firestore, 'liveItems', editingItem.id);
          await updateDoc(docRef, itemData);
-         setItems(items.map(i => i.id === editingItem.id ? { id: editingItem.id, ...itemData } : i));
+         updated = items.map(i => i.id === editingItem.id ? { id: editingItem.id, ...itemData } : i);
          toast({ title: 'Updated', description: 'Item updated successfully.' });
       } else {
          const res = await addDoc(collection(firestore, 'liveItems'), itemData);
-         setItems([...items, { id: res.id, ...itemData }]);
+         updated = [...items, { id: res.id, ...itemData }];
          toast({ title: 'Added', description: 'New item added successfully.' });
       }
+      setItems(updated);
+      try {
+        localStorage.setItem('bookeato_live_items_override', JSON.stringify(updated));
+        window.dispatchEvent(new Event('storage'));
+      } catch (e) {}
     } catch (e) {
       toast({ title: 'Error', description: 'Failed to save item', variant: 'destructive' });
-      throw e; // rethrow to keep dialog open if needed, or dialog handles it
+      throw e;
     }
   };
 
@@ -185,10 +213,19 @@ function LiveMenuManager() {
       const docRef = doc(firestore, 'liveItems', item.id);
       const nextState = !item.isTodaysDish;
       await updateDoc(docRef, { isTodaysDish: nextState });
-      setItems(items.map(i => i.id === item.id ? { ...i, isTodaysDish: nextState } : i));
+      // If marking true, unmark all other items as Today's Dish
+      const updated = items.map(i => {
+        if (i.id === item.id) return { ...i, isTodaysDish: nextState };
+        return nextState ? { ...i, isTodaysDish: false } : i;
+      });
+      setItems(updated);
+      try {
+        localStorage.setItem('bookeato_live_items_override', JSON.stringify(updated));
+        window.dispatchEvent(new Event('storage'));
+      } catch (e) {}
       toast({ 
         title: nextState ? 'Set as Today\'s Dish' : 'Removed from Today\'s Dish', 
-        description: nextState ? `"${item.name}" is now featured as Today's Dish.` : `"${item.name}" is no longer featured.` 
+        description: nextState ? `"${item.name}" is now featured as Today's Dish on customer page.` : `"${item.name}" is no longer featured.` 
       });
     } catch (e) {
       toast({ title: 'Error', description: 'Failed to update Today\'s Dish status', variant: 'destructive' });
@@ -225,6 +262,159 @@ function LiveMenuManager() {
            </Button>
         </div>
       </div>
+
+      {/* BACKEND SUBSCRIPTION PRICES & PORTION RATES MANAGER (ADMIN CONTROL) */}
+      <Card className="rounded-[2rem] border-stone-200/80 shadow-md bg-white p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
+          <div>
+            <Badge className="bg-emerald-100 text-emerald-950 font-black text-[10px] uppercase">Backend Admin Control</Badge>
+            <h2 className="text-xl font-black text-stone-900 mt-0.5">Live Subscription Item & Portion Price Manager</h2>
+            <p className="text-xs text-stone-500 font-medium">Update prices per portion for Coconut Water, Salad Box ingredients, and Overnight Oats toppings. Changes reflect live for customers instantly.</p>
+          </div>
+          <Button 
+            onClick={() => {
+              const config = {
+                coconutPrices,
+                saladBasePrice,
+                oatsBasePrice,
+                saladGrains: [
+                  { id: 'chickpeas', name: 'Chickpeas (Kabuli Chana)', price: 30, icon: '🫘' },
+                  { id: 'lobiya', name: 'Black-Eyed Peas (Lobiya)', price: 30, icon: '🌱' },
+                  { id: 'moong', name: 'Sprouted Green Moong', price: 25, icon: '🌿' },
+                  { id: 'paneer', name: 'Organic Paneer Cubes', price: 35, icon: '🧀' },
+                  { id: 'tofu', name: 'High-Protein Tofu', price: 35, icon: '🟩' },
+                ],
+                saladVeggies: [
+                  { id: 'onions', name: 'Red Onions', price: 15, icon: '🧅' },
+                  { id: 'tomatoes', name: 'Crisp Tomatoes', price: 15, icon: '🍅' },
+                  { id: 'cherry_tomatoes', name: 'Cherry Tomatoes', price: 20, icon: '🍒' },
+                  { id: 'peanuts', name: 'Roasted Peanuts', price: 15, icon: '🥜' },
+                  { id: 'capsicum', name: 'Capsicum (Bell Pepper)', price: 15, icon: '🫑' },
+                  { id: 'lettuce', name: 'Fresh Lettuce', price: 15, icon: '🥬' },
+                  { id: 'cucumber', name: 'Crispy Cucumber', price: 15, icon: '🥒' },
+                  { id: 'corn', name: 'Sweet Corn', price: 15, icon: '🌽' },
+                ]
+              };
+              localStorage.setItem('bookeato_subscription_prices', JSON.stringify(config));
+              window.dispatchEvent(new Event('storage'));
+              toast({ title: "Subscription Prices Saved", description: "Updated ingredient portion prices are now live for customers." });
+            }}
+            className="bg-emerald-800 hover:bg-emerald-900 text-white font-black text-xs rounded-xl h-9 px-4 shrink-0"
+          >
+            Save Admin Portion Prices
+          </Button>
+        </div>
+
+        {/* EDITABLE PORTION PRICES CONTROLS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold">
+          <div className="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-2.5">
+            <span className="font-extrabold text-stone-900 block text-sm">1. Coconut Water Prices</span>
+            <div className="flex justify-between items-center bg-white p-2 rounded-xl border border-stone-200">
+              <span>500 ml Bottle (₹)</span>
+              <Input 
+                type="number"
+                value={coconutPrices['500ml'] || 79}
+                onChange={e => setCoconutPrices({ ...coconutPrices, '500ml': Number(e.target.value) })}
+                className="w-20 h-8 text-right font-black text-emerald-800"
+              />
+            </div>
+            <div className="flex justify-between items-center bg-white p-2 rounded-xl border border-stone-200">
+              <span>1 Litre Bottle (₹)</span>
+              <Input 
+                type="number"
+                value={coconutPrices['1ltr'] || 149}
+                onChange={e => setCoconutPrices({ ...coconutPrices, '1ltr': Number(e.target.value) })}
+                className="w-20 h-8 text-right font-black text-emerald-800"
+              />
+            </div>
+          </div>
+
+          <div className="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-2.5">
+            <span className="font-extrabold text-stone-900 block text-sm">2. Salad Box Rates</span>
+            <div className="flex justify-between items-center bg-white p-2 rounded-xl border border-stone-200">
+              <span>Base Salad Box (₹)</span>
+              <Input 
+                type="number"
+                value={saladBasePrice}
+                onChange={e => setSaladBasePrice(Number(e.target.value))}
+                className="w-20 h-8 text-right font-black text-amber-800"
+              />
+            </div>
+            <div className="flex justify-between items-center bg-white p-2 rounded-xl border border-stone-200">
+              <span>Grains Add-ons Rate</span>
+              <span className="font-black text-amber-800">+₹25 - ₹35</span>
+            </div>
+          </div>
+
+          <div className="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-2.5">
+            <span className="font-extrabold text-stone-900 block text-sm">3. Oats Jar Rates</span>
+            <div className="flex justify-between items-center bg-white p-2 rounded-xl border border-stone-200">
+              <span>Base Oats Jar (₹)</span>
+              <Input 
+                type="number"
+                value={oatsBasePrice}
+                onChange={e => setOatsBasePrice(Number(e.target.value))}
+                className="w-20 h-8 text-right font-black text-purple-900"
+              />
+            </div>
+            <div className="flex justify-between items-center bg-white p-2 rounded-xl border border-stone-200">
+              <span>24g Protein Powder Flavors</span>
+              <span className="font-black text-purple-900">+₹45 / flavor</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ADMIN SUBSCRIPTION ITEMS ADD / REMOVE / EDIT LIST */}
+        <div className="border-t border-stone-100 pt-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="font-black text-sm text-stone-900">Active Live Subscription Catalog Items</span>
+            <Button 
+              onClick={() => {
+                setEditingItem({
+                  id: `sub-${Date.now()}`,
+                  name: "Cold-Pressed Detox Juice",
+                  price: 99,
+                  imageUrl: "/live_menu/bookeato_coconut_glass_bottle.jpg",
+                  category: "Daily Health Subscription",
+                  inStock: true,
+                  isVeg: true,
+                  ingredients: ["Celery", "Green Apple", "Cucumber", "Lemon"],
+                  brandStory: "Freshly cold-pressed raw juice delivered daily in reusable glass bottle.",
+                  societyId: "global"
+                });
+                setIsEditorOpen(true);
+              }}
+              className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl h-8 px-3"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1" /> Add New Subscription Item
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { title: 'Fresh Tender Coconut Water', category: 'Glass Bottle • 100% Pure Raw', price: '₹79 - ₹149', img: '/live_menu/bookeato_coconut_glass_bottle.jpg' },
+              { title: 'Customizable Organic Salad Box', category: 'Custom Grains & Veggies', price: 'Base ₹99', img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=400&auto=format&fit=crop' },
+              { title: 'Overnight Protein Oats Mug', category: 'Milk, Fruits & Protein', price: 'Base ₹129', img: 'https://images.unsplash.com/photo-1517673400267-0251440c45dc?q=80&w=400&auto=format&fit=crop' }
+            ].map((sub, idx) => (
+              <div key={idx} className="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-stone-200 relative overflow-hidden shrink-0">
+                    <Image src={sub.img} alt={sub.title} fill className="object-cover" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-stone-900 text-xs">{sub.title}</h4>
+                    <p className="text-[10px] text-stone-500 font-medium">{sub.category}</p>
+                    <span className="text-[10px] font-black text-emerald-800">{sub.price}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Badge className="bg-emerald-100 text-emerald-950 font-bold text-[9px]">Active</Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {items.map(item => (

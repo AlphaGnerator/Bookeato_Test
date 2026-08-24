@@ -1,7 +1,7 @@
 'use client'; 
 
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';
-import type { CookingSlot, UserProfile, Booking, Dish, DraftBooking, DraftBookingItem, Transaction, Subscription, MarketplaceProduct, MarketplaceCartItem } from '@/lib/types';
+import type { CookingSlot, UserProfile, Booking, Dish, DraftBooking, DraftBookingItem, Transaction, Subscription, MarketplaceProduct, MarketplaceCartItem, SelectedCustomization } from '@/lib/types';
 import { defaultUser } from '@/lib/mock-data';
 import { useUser, useFirestore, useMemoFirebase, setDocumentNonBlocking, useDoc, addDocumentNonBlocking, updateDocumentNonBlocking, useCollection } from '@/firebase';
 import { doc, collection, getDocs, writeBatch, updateDoc, onSnapshot, query, serverTimestamp } from 'firebase/firestore';
@@ -42,7 +42,7 @@ interface CulinaryStore {
   
   // Marketplace
   marketplaceCart: MarketplaceCartItem[];
-  addToMarketplaceCart: (product: MarketplaceProduct) => void;
+  addToMarketplaceCart: (product: MarketplaceProduct, selectedCustomizations?: SelectedCustomization[]) => void;
   removeFromMarketplaceCart: (productId: string) => void;
   updateMarketplaceQuantity: (productId: string, quantity: number) => void;
   clearMarketplaceCart: () => void;
@@ -665,16 +665,18 @@ export const CulinaryStoreProvider = ({ children }: { children: React.ReactNode 
     }
   }, []);
 
-  const addToMarketplaceCart = useCallback((product: MarketplaceProduct) => {
+  const addToMarketplaceCart = useCallback((product: MarketplaceProduct, selectedCustomizations?: SelectedCustomization[]) => {
     setMarketplaceCart(prev => {
-      const existing = prev.find(item => item.product.id === product.id);
+      const existingIndex = prev.findIndex(item => item.product.id === product.id);
       let updated;
-      if (existing) {
-        updated = prev.map(item => 
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      if (existingIndex > -1) {
+        updated = prev.map((item, idx) => 
+          idx === existingIndex 
+            ? { ...item, quantity: item.quantity + 1, selectedCustomizations: selectedCustomizations || item.selectedCustomizations } 
+            : item
         );
       } else {
-        updated = [...prev, { product, quantity: 1 }];
+        updated = [...prev, { product, quantity: 1, selectedCustomizations }];
       }
       localStorage.setItem(MARKETPLACE_CART_STORAGE_KEY, JSON.stringify(updated));
       return updated;
@@ -710,31 +712,75 @@ export const CulinaryStoreProvider = ({ children }: { children: React.ReactNode 
   }, []);
 
   const executeUnifiedCheckout = useCallback(async (planDetails: any, requiredRecharge: number) => {
-    if (!firestore || !firebaseUser) {
-        throw new Error("User not authenticated for checkout.");
-    }
-    if (requiredRecharge > 0) {
-        rechargeWallet(requiredRecharge);
+    if (firestore && firebaseUser) {
+        if (requiredRecharge > 0) {
+            rechargeWallet(requiredRecharge);
+        }
+
+        if (planDetails.type !== 'daily' && planDetails.type !== 'day') {
+            await purchaseSubscription(planDetails);
+        } else {
+            // Daily plan is a one-off payment
+            deductFromWallet(planDetails.cost);
+            const transactionRef = doc(collection(firestore, 'customers', firebaseUser.uid, 'transactions'));
+            const newTransaction: Omit<Transaction, 'id'> = {
+                type: 'booking_payment',
+                amount: planDetails.cost,
+                date: serverTimestamp(),
+                details: {
+                    description: `Daily booking on ${format(new Date(), 'PPP')}`
+                }
+            };
+            setDocumentNonBlocking(transactionRef, newTransaction, {});
+        }
+
+        await submitAllDraftBookings(planDetails.cost);
     }
 
-    if (planDetails.type !== 'daily' && planDetails.type !== 'day') {
-        await purchaseSubscription(planDetails);
-    } else {
-        // Daily plan is a one-off payment
-        deductFromWallet(planDetails.cost);
-        const transactionRef = doc(collection(firestore, 'customers', firebaseUser.uid, 'transactions'));
-        const newTransaction: Omit<Transaction, 'id'> = {
-            type: 'booking_payment',
-            amount: planDetails.cost,
-            date: serverTimestamp(),
-            details: {
-                description: `Daily booking on ${format(new Date(), 'PPP')}`
-            }
-        };
-        setDocumentNonBlocking(transactionRef, newTransaction, {});
+    // Save marketplace order if marketplace items exist
+    if (marketplaceCart && marketplaceCart.length > 0) {
+        try {
+            const currentOrdersRaw = localStorage.getItem('bookeato_marketplace_orders');
+            const existingOrders = currentOrdersRaw ? JSON.parse(currentOrdersRaw) : [];
+            const newOrderId = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+            const newCustId = `CUST-${Math.floor(1000 + Math.random() * 9000)}`;
+            
+            const itemTotal = marketplaceCart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+            
+            const newOrder = {
+                id: newOrderId,
+                customerId: newCustId,
+                society: planDetails?.configuration?.society || 'My Home Vihanga',
+                area: planDetails?.configuration?.city || 'Nanakramguda',
+                pincode: planDetails?.configuration?.pincode || '500032',
+                items: marketplaceCart.map(item => ({
+                    name: item.product.name,
+                    qty: item.quantity,
+                    price: item.product.price,
+                    customization: item.selectedCustomizations ? item.selectedCustomizations.map(c => c.optionLabel).join(', ') : undefined
+                })),
+                itemTotal: itemTotal,
+                packagingCharge: 20,
+                deliveryCharge: 0,
+                gstTax: 0,
+                voucherApplied: planDetails?.configuration?.appliedVoucher ? `${planDetails.configuration.appliedVoucher}` : 'None',
+                amount: itemTotal + 20,
+                status: 'Pending',
+                time: 'Just now',
+                deliverySlot: 'Today, 6:00 PM - 8:00 PM',
+                sellerName: marketplaceCart[0]?.product?.sellerName || 'Swadeshi Organic Farm',
+                pickupAgent: {
+                    name: 'Ramesh Kumar (Bookeato Fleet)',
+                    phone: '+91 9876500112'
+                }
+            };
+            
+            localStorage.setItem('bookeato_marketplace_orders', JSON.stringify([newOrder, ...existingOrders]));
+            clearMarketplaceCart();
+        } catch (err) {
+            console.error("Failed to save marketplace order:", err);
+        }
     }
-
-    await submitAllDraftBookings(planDetails.cost);
 
     try {
         localStorage.removeItem(GUEST_CONFIG_STORAGE_KEY);
@@ -743,7 +789,7 @@ export const CulinaryStoreProvider = ({ children }: { children: React.ReactNode 
         console.error("Failed to clear guest config from localStorage:", error);
     }
     router.push('/dashboard');
-  }, [rechargeWallet, purchaseSubscription, submitAllDraftBookings, deductFromWallet, firestore, firebaseUser, router]);
+  }, [rechargeWallet, purchaseSubscription, submitAllDraftBookings, deductFromWallet, firestore, firebaseUser, router, marketplaceCart, clearMarketplaceCart]);
 
 
   // const isInitialized = !isUserLoading && !isProfileLoading && !areBookingsLoading && !areDishesLoading;

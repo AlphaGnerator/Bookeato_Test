@@ -361,7 +361,7 @@ const heroSlides = [
         description: 'No subscription required. Shop authentic, lab-tested pantry staples on-demand.',
         price: '0',
         cta: 'Visit Marketplace',
-        link: '#services-grid',
+        link: '/marketplace',
         imageUrl: '/carousel/carousel_pantry_bg.png?v=11',
         hasBurnedText: false,
         features: [
@@ -882,11 +882,14 @@ export default function WelcomePage() {
                                key={slide.id + idx} 
                                className="h-full pl-0 relative cursor-pointer"
                                onClick={() => {
+                                   if (slide.id === 'pantry') {
+                                       router.push('/marketplace');
+                                       return;
+                                   }
                                    const serviceMapping: Record<string, string> = {
                                        cook: 'Cook',
                                        maid: 'Maid',
                                        elder: 'Elder help',
-                                       pantry: 'Marketplace'
                                    };
                                    if (serviceMapping[slide.id]) {
                                        setActiveService(serviceMapping[slide.id]);
@@ -979,29 +982,15 @@ export default function WelcomePage() {
              </div>
           </section>
 
-          {/* Bookeato Live Kitchens Banner - Positioned below carousel and above services */}
-          <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-orange-600 text-white px-4 py-3 text-center flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 relative z-30 shadow-md">
-             <div className="flex items-center gap-2">
-               <span className="relative flex h-3 w-3">
-                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-100 opacity-75"></span>
-                   <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] border border-red-300"></span>
-               </span>
-               <span className="font-bold text-xs sm:text-sm tracking-wide">We are setting up Live Kitchens in select societies!</span>
-             </div>
-             <Link href="/live" className="font-black text-xs sm:text-sm hover:bg-white hover:text-orange-700 text-white transition-all px-4 py-1 rounded-full backdrop-blur-sm border border-white/30 flex items-center gap-1.5 active:scale-95 shadow-sm">
-                Order from Bookeato Live <ArrowRight className="w-3.5 h-3.5" />
-             </Link>
-          </div>
-
           {/* Service Hub Section - Swiggy Style Pills */}
           <section 
               id="services-grid" 
-              className="relative pt-8 pb-0 bg-white overflow-visible z-20"
+              className="relative pt-6 pb-0 bg-white overflow-visible z-20"
           >
              <div className="sticky top-16 md:top-20 z-45 w-full bg-white transition-all duration-300 py-3 md:py-4 border-b border-stone-200/20 shadow-sm mt-0">
                  <div className="container mx-auto px-2 md:px-6 relative z-30 space-y-4">
-                     {/* Layer 1: Top Featured Row (Marketplace & Bookeato Live) */}
-                     <div className="flex justify-center gap-3 sm:gap-6 w-full px-2">
+                     {/* Layer 1: Top Featured Row (Marketplace & Bookeato Live) - Prominent Extra Large Cards covering white space */}
+                     <div className="flex justify-center gap-3 sm:gap-6 w-full px-2 sm:px-4 max-w-6xl mx-auto">
                          {topServices.map((service) => {
                              const isActive = activeService === service.id;
 
@@ -1011,38 +1000,45 @@ export default function WelcomePage() {
                                      onClick={() => {
                                          if (service.id === 'Bookeato Live') {
                                              router.push('/live');
+                                         } else if (service.id === 'Marketplace') {
+                                             router.push('/marketplace');
                                          } else {
                                              setActiveService(service.id);
                                          }
                                      }}
                                      className={cn(
-                                         "relative flex flex-row items-center gap-3 transition-all duration-300 ease-in-out cursor-pointer px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-2xl sm:rounded-3xl border shadow-md flex-1 max-w-xs justify-center",
+                                         "relative flex flex-row items-center gap-3.5 sm:gap-6 transition-all duration-300 ease-in-out cursor-pointer px-4 sm:px-8 md:px-10 py-4 sm:py-6 md:py-7 rounded-2xl sm:rounded-3xl border-2 shadow-xl flex-1 justify-start sm:justify-center active:scale-95 group",
                                          service.themeBg,
                                          isActive 
-                                            ? "ring-4 ring-white/60 scale-105 z-40 border-2 border-white shadow-xl font-black" 
-                                            : "opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 border-white/20"
+                                            ? "ring-4 ring-white/60 scale-105 z-40 border-2 border-white shadow-2xl font-black" 
+                                            : "opacity-95 hover:opacity-100 hover:scale-[1.02] border-white/30"
                                      )}
                                  >
-                                     <div className="relative w-11 h-11 sm:w-14 sm:h-14 shrink-0 rounded-xl overflow-hidden shadow-sm border border-white/30">
-                                         <Image src={service.image} alt={service.name} fill className="object-cover" sizes="60px" />
+                                     <div className="relative w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 shrink-0 rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg border-2 border-white/50 group-hover:scale-105 transition-transform duration-300">
+                                         <Image src={service.image} alt={service.name} fill className="object-cover" sizes="120px" />
                                      </div>
-                                     <div className="text-left">
-                                         <span className="font-black text-xs sm:text-base tracking-tight block leading-tight">
+                                     <div className="text-left space-y-1">
+                                         <span className="font-black text-base sm:text-2xl md:text-3xl tracking-tight block leading-none">
                                              {service.name}
                                          </span>
-                                         <span className="text-[10px] sm:text-xs font-semibold opacity-90 flex items-center gap-1.5 mt-0.5">
+                                         <span className="text-xs sm:text-base font-extrabold opacity-95 flex items-center gap-2 pt-0.5">
                                              {service.id === 'Bookeato Live' ? (
                                                  <>
-                                                     <span className="relative flex h-2 w-2">
+                                                     <span className="relative flex h-3 w-3">
                                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-200 opacity-75"></span>
-                                                         <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                                         <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                                                      </span>
-                                                     Live Kitchens
+                                                     <span className="font-black">Live Society Kitchens</span>
                                                  </>
                                              ) : (
-                                                 '🛒 Exclusive Store'
+                                                 '🛒 Organic Store & Pickles'
                                              )}
                                          </span>
+                                         <p className="text-[10px] sm:text-xs font-semibold opacity-90 hidden sm:block">
+                                             {service.id === 'Bookeato Live' 
+                                                 ? 'Order freshly cooked meals from top society cooks near you'
+                                                 : 'Farm-fresh organic produce, BILONA Ghee, and homemade pickles'}
+                                         </p>
                                      </div>
                                  </button>
                              );
