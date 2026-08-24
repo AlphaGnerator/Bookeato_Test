@@ -43,7 +43,7 @@ const heroCarouselDishes = [
         id: 1,
         name: 'Dal Makhani',
         tags: ['Creamy', 'Chef-curated', 'Delhi Cook'],
-        image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=1770&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=75&w=600&auto=format&fit=crop',
         hint: 'dal makhani',
         calories: 320,
         protein: 14,
@@ -53,7 +53,7 @@ const heroCarouselDishes = [
         id: 2,
         name: 'Paneer Butter Masala',
         tags: ['Rich', 'Chef-curated', 'Mumbai Cook'],
-        image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=1636&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=75&w=600&auto=format&fit=crop',
         hint: 'paneer butter masala',
         calories: 450,
         protein: 20,
@@ -63,7 +63,7 @@ const heroCarouselDishes = [
         id: 3,
         name: 'Authentic Biryani',
         tags: ['Spiced', 'Chef-curated', 'Hyderabad Cook'],
-        image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=1770&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=75&w=600&auto=format&fit=crop',
         hint: 'authentic biryani',
         calories: 480,
         protein: 24,
@@ -73,7 +73,7 @@ const heroCarouselDishes = [
         id: 4,
         name: 'Palak Paneer',
         tags: ['Healthy', 'Chef-curated', 'Bangalore Cook'],
-        image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=1770&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?q=75&w=600&auto=format&fit=crop',
         hint: 'palak paneer',
         calories: 390,
         protein: 18,
@@ -83,7 +83,7 @@ const heroCarouselDishes = [
         id: 5,
         name: 'Chole Bhature',
         tags: ['Indulgent', 'Chef-curated', 'Delhi Cook'],
-        image: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?q=80&w=1770&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?q=75&w=600&auto=format&fit=crop',
         hint: 'chole bhature',
         calories: 550,
         protein: 16,
@@ -93,7 +93,7 @@ const heroCarouselDishes = [
         id: 6,
         name: 'Masala Dosa',
         tags: ['Crispy', 'Chef-curated', 'Chennai Cook'],
-        image: 'https://images.unsplash.com/photo-1589301760014-d929f39ce9b1?q=80&w=1770&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1589301760014-d929f39ce9b1?q=75&w=600&auto=format&fit=crop',
         hint: 'masala dosa',
         calories: 280,
         protein: 6,
@@ -106,35 +106,35 @@ const curatedMealPlans = [
     id: 'plan-high-protein',
     title: 'High Protein Weekly Plan',
     badge: 'Fitness & Muscle',
-    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=75&w=600&auto=format&fit=crop',
     pointers: ['High Protein & Fiber', 'Muscle Gain Support', 'Customized Macros']
   },
   {
     id: 'plan-kids-friendly',
     title: 'Kids Friendly Meal Plan',
     badge: 'Family Favorite',
-    image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?q=75&w=600&auto=format&fit=crop',
     pointers: ['Zero Refined Sugar', 'Mild Spices & Flavors', 'Hidden Veggie Goodness']
   },
   {
     id: 'plan-elderly',
     title: 'Elderly Care Meal Plan',
     badge: 'Gentle & Soft',
-    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=75&w=600&auto=format&fit=crop',
     pointers: ['Easy to Digest Khichdi', 'Low Sodium & Oil', 'Traditional Home Comforts']
   },
   {
     id: 'plan-quick-recipes',
     title: 'Quick Recipes Plan',
     badge: 'Busy Workdays',
-    image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?q=75&w=600&auto=format&fit=crop',
     pointers: ['20-Min Fast Cooking', 'Quick Omelette & Scrambles', 'For Busy Professionals']
   },
   {
     id: 'plan-bld',
     title: 'Breakfast, Lunch & Dinner Plan',
     badge: 'Full Day Package',
-    image: 'https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?q=75&w=600&auto=format&fit=crop',
     pointers: ['3 Complete Daily Meals', 'Fresh Cooked Daily', 'Full Menu Variety']
   }
 ];
@@ -797,13 +797,10 @@ export default function WelcomePage() {
 
   React.useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 450) {
-        setShowFloatingCTA(true);
-      } else {
-        setShowFloatingCTA(false);
-      }
+      const isPastThreshold = window.scrollY > 450;
+      setShowFloatingCTA(prev => (prev !== isPastThreshold ? isPastThreshold : prev));
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
